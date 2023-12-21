@@ -15,22 +15,22 @@ class MailRegistrationServiceIntegrationTest : BaseIntegrationTest() {
     lateinit var service: MailRegistrationService
 
     @Autowired
-    lateinit var appealRepo: MailRepo
+    lateinit var mailRepo: MailRepo
 
     @Test
     fun `When registerMail() add new Mail success`() = runBlocking {
 
         val text = "text"
-        val token = "token"
+        val email = "test@test.ru"
 
         val request = RegisterMailRequest.newBuilder()
             .setText(text)
-            .setToken(token)
+            .setEmail(email)
             .build()
 
         val result = service.registerMail(request)
 
-        val verify = appealRepo.findById(UUID.fromString(result.appeal.id))
+        val verify = mailRepo.findById(UUID.fromString(result.mail.id))
 
         assert(verify!!.text == text)
     }

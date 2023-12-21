@@ -1,55 +1,36 @@
 package ru.somarov.mail.application.service
 
-import com.denumhub.appeal.infrastructure.db.entity.Appeal
-import com.denumhub.appeal.infrastructure.db.entity.AppealChannel
-import com.denumhub.appeal.infrastructure.db.entity.AppealStatus
-import com.denumhub.appeal.infrastructure.db.repo.AppealRepo
-import com.denumhub.appeal.presentation.grpc.RegisterAppealRequest
-import com.denumhub.appeal.presentation.grpc.RegisterAppealResponse
-import com.denumhub.response.UserProfileResponse
-import com.denumhub.service.MonolithBackendAdapterApi
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import ru.somarov.mail.infrastructure.db.entity.Mail
+import ru.somarov.mail.infrastructure.db.entity.MailChannel
+import ru.somarov.mail.infrastructure.db.entity.MailStatus
+import ru.somarov.mail.infrastructure.db.repo.MailRepo
+import ru.somarov.mail.presentation.grpc.RegisterMailRequest
+import ru.somarov.mail.presentation.grpc.RegisterMailResponse
 import java.time.OffsetDateTime
 import java.util.UUID
 
 @Service
-class MailRegistrationService(
-    private val appealRepo: AppealRepo,
-    private val monolithBackendAdapterApi: MonolithBackendAdapterApi
-) {
+class MailRegistrationService(private val appealRepo: MailRepo) {
     private val log = LoggerFactory.getLogger(MailRegistrationService::class.java)
-    suspend fun registerMail(request: RegisterAppealRequest): RegisterAppealResponse {
-        log.info("Gor registerAppeal request with following text: ${request.text}, and token: ${request.token}")
-        val userInfo = monolithBackendAdapterApi.getUserProfile(request.token)
+    suspend fun registerMail(request: RegisterMailRequest): RegisterMailResponse {
+        log.info("Gor registerAppeal request with following text: ${request.text}, and mail: ${request.email}")
 
-        val newAppeal = Appeal(
+        val newMail = Mail(
             id = UUID.randomUUID(),
-            clientId = userInfo.id,
-            clientEmail = userInfo.email,
-            clientPhone = userInfo.phone,
+            clientEmail = request.email,
             text = request.text,
-            appealStatusId = AppealStatus.Companion.AppealStatusCode.NEW.id,
-            isEmailSent = false,
+            mailStatusId = MailStatus.Companion.MailStatusCode.NEW.id,
             creationDate = OffsetDateTime.now(),
             lastUpdateDate = OffsetDateTime.now(),
-            clientFio = formFio(userInfo),
-            clientBirthday = userInfo.birthdate,
-            appealChannelId = AppealChannel.Companion.AppealChannelCode.MOBILE.id
+            mailChannelId = MailChannel.Companion.MailChannelCode.MOBILE.id
         )
 
-        appealRepo.save(newAppeal)
+        appealRepo.save(newMail)
 
-        return RegisterAppealResponse.newBuilder()
-            .setAppeal(com.denumhub.appeal.presentation.grpc.Appeal.newBuilder().setId(newAppeal.id.toString()))
+        return RegisterMailResponse.newBuilder()
+            .setMail(ru.somarov.mail.presentation.grpc.Mail.newBuilder().setId(newMail.id.toString()))
             .build()
-    }
-
-    private fun formFio(userInfo: UserProfileResponse): String {
-        var result = ""
-        if (userInfo.surname != null) result = "${userInfo.surname}"
-        if (userInfo.name != null) result = "$result ${userInfo.name}"
-        if (userInfo.patronymic != null) result = "$result ${userInfo.patronymic}"
-        return result
     }
 }

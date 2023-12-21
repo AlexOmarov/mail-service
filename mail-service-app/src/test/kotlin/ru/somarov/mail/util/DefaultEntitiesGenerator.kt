@@ -3,9 +3,9 @@ package ru.somarov.mail.util
 import ru.somarov.mail.presentation.grpc.RegisterMailRequest
 
 object DefaultEntitiesGenerator {
-    fun createRegisterMailRequest(token: String = "token", text: String = "text"): RegisterMailRequest {
+    fun createRegisterMailRequest(email: String = "test@test.ru", text: String = "text"): RegisterMailRequest {
         return RegisterMailRequest.newBuilder()
-            .setToken(token)
+            .setEmail(email)
             .setText(text)
             .build()
     }

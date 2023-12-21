@@ -21,7 +21,7 @@ class EmailSendingSchedulerTests : BaseIntegrationTest() {
     fun `When scheduler starts it calls email service for sendEmailsForLatestMails method`() {
         runBlocking { delay(DELAY + 100) }
         verifyBlocking(emailService, atLeastOnce()) {
-            sendLatestEmails()
+            sendNewEmails()
         }
     }
 }
