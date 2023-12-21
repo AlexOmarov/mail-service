@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/struct.proto";
+
+package ru.somarov.mail.presentation.grpc;
+
+option java_multiple_files = true;
+
+service MailService {
+  rpc registerMail (RegisterMailRequest) returns (RegisterMailResponse) {}
+}
+
+message RegisterMailRequest {
+  string email = 1;
+  string text = 2;
+}
+
+message RegisterMailResponse {
+  Mail mail = 1;
+}
+
+message Mail {
+  string id = 1;
+  string text = 2;
+}

@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  service:
+    build:
+      context: .
+    container_name: service
+    depends_on:
+      - db
+    environment:
+      DB_HOST: appeal-db
+      DB_PORT: 5432
+      DB_NAME: mail_service
+      DB_SCHEMA: mail_service
+      DB_PASSWORD: mail_service
+      DB_USER: mail_service
+      spring.profiles.active: dev
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+
+  db:
+    image: postgres
+    container_name: db
+    restart: always
+    ports:
+      - "7000:5432"
+    environment:
+      POSTGRES_PASSWORD: mail_service
+      POSTGRES_USER: mail_service
+      POSTGRES_DB: mail_service
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+volumes:
+  pg_data: {}

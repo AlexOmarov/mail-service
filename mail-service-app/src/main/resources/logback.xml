@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration>
+
+<configuration debug="false">
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <springProperty name="componentName" source="spring.application.name"/>
+    <appender name="CONSOLE_TEXT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>${CONSOLE_LOG_CHARSET}</charset>
+        </encoder>
+    </appender>
+    <appender name="CONSOLE_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <pattern>yyyy-MM-dd' 'HH:mm:ss.SSS</pattern>
+                    <fieldName>timestamp</fieldName>
+                    <timeZone>UTC</timeZone>
+                </timestamp>
+                <pattern>
+                    <omitEmptyFields>false</omitEmptyFields>
+                    <pattern>
+                        {
+                            "level": "%level",
+                            "message": "%message",
+                            "traceId": "%X{traceId}",
+                            "spanId": "%X{spanId}",
+                            "loggerName": "%logger",
+                            "threadName": "%thread",
+                            "componentName": "${componentName}"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>
+    <root>
+        <if condition='Boolean.valueOf(p("CONSOLE_LOG_JSON"))'>
+            <then>
+                <appender-ref ref="CONSOLE_JSON"/>
+            </then>
+            <else>
+                <appender-ref ref="CONSOLE_TEXT"/>
+            </else>
+        </if>
+    </root>
+    <!-- Stop output INFO at start -->
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+</configuration>

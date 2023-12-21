@@ -1,0 +1,114 @@
+contour:
+  instance: unknown
+  grpc-port: 9090
+  http-port: 8080
+  mail:
+    destination-email: omarov@orbsoft.ru
+    host: smtp.yandex.ru
+    port: 465
+    username: omarov@orbsoft.ru
+    password: 1111
+    protocol: smtp
+    ssl-enabled: true
+    tls-enabled: true
+    tls-required: true
+    auth-enabled: true
+    debug-enabled: true
+  scheduling:
+    enabled: true
+    thread-pool-size: 5 # increase if new scheds are coming to not make race conditions
+    min-lock: 0
+    max-lock: 1h
+    email-sending:
+      enabled: true
+      delay: PT10S
+      batch-size: 20
+      lock-max-duration: PT1H
+      days-to-check-for-unsent-emails: 1
+  database:
+    host: localhost
+    schema: appealdb
+    port: 5432
+    name: appeal_service
+    user: appeal_service
+    password: appeal_service
+
+management:
+  health:
+    readinessState:
+      enabled: true
+    livenessState:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,info
+      show-details: always
+      show-components: always
+      probes:
+        enabled: true
+        add-additional-paths: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+grpc:
+  server:
+    port: '${contour.grpc-port}'
+
+server:
+  port: '${contour.http-port}'
+
+messages:
+  encoding: 'UTF-8'
+  basename: 'classpath:messages/messages'
+
+spring:
+  mail:
+    host: '${contour.mail.host}'
+    port: '${contour.mail.port}'
+    username: '${contour.mail.username}'
+    password: '${contour.mail.password}'
+    properties:
+      mail:
+        transport:
+          protocol: '${contour.mail.protocol}'
+        smtp:
+          auth: '${contour.mail.auth-enabled}'
+          ssl:
+            enable: '${contour.mail.ssl-enabled}'
+          starttls:
+            enable: '${contour.mail.tls-enabled}'
+            required: '${contour.mail.tls-required}'
+  main:
+    banner-mode: off
+  r2dbc:
+    url: 'r2dbc:postgresql://${contour.database.host}:${contour.database.port}/${contour.database.name}?currentSchema=${contour.database.schema}'
+    username: '${contour.database.user}'
+    password: '${contour.database.password}'
+    pool:
+      initial-size: 4
+      max-size: 8
+  flyway:
+    enabled: 'true'
+    url: 'jdbc:postgresql://${contour.database.host}:${contour.database.port}/${contour.database.name}?currentSchema=${contour.database.schema}'
+    user: '${contour.database.user}'
+    password: '${contour.database.password}'
+  application:
+    name: 'mail-service'
+
+logging:
+  level:
+    root: INFO

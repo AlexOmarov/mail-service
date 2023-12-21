@@ -1,0 +1,27 @@
+logging:
+  config: classpath:logback-spring.xml
+
+grpc:
+  server:
+    port: 9090
+  client:
+    mail-service:
+      address: localhost:9090
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      setKeepAliveTime: 6m
+      negotiationType: plaintext
+
+contour:
+  mail:
+    destination-email: 'test@yandex.ru'
+    host: 'smtp.yandex.com'
+    port: '465'
+    username: 'test@yandex.ru'
+    password: 'password'
+    protocol: 'smtp'
+    tls-enabled: true
+    auth-enabled: true
+    debug-enabled: false
+  scheduling:
+    max-email-sending-iterations: ${MAX_EMAIL_SENDING_ITERATIONS:10}
