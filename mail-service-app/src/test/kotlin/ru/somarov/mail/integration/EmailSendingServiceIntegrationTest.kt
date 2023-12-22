@@ -26,7 +26,7 @@ class EmailSendingServiceIntegrationTest : BaseIntegrationTest() {
     fun `When email service gets send email request then`() = runBlocking {
         generateMails()
 
-        emailService.sendNewEmails()
+        emailService.sendNewEmails(OffsetDateTime.now().minusHours(24))
 
         assert(repository.findAll().map { it.mailStatusId == MailStatus.Companion.MailStatusCode.SENT.id }
             .reduce { accumulator, value -> accumulator && value })

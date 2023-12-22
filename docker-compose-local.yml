@@ -7,12 +7,12 @@ services:
     depends_on:
       - db
     environment:
-      DB_HOST: appeal-db
-      DB_PORT: 5432
-      DB_NAME: mail_service
-      DB_SCHEMA: mail_service
-      DB_PASSWORD: mail_service
-      DB_USER: mail_service
+      contour.database.host: appeal-db
+      contour.database.port: 5432
+      contour.database.name: mail_service
+      contour.database.schema: mail_service
+      contour.database.password: mail_service
+      contour.database.user: mail_service
       spring.profiles.active: dev
     ports:
       - "8080:8080"
@@ -30,5 +30,101 @@ services:
       POSTGRES_DB: mail_service
     volumes:
       - pg_data:/var/lib/postgresql/data
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_SERVER_ID: 1
+    ports:
+      - "2181:2181"
+    volumes:
+      - zk-data:/var/lib/zookeeper/data
+      - zk-txn-logs:/var/lib/zookeeper/log
+      - zk-secrets:/etc/zookeeper/secrets
+
+  kafka:
+    image: confluentinc/cp-enterprise-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+      - kafka-secrets:/etc/kafka/secrets
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui
+    ports:
+      - "9001:8080"
+    depends_on:
+      - zookeeper
+      - kafka
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      KAFKA_CLUSTERS_0_JMXPORT: 9997
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry
+    depends_on:
+      - kafka
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: localhost
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:6005
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:9092'
+    ports:
+      - "6005:6005"
+    volumes:
+      - schema-registry-secrets:/etc/schema-registry/secrets
+
+  sonarqube:
+    image: sonarqube
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    ports:
+      - "4001:9000"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "${PGADMIN_PORT:-4002}:80"
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+      - "9411:9411"
+
+
 volumes:
   pg_data: {}
+  zk-data: { }
+  zk-txn-logs: { }
+  zk-secrets: { }
+  pgadmin: { }
+  sonarqube_data: { }
+  sonarqube_extensions: { }
+  sonarqube_logs:
+  kafka-data: { }
+  kafka-secrets: { }
+
+  schema-registry-secrets: { }

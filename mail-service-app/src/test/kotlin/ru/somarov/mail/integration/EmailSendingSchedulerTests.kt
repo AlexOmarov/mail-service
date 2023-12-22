@@ -9,6 +9,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.TestPropertySource
 import ru.somarov.mail.application.service.EmailService
 import ru.somarov.mail.base.BaseIntegrationTest
+import java.time.OffsetDateTime
 
 private const val DELAY = 300L
 
@@ -21,7 +22,7 @@ class EmailSendingSchedulerTests : BaseIntegrationTest() {
     fun `When scheduler starts it calls email service for sendEmailsForLatestMails method`() {
         runBlocking { delay(DELAY + 100) }
         verifyBlocking(emailService, atLeastOnce()) {
-            sendNewEmails()
+            sendNewEmails(OffsetDateTime.now().minusHours(24))
         }
     }
 }
