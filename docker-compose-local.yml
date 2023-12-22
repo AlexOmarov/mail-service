@@ -109,11 +109,11 @@ services:
       - pgadmin:/var/lib/pgadmin
     ports:
       - "${PGADMIN_PORT:-4002}:80"
+
   zipkin:
     image: openzipkin/zipkin
     ports:
       - "9411:9411"
-
 
 volumes:
   pg_data: {}
