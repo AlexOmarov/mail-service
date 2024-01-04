@@ -8,22 +8,19 @@ import reactor.core.scheduler.Schedulers
 import java.io.ByteArrayOutputStream
 import java.nio.channels.Channels
 
-class LoggingRequestDecorator internal constructor(
+internal class LoggingRequestDecorator(
     delegate: ServerHttpRequest,
     private val logger: HttpLogger
 ) : ServerHttpRequestDecorator(delegate) {
 
-    private val body: Flux<DataBuffer>?
+    private val body: Flux<DataBuffer>? = super.getBody()
+        .publishOn(Schedulers.boundedElastic())
+        .doOnNext { buffer ->
+            val bodyStream = ByteArrayOutputStream()
+            val channel = Channels.newChannel(bodyStream)
+            buffer.readableByteBuffers().forEach { channel.write(it) }
+            logger.logRequest(delegate, String(bodyStream.toByteArray()))
+        }
 
     override fun getBody(): Flux<DataBuffer> = body!!
-
-    init {
-        body = super.getBody().publishOn(Schedulers.boundedElastic())
-            .doOnNext { buffer ->
-                val bodyStream = ByteArrayOutputStream()
-                val channel = Channels.newChannel(bodyStream)
-                buffer.readableByteBuffers().forEach { channel.write(it) }
-                logger.logRequest(delegate, String(bodyStream.toByteArray()))
-            }
-    }
 }

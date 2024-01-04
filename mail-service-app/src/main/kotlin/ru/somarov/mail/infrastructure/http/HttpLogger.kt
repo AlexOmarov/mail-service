@@ -7,7 +7,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.util.StringUtils
 import java.util.Optional
 
-class HttpLogger(private val filters: List<HttpLoggerFilter>) {
+internal class HttpLogger(private val filters: List<HttpLoggerFilter>) {
     private val log = LoggerFactory.getLogger(this.javaClass)
 
     fun logRequest(request: ServerHttpRequest, body: String? = null) {

@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
 
 @Configuration
-class MicrometerConfig {
+private class MicrometerConfig {
     @Bean
     fun customize(props: ServiceProps, env: Environment, buildProperties: BuildProperties):
         MeterRegistryCustomizer<MeterRegistry> {

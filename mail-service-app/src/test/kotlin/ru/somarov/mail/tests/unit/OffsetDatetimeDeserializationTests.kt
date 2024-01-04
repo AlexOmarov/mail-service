@@ -2,7 +2,7 @@ package ru.somarov.mail.tests.unit
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import ru.somarov.mail.application.util.OffsetDateTimeDeserializer
+import ru.somarov.mail.infrastructure.datetime.OffsetDateTimeDeserializer
 import java.time.OffsetDateTime
 import java.time.format.DateTimeParseException
 

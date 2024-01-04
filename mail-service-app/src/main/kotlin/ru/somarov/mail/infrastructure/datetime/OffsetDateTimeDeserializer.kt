@@ -1,4 +1,4 @@
-package ru.somarov.mail.application.util
+package ru.somarov.mail.infrastructure.datetime
 
 import ru.somarov.mail.presentation.constants.MailServiceApiConstants.DATETIME_PATTERN
 import java.time.OffsetDateTime

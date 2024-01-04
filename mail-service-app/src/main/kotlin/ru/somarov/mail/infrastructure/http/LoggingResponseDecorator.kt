@@ -11,7 +11,7 @@ import reactor.core.scheduler.Schedulers
 import java.io.ByteArrayOutputStream
 import java.nio.channels.Channels
 
-class LoggingResponseDecorator internal constructor(
+internal class LoggingResponseDecorator internal constructor(
     private var request: ServerHttpRequest,
     delegate: ServerHttpResponse,
     private val httpLogger: HttpLogger

@@ -16,7 +16,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar
 @Configuration
 @EnableSchedulerLock(defaultLockAtMostFor = "15m")
 @ConditionalOnProperty(name = ["contour.scheduling.enabled"], havingValue = "true")
-class SchedulingConfig(private val props: ServiceProps) : SchedulingConfigurer {
+private class SchedulingConfig(private val props: ServiceProps) : SchedulingConfigurer {
     override fun configureTasks(taskRegistrar: ScheduledTaskRegistrar) {
         val threadPoolTaskScheduler = ThreadPoolTaskScheduler()
 

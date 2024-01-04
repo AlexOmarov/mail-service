@@ -1,4 +1,4 @@
-package ru.somarov.mail.infrastructure.grpc
+package ru.somarov.mail.infrastructure.grpc.observation
 
 import io.grpc.Metadata
 import io.grpc.ServerCall

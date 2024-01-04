@@ -1,4 +1,4 @@
-package ru.somarov.mail.infrastructure.grpc
+package ru.somarov.mail.infrastructure.grpc.logging
 
 import io.grpc.CallOptions
 import io.grpc.Channel
@@ -9,7 +9,7 @@ import io.grpc.ForwardingClientCallListener
 import io.grpc.Metadata
 import io.grpc.MethodDescriptor
 import org.slf4j.LoggerFactory
-import ru.somarov.mail.infrastructure.util.GrpcLoggingUtil.formLogFromMessage
+import ru.somarov.mail.infrastructure.grpc.logging.GrpcLoggingUtil.formLogFromMessage
 
 class GrpcLoggingClientInterceptor : ClientInterceptor {
     private val log = LoggerFactory.getLogger(GrpcLoggingClientInterceptor::class.java)

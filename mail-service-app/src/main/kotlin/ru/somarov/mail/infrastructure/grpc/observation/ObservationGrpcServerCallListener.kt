@@ -1,4 +1,4 @@
-package ru.somarov.mail.infrastructure.grpc.wrappers
+package ru.somarov.mail.infrastructure.grpc.observation
 
 import io.grpc.ForwardingServerCallListener
 import io.grpc.ServerCall

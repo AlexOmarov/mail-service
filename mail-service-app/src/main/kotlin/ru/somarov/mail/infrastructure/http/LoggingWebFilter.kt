@@ -7,7 +7,7 @@ import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
 
 @Component
-class LoggingWebFilter(private val filters: List<HttpLoggerFilter>) : WebFilter {
+private class LoggingWebFilter(private val filters: List<HttpLoggerFilter>) : WebFilter {
 
     @Suppress("kotlin:S6508")
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {

@@ -1,4 +1,4 @@
-package ru.somarov.mail.infrastructure.grpc
+package ru.somarov.mail.infrastructure.grpc.logging
 
 import io.grpc.ForwardingServerCall.SimpleForwardingServerCall
 import io.grpc.ForwardingServerCallListener.SimpleForwardingServerCallListener
@@ -9,7 +9,7 @@ import io.grpc.ServerInterceptor
 import io.grpc.Status
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import ru.somarov.mail.infrastructure.util.GrpcLoggingUtil.formLogFromMessage
+import ru.somarov.mail.infrastructure.grpc.logging.GrpcLoggingUtil.formLogFromMessage
 
 class GrpcLoggingServerInterceptor : ServerInterceptor {
 

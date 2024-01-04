@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.reduce
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import ru.somarov.mail.application.service.EmailService
+import ru.somarov.mail.infrastructure.service.EmailService
 import ru.somarov.mail.base.BaseIntegrationTest
 import ru.somarov.mail.infrastructure.db.entity.Mail
 import ru.somarov.mail.infrastructure.db.entity.MailChannel

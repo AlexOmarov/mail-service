@@ -5,7 +5,10 @@ import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.ServerWebExchangeDecorator
 
-class LoggingWebExchange(logger: HttpLogger, delegate: ServerWebExchange) : ServerWebExchangeDecorator(delegate) {
+internal class LoggingWebExchange(
+    logger: HttpLogger,
+    delegate: ServerWebExchange
+) : ServerWebExchangeDecorator(delegate) {
 
     private val requestDecorator = LoggingRequestDecorator(delegate.request, logger)
 

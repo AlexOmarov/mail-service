@@ -7,7 +7,7 @@ import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.verifyBlocking
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.TestPropertySource
-import ru.somarov.mail.application.service.EmailService
+import ru.somarov.mail.infrastructure.service.EmailService
 import ru.somarov.mail.base.BaseIntegrationTest
 import java.time.OffsetDateTime
 

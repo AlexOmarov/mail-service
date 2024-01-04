@@ -1,4 +1,4 @@
-package ru.somarov.mail.infrastructure.util
+package ru.somarov.mail.infrastructure.grpc.logging
 
 import com.google.protobuf.ByteString
 import com.google.protobuf.MessageOrBuilder

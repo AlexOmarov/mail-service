@@ -12,7 +12,7 @@ import java.util.TimeZone
 @Configuration
 @EnableConfigurationProperties
 @ConfigurationPropertiesScan
-class AppConfig(private val registry: MeterRegistry, private val buildProps: BuildProperties) {
+private class AppConfig(private val registry: MeterRegistry, private val buildProps: BuildProperties) {
     @PostConstruct
     fun init() {
         TimeZone.setDefault(TimeZone.getTimeZone(TIMEZONE))

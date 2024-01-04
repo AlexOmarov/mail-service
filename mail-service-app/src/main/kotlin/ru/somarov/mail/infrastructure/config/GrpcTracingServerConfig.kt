@@ -6,12 +6,12 @@ import net.devh.boot.grpc.server.interceptor.GrpcGlobalServerInterceptor
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
-import ru.somarov.mail.infrastructure.grpc.GrpcObservationServerInterceptor
-import ru.somarov.mail.infrastructure.grpc.GrpcPropagationServerInterceptor
+import ru.somarov.mail.infrastructure.grpc.observation.GrpcObservationServerInterceptor
+import ru.somarov.mail.infrastructure.grpc.observation.GrpcPropagationServerInterceptor
 
 @Configuration
 @ConditionalOnClass(value = [Configuration::class, GrpcGlobalServerInterceptor::class])
-class GrpcTracingServerConfig {
+private class GrpcTracingServerConfig {
     @GrpcGlobalServerInterceptor
     @Order(InterceptorOrder.ORDER_TRACING_METRICS + PROPAGATION_INTERCEPTOR_ORDER)
     fun serverPropagationInterceptor(observationRegistry: ObservationRegistry): GrpcPropagationServerInterceptor {

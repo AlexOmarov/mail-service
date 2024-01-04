@@ -8,11 +8,11 @@ import net.devh.boot.grpc.common.util.InterceptorOrder
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
-import ru.somarov.mail.infrastructure.grpc.GrpcObservationClientInterceptor
+import ru.somarov.mail.infrastructure.grpc.observation.GrpcObservationClientInterceptor
 
 @Configuration
 @ConditionalOnClass(value = [Configuration::class, GrpcGlobalClientInterceptor::class])
-class GrpcTracingClientConfig {
+private class GrpcTracingClientConfig {
     @GrpcGlobalClientInterceptor
     @Order(InterceptorOrder.ORDER_LAST)
     fun tracingClientInterceptor(registry: ObservationRegistry): ClientInterceptor {

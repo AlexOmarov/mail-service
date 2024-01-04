@@ -1,4 +1,4 @@
-package ru.somarov.mail.infrastructure.grpc
+package ru.somarov.mail.infrastructure.grpc.observation
 
 import io.grpc.Metadata
 import io.grpc.ServerCall
@@ -10,8 +10,6 @@ import io.micrometer.core.instrument.binder.grpc.GrpcServerObservationContext
 import io.micrometer.core.instrument.binder.grpc.GrpcServerObservationConvention
 import io.micrometer.observation.Observation
 import io.micrometer.observation.ObservationRegistry
-import ru.somarov.mail.infrastructure.grpc.wrappers.ObservationGrpcServerCall
-import ru.somarov.mail.infrastructure.grpc.wrappers.ObservationGrpcServerCallListener
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Supplier
 

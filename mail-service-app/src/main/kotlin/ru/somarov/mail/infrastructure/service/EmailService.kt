@@ -1,4 +1,4 @@
-package ru.somarov.mail.application.service
+package ru.somarov.mail.infrastructure.service
 
 import kotlinx.coroutines.flow.toList
 import org.slf4j.LoggerFactory

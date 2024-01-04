@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.event.EventListener
 import org.springframework.core.annotation.Order
-import ru.somarov.mail.infrastructure.grpc.GrpcLoggingClientInterceptor
-import ru.somarov.mail.infrastructure.grpc.GrpcLoggingServerInterceptor
+import ru.somarov.mail.infrastructure.grpc.logging.GrpcLoggingClientInterceptor
+import ru.somarov.mail.infrastructure.grpc.logging.GrpcLoggingServerInterceptor
 
 @Configuration
-class GrpcClientServerLoggingConfig {
+private class GrpcClientServerLoggingConfig {
 
     private val log = LoggerFactory.getLogger(GrpcClientServerLoggingConfig::class.java)
 
