@@ -9,7 +9,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
+import org.mockito.kotlin.anyVararg
 import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.reset
@@ -18,9 +18,8 @@ import org.springframework.aop.AopInvocationException
 import org.springframework.aop.support.AopUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.SpyBean
-import org.springframework.mail.SimpleMailMessage
-import org.springframework.mail.javamail.JavaMailSender
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
@@ -47,17 +46,17 @@ class BaseIntegrationTest {
     @Autowired
     lateinit var dbClient: DatabaseClient
 
-    @SpyBean
-    lateinit var emailSender: JavaMailSender
+    @MockBean
+    lateinit var emailSender: JavaMailSenderImpl
 
     @BeforeEach
     fun setup() {
         spyBeanWorkAround() // For SpyBean usage https://github.com/spring-projects/spring-framework/issues/31713
 
         val message = MimeMessage(Session.getDefaultInstance(Properties()))
-        doReturn(message).`when`(emailSender).createMimeMessage()
 
-        doNothing().whenever(emailSender).send(any<SimpleMailMessage>())
+        doReturn(message).whenever(emailSender).createMimeMessage()
+        doNothing().whenever(emailSender).send(anyVararg<MimeMessage>())
     }
 
     @AfterEach

@@ -2,9 +2,11 @@ package ru.somarov.mail.tests.integration
 
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.reduce
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.context.TestPropertySource
 import ru.somarov.mail.infrastructure.service.EmailService
 import ru.somarov.mail.base.BaseIntegrationTest
 import ru.somarov.mail.infrastructure.db.entity.Mail
@@ -14,7 +16,8 @@ import ru.somarov.mail.infrastructure.db.repo.MailRepo
 import java.time.OffsetDateTime
 import java.util.UUID
 
-class EmailSendingServiceIntegrationTest : BaseIntegrationTest() {
+@TestPropertySource(properties = ["contour.scheduling.email-sending.enabled = false"])
+private class EmailSendingServiceIntegrationTest : BaseIntegrationTest() {
 
     @Autowired
     lateinit var emailService: EmailService
@@ -45,6 +48,6 @@ class EmailSendingServiceIntegrationTest : BaseIntegrationTest() {
                     lastUpdateDate = OffsetDateTime.now(),
                 )
             }
-        )
+        ).toList()
     }
 }

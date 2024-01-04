@@ -3,26 +3,36 @@ package ru.somarov.mail.tests.integration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.verifyBlocking
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.TestPropertySource
-import ru.somarov.mail.infrastructure.service.EmailService
 import ru.somarov.mail.base.BaseIntegrationTest
+import ru.somarov.mail.infrastructure.service.EmailService
 import java.time.OffsetDateTime
 
 private const val DELAY = 300L
 
 @TestPropertySource(properties = ["contour.scheduling.email-sending.delay = $DELAY"])
-class EmailSendingSchedulerTests : BaseIntegrationTest() {
+private class EmailSendingSchedulerTests : BaseIntegrationTest() {
     @SpyBean
     lateinit var emailService: EmailService
 
     @Test
     fun `When scheduler starts it calls email service for sendEmailsForLatestMails method`() {
         runBlocking { delay(DELAY + 100) }
+
+        val captor = argumentCaptor<OffsetDateTime>()
+
         verifyBlocking(emailService, atLeastOnce()) {
-            sendNewEmails(OffsetDateTime.now().minusHours(24))
+            sendNewEmails(captor.capture())
         }
+
+        val captured = captor.firstValue
+        assert(
+            captured.withSecond(0).withNano(0)
+                .isEqual(OffsetDateTime.now().minusHours(24).withSecond(0).withNano(0))
+        )
     }
 }

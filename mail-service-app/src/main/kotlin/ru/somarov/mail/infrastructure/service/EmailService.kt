@@ -42,6 +42,7 @@ class EmailService(
     private suspend fun processIteration(startDate: OffsetDateTime): List<Mail> {
         val batchSize = props.contour.scheduling.emailSending.batchSize
 
+        // TODO: if error occurred then endless loop
         val mails = mailRepo.findAllByMailStatusIdAndCreationDateAfter(
             NEW.id,
             startDate,
@@ -59,12 +60,14 @@ class EmailService(
 
     private suspend fun saveSendingResult(mails: List<Mail>) {
         log.info("Emails for mails $mails have been sent. Updating mail data.")
-        mails.forEach { mail ->
-            mail.mailStatusId = SENT.id
-            mail.lastUpdateDate = OffsetDateTime.now()
-            mail.new = false
-        }
-        mailRepo.saveAll(mails).toList()
+        mailRepo.saveAll(
+            mails.map { mail ->
+                mail.mailStatusId = SENT.id
+                mail.lastUpdateDate = OffsetDateTime.now()
+                mail.new = false
+                mail
+            }
+        ).toList()
     }
 
     // Have to do TooGenericExceptionCaught to catch all types of network exceptions

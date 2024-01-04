@@ -3,10 +3,10 @@ contour:
   grpc-port: 9090
   http-port: 8080
   mail:
-    destination-email: omarov@orbsoft.ru
+    destination-email: test@yandex.ru
     host: smtp.yandex.ru
     port: 465
-    username: omarov@orbsoft.ru
+    username: test@yandex.ru
     password: 1111
     protocol: smtp
     ssl-enabled: true
@@ -27,11 +27,11 @@ contour:
       days-to-check-for-unsent-emails: 1
   database:
     host: localhost
-    schema: appealdb
+    schema: mail_service
     port: 5432
-    name: appeal_service
-    user: appeal_service
-    password: appeal_service
+    name: mail_service
+    user: mail_service
+    password: mail_service
 
 management:
   health:

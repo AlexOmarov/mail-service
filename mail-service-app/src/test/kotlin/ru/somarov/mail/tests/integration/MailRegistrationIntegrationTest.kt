@@ -18,7 +18,7 @@ import ru.somarov.mail.presentation.grpc.RegisterMailRequest
 import ru.somarov.mail.util.DefaultEntitiesGenerator.createRegisterMailRequest
 
 @TestPropertySource(properties = ["contour.scheduling.enabled = false"])
-class MailRegistrationIntegrationTest : BaseIntegrationTest() {
+private class MailRegistrationIntegrationTest : BaseIntegrationTest() {
     @SpyBean
     lateinit var service: MailRegistrationService
 
@@ -33,20 +33,17 @@ class MailRegistrationIntegrationTest : BaseIntegrationTest() {
     @Test
     fun `When register mail request comes without required fields then treat like empty strings`() {
         val captor = argumentCaptor<Mail>()
-        val tokenCaptor = argumentCaptor<String>()
 
         runBlocking {
             grpcTestClient.registerMail(RegisterMailRequest.newBuilder().build())
         }
-
-        val tokenPassedToMonolith = tokenCaptor.firstValue
-        assert(tokenPassedToMonolith == "")
 
         verifyBlocking(mailRepo, times(1)) {
             save(captor.capture())
         }
         val entityToSave = captor.firstValue
         assert(entityToSave.text == "")
+        assert(entityToSave.clientEmail == "")
     }
 
     @Test
@@ -80,7 +77,7 @@ class MailRegistrationIntegrationTest : BaseIntegrationTest() {
 
         runBlocking {
             grpcTestClient.registerMail(
-                createRegisterMailRequest()
+                createRegisterMailRequest(email = email)
             )
         }
         verifyBlocking(mailRepo, times(1)) {

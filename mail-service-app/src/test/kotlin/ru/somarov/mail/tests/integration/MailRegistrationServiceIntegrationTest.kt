@@ -9,7 +9,7 @@ import ru.somarov.mail.infrastructure.db.repo.MailRepo
 import ru.somarov.mail.presentation.grpc.RegisterMailRequest
 import java.util.UUID
 
-class MailRegistrationServiceIntegrationTest : BaseIntegrationTest() {
+private class MailRegistrationServiceIntegrationTest : BaseIntegrationTest() {
 
     @Autowired
     lateinit var service: MailRegistrationService

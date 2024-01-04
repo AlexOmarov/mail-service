@@ -1,11 +1,11 @@
 # Mail Service
 
-Сервис предназначен для формирования, хранения и обработки email сообщений.
-
-[![Java version](https://img.shields.io/static/v1?label=Java&message=21&color=blue)](https://sonarqube.denumtech.ru/dashboard?id=appeal-service)
+[![Java version](https://img.shields.io/static/v1?label=Java&message=21&color=blue)]()
 [![Coverage]()]()
 [![Quality Gate Status]()]()
 [![Bugs]()]()
+
+Сервис предназначен для формирования, хранения и обработки email сообщений.
 
 ## Содержание
 - [Введение](#Введение)
@@ -104,10 +104,10 @@
 - Postgres база (v. 15 и выше). Стандартные конфиги (с именами системных переменных):
   - host: ${contour.database.host:localhost}
   - port: ${contour.database.port:5432}
-  - name: ${contour.database.name:appeal_service}
-  - schema: ${contour.database.schema:appealdb}
-  - user: ${contour.database.user:appeal_service}
-  - password: ${contour.database.password:appeal_service}
+  - name: ${contour.database.name:mail_service}
+  - schema: ${contour.database.schema:mail_service}
+  - user: ${contour.database.user:mail_service}
+  - password: ${contour.database.password:mail_service}
 
 Также имеется возможность настроить логирование:
 - CONSOLE_LOG_JSON (true/false) - включает json appender, который используется для импорта логов в elk стэк

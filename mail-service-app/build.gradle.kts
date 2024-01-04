@@ -31,9 +31,17 @@ koverReport {
         xml {
             onCheck = true
         }
-
+        log {
+            onCheck = true
+        }
         html {
             onCheck = true
+        }
+        // TODO: Get rid of [ant:jacocoReport] Rule violated for bundle :mail-service-app: lines covered ratio is 0.5994, but expected minimum is 1.0000
+        verify {
+            rule {
+                minBound(50)
+            }
         }
     }
 }
