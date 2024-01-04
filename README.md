@@ -23,6 +23,7 @@
 ### Публикация
 Для тестирования будет полезна возможность локальной публикации пакетов в mavenLocal. 
 Для этого используется команда publishToMavenLocal.
+
 ```bash
 .\gradlew publishToMavenLocal
 ```
