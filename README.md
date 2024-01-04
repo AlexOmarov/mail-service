@@ -1,9 +1,9 @@
 # Mail Service
 
-[![Java version](https://img.shields.io/static/v1?label=Java&message=21&color=blue)]()
-[![Coverage]()]()
-[![Quality Gate Status]()]()
-[![Bugs]()]()
+[![Java version](https://img.shields.io/static/v1?label=Java&message=21&color=blue)](https://sonarcloud.io/project/overview?id=AlexOmarov_mail-service)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=AlexOmarov_mail-service&metric=coverage)](https://sonarcloud.io/summary/new_code?id=AlexOmarov_mail-service)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=AlexOmarov_mail-service&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=AlexOmarov_mail-service)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=AlexOmarov_mail-service&metric=bugs)](https://sonarcloud.io/summary/new_code?id=AlexOmarov_mail-service)
 
 Сервис предназначен для формирования, хранения и обработки email сообщений.
 
