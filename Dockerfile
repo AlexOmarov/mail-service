@@ -9,8 +9,8 @@ RUN gradle clean build -x test -x detekt
 #pack
 FROM openjdk:21-jdk-slim
 
-RUN groupadd --system --gid 1000 appuser && \
-    useradd --system --uid 1000 --gid 1000 appuser
+RUN groupadd --system --gid 100 appuser && \
+    useradd --system --uid 100 --gid 100 appuser
 USER appuser
 COPY --from=build /tmp/.build/app/libs/app.jar /app.jar
 EXPOSE 8080 9090

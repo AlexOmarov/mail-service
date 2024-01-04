@@ -17,7 +17,7 @@ defaults:
 
 jobs:
   release:
-    name: Release new version of service
+    name: Release new version of service image
     runs-on: ubuntu-latest
     steps:
 
@@ -36,9 +36,6 @@ jobs:
         uses: gradle/gradle-build-action@v2.4.2
         with:
           gradle-version: 8.5
-
-      - name: Build
-        run: ./gradlew build -x test installBootDist
 
       - name: Log in to Docker Hub
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
