@@ -1,4 +1,4 @@
-package ru.somarov.mail.unit
+package ru.somarov.mail.tests.unit
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

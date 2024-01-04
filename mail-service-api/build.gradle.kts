@@ -32,13 +32,6 @@ sourceSets {
     main.java.srcDirs("${project.layout.buildDirectory.get()}/generated/source/proto/main/grpckt")
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "20"
-        freeCompilerArgs = listOf("-Xjsr305=strict")
-    }
-}
-
 protobuf {
     protoc {
         artifact = "com.google.protobuf:protoc:3.22.2"
@@ -72,7 +65,7 @@ publishing {
     }
     repositories {
         maven {
-            url = uri(System.getenv("PRIVATE_REPO_URL"))
+            url = uri(System.getenv("PRIVATE_REPO_URL") ?: "")
             name = "PrivateRepo"
             credentials(HttpHeaderCredentials::class) {
                 name = "Token"

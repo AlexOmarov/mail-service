@@ -8,6 +8,13 @@ allprojects {
     group = "ru.somarov"
 }
 
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions {
+        jvmTarget = "21"
+        freeCompilerArgs = listOf("-Xjsr305=strict")
+    }
+}
+
 var exclusions = project.properties["test_exclusions"].toString()
 
 sonar {

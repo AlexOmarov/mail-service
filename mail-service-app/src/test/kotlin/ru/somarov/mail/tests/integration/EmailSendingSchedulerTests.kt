@@ -1,4 +1,4 @@
-package ru.somarov.mail.integration
+package ru.somarov.mail.tests.integration
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking

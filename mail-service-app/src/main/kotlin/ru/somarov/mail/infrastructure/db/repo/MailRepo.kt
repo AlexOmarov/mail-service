@@ -10,8 +10,8 @@ import java.util.UUID
 
 @Repository
 interface MailRepo : CoroutineCrudRepository<Mail, UUID> {
-    fun findAllByIsEmailSentAndCreationDateAfter(
-        isEmailSent: Boolean,
+    fun findAllByMailStatusIdAndCreationDateAfter(
+        mailStatusId: UUID,
         creationDate: OffsetDateTime,
         page: Pageable
     ): Flow<Mail>

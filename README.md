@@ -2,7 +2,7 @@
 
 Сервис предназначен для формирования, хранения и обработки email сообщений.
 
-[![Java version](https://img.shields.io/static/v1?label=Java&message=20&color=blue)](https://sonarqube.denumtech.ru/dashboard?id=appeal-service)
+[![Java version](https://img.shields.io/static/v1?label=Java&message=21&color=blue)](https://sonarqube.denumtech.ru/dashboard?id=appeal-service)
 [![Coverage]()]()
 [![Quality Gate Status]()]()
 [![Bugs]()]()

@@ -66,6 +66,6 @@ data class Mail(
                    
                    <p><small>ID обращения: ${mail.id}</small></p>
                </div>
-            """.trimIndent()
+        """.trimIndent()
     }
 }

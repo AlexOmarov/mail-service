@@ -60,13 +60,6 @@ tasks.bootJar {
     archiveFileName.set("app.jar")
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "20"
-        freeCompilerArgs = listOf("-Xjsr305=strict")
-    }
-}
-
 tasks.withType<Test> {
     useJUnitPlatform()
     testLogging {

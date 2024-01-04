@@ -7,7 +7,8 @@ import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
 import ru.somarov.mail.infrastructure.config.ServiceProps
 import ru.somarov.mail.infrastructure.db.entity.Mail
-import ru.somarov.mail.infrastructure.db.entity.MailStatus
+import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.NEW
+import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.SENT
 import ru.somarov.mail.infrastructure.db.repo.MailRepo
 import java.time.OffsetDateTime
 
@@ -32,7 +33,6 @@ class EmailService(
             amountOfSentEmails += mails.size
 
             iteration++
-
         } while (!mails.isNullOrEmpty())
 
         log.info("Finished sending emails for unprocessed mails from $startDate")
@@ -40,10 +40,12 @@ class EmailService(
     }
 
     private suspend fun processIteration(startDate: OffsetDateTime): List<Mail> {
-        val mails = mailRepo.findAllByIsEmailSentAndCreationDateAfter(
-            false,
+        val batchSize = props.contour.scheduling.emailSending.batchSize
+
+        val mails = mailRepo.findAllByMailStatusIdAndCreationDateAfter(
+            NEW.id,
             startDate,
-            Pageable.ofSize(props.contour.scheduling.emailSending.batchSize).withPage(0)
+            Pageable.ofSize(batchSize).withPage(0)
         ).toList()
 
         if (mails.isNotEmpty()) {
@@ -58,7 +60,7 @@ class EmailService(
     private suspend fun saveSendingResult(mails: List<Mail>) {
         log.info("Emails for mails $mails have been sent. Updating mail data.")
         mails.forEach { mail ->
-            mail.mailStatusId = MailStatus.Companion.MailStatusCode.SENT.id
+            mail.mailStatusId = SENT.id
             mail.lastUpdateDate = OffsetDateTime.now()
             mail.new = false
         }
