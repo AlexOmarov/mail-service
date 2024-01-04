@@ -35,13 +35,8 @@ jobs:
       - name: GradleSetup
         uses: gradle/gradle-build-action@v2.4.2
 
-      - name: Build
-        run: ./gradlew build -x test
-
-      - name: Test
-        run: |
-          ./gradlew test
+      - name: Build and test
+        run: ./gradlew build
 
       - name: Scan
-        run: |
-          ./gradlew sonar -D"sonar.host.url"="https://sonarcloud.io" -D"sonar.token"=${{ secrets.SONAR_TOKEN }} -D"sonar.projectKey"=${{ secrets.SONAR_PROJECT_KEY }} -D"sonar.organization"=${{ secrets.SONAR_ORG }}
+        run: ./gradlew sonar -D"sonar.host.url"="https://sonarcloud.io" -D"sonar.token"=${{ secrets.SONAR_TOKEN }} -D"sonar.projectKey"=${{ secrets.SONAR_PROJECT_KEY }} -D"sonar.organization"=${{ secrets.SONAR_ORG }}
