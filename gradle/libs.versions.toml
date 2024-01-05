@@ -67,6 +67,7 @@ reactor-test = { group = "io.projectreactor", name = "reactor-test", version = "
 shedlock-provider-r2dbc = { group = "net.javacrumbs.shedlock", name = "shedlock-provider-r2dbc", version.ref = "shedlock" }
 shedlock-spring = { group = "net.javacrumbs.shedlock", name = "shedlock-spring", version.ref = "shedlock" }
 spring-boot-starter-actuator = { group = "org.springframework.boot", name = "spring-boot-starter-actuator", version.ref = "spring-boot" }
+spring-boot-starter-security = { group = "org.springframework.boot", name = "spring-boot-starter-security", version.ref = "spring-boot" }
 spring-boot-starter-aop = { group = "org.springframework.boot", name = "spring-boot-starter-aop", version.ref = "spring-boot" }
 spring-boot-starter-cache = { group = "org.springframework.boot", name = "spring-boot-starter-cache", version.ref = "spring-boot" }
 spring-boot-starter-data-r2dbc = { group = "org.springframework.boot", name = "spring-boot-starter-data-r2dbc", version.ref = "spring-boot" }
@@ -82,7 +83,7 @@ testcontainers-postgres = { group = "org.testcontainers", name = "postgresql", v
 janino = { group = "org.codehaus.janino", name = "janino", version.ref = "janino" }
 
 [bundles]
-reactive-service-base = ["logstash-logback-encoder", "spring-boot-starter-webflux", "spring-boot-starter-validation", "spring-boot-starter-cache", "spring-boot-starter-actuator", "spring-boot-starter-aop", "kotlin-coroutines-core", "kotlin-coroutines-reactive", "kotlin-coroutines-reactor", "kotlin-extensions", "kotlin-jackson", "jackson-databind", "jackson-core", "jackson-annotations", "micrometer", "micrometer-registry-prometheus", "micrometer-reactor", "micrometer-tracing", "micrometer-tracing-otel", "micrometer-context-propagation", "janino"]
+reactive-service-base = ["logstash-logback-encoder", "spring-boot-starter-webflux", "spring-boot-starter-security", "spring-boot-starter-validation", "spring-boot-starter-cache", "spring-boot-starter-actuator", "spring-boot-starter-aop", "kotlin-coroutines-core", "kotlin-coroutines-reactive", "kotlin-coroutines-reactor", "kotlin-extensions", "kotlin-jackson", "jackson-databind", "jackson-core", "jackson-annotations", "micrometer", "micrometer-registry-prometheus", "micrometer-reactor", "micrometer-tracing", "micrometer-tracing-otel", "micrometer-context-propagation", "janino"]
 reactive-service-test = ["junit-api", "junit-engine", "testcontainers-junit", "mockito", "mockk", "reactor-test", "awaitility", "spring-starter-test"]
 database-postgresql = ["spring-boot-starter-data-r2dbc", "r2dbc-postgresql", "r2dbc-proxy", "flyway-core", "postgresql"]
 grpc-client = ["grpc-client-spring-boot-starter", "grpc-kotlin-stub", "protobuf-kotlin"]
