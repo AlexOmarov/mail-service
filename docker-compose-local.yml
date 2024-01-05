@@ -17,6 +17,7 @@ services:
       contour.database.password: mail_service
       contour.database.user: mail_service
       spring.profiles.active: dev
+      CONSOLE_LOG_JSON: true
     ports:
       - "8080:8080"
       - "9091:9090"

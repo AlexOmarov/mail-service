@@ -53,6 +53,7 @@ dependencies {
 
     implementation(libs.spring.boot.starter.mail)
     implementation(libs.bundles.shedlock)
+    implementation(libs.bundles.springdoc)
     implementation(libs.bundles.reactive.service.base)
     implementation(libs.bundles.database.postgresql)
     implementation(libs.bundles.grpc.server)
