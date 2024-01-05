@@ -1,9 +1,9 @@
-package com.denumhub.error.grpc
+package ru.somarov.mail.infrastructure.grpc.error.grpc
 
-import com.denumhub.error.exception.technical.TechnicalException
-import com.denumhub.error.exception.technical.TechnicalExceptionRegistryMember
-import com.denumhub.error.exception.technical.TechnicalExceptionRegistryMember.BASE_TECHNICAL_EXCEPTION
-import com.denumhub.error.exception.technical.TechnicalExceptionRegistryMember.SIDE_SYSTEM_EXCEPTION
+import ru.somarov.mail.infrastructure.grpc.error.exception.technical.TechnicalException
+import ru.somarov.mail.infrastructure.grpc.error.exception.technical.TechnicalExceptionRegistryMember
+import ru.somarov.mail.infrastructure.grpc.error.exception.technical.TechnicalExceptionRegistryMember.BASE_TECHNICAL_EXCEPTION
+import ru.somarov.mail.infrastructure.grpc.error.exception.technical.TechnicalExceptionRegistryMember.SIDE_SYSTEM_EXCEPTION
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.rpc.Code
 import com.google.rpc.ErrorInfo

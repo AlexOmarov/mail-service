@@ -1,9 +1,9 @@
-package com.denumhub.error.grpc
+package ru.somarov.mail.infrastructure.grpc.error.grpc
 
-import com.denumhub.error.exception.technical.TechnicalException
-import com.denumhub.error.exception.technical.TechnicalExceptionRegistryMember.BASE_TECHNICAL_EXCEPTION
-import com.denumhub.error.grpc.GrpcExceptionClientInterceptor.Companion.EXCEPTION_INTERCEPTOR_ORDER
-import com.denumhub.error.grpc.extend.toTechnicalException
+import ru.somarov.mail.infrastructure.grpc.error.exception.technical.TechnicalException
+import ru.somarov.mail.infrastructure.grpc.error.exception.technical.TechnicalExceptionRegistryMember.BASE_TECHNICAL_EXCEPTION
+import ru.somarov.mail.infrastructure.grpc.error.grpc.GrpcExceptionClientInterceptor.Companion.EXCEPTION_INTERCEPTOR_ORDER
+import ru.somarov.mail.infrastructure.grpc.error.grpc.extend.toTechnicalException
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.grpc.CallOptions
 import io.grpc.Channel

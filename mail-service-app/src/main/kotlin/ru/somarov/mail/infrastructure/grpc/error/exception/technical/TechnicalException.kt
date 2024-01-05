@@ -1,4 +1,4 @@
-package com.denumhub.error.exception.technical
+package ru.somarov.mail.infrastructure.grpc.error.exception.technical
 
 import java.time.OffsetDateTime
 import java.util.UUID

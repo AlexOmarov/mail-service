@@ -1,7 +1,7 @@
-package com.denumhub.error.grpc
+package ru.somarov.mail.infrastructure.grpc.error.grpc
 
-import com.denumhub.error.exception.technical.TechnicalException
-import com.denumhub.error.exception.technical.TechnicalExceptionRegistryMember
+import ru.somarov.mail.infrastructure.grpc.error.exception.technical.TechnicalException
+import ru.somarov.mail.infrastructure.grpc.error.exception.technical.TechnicalExceptionRegistryMember
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.grpc.ForwardingServerCall
 import io.grpc.ServerCall

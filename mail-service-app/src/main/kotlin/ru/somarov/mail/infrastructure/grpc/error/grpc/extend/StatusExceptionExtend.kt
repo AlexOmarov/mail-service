@@ -1,6 +1,6 @@
-package com.denumhub.error.grpc.extend
+package ru.somarov.mail.infrastructure.grpc.error.grpc.extend
 
-import com.denumhub.error.exception.technical.TechnicalException
+import ru.somarov.mail.infrastructure.grpc.error.exception.technical.TechnicalException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.rpc.ErrorInfo
 import io.grpc.StatusException
