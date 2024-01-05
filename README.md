@@ -60,6 +60,28 @@
 #### Локальный Docker
 Необходимо использовать `docker-compose-local.yml` чтобы собрать образ и стартовать контейнер.
 В стандартной конфигурации сервис будет использовать `application-dev.yml` файл свойств.
+Following ports are served on host machine
+
+8080 - service (http)
+9091 - service (grpc)
+
+7000 - postgres (odbc) (нужно добавить в dbeaver)
+4002 - pgadmin (http) (нужно добавить db:5432)
+
+2181 - zookeeper (tcp)
+9092 - kafka cluster (tcp)
+6005 - schema registry (tcp/http)
+9001 - kafka ui (http)
+
+9411 - zipkin (http/tcp)
+3000 - grafana (http/tcp)
+9090 - prometheus (http/tcp)
+
+25826, 5046 - logstash (tcp)
+9200 - elastic (tcp/http)
+5601 - kibana (http)
+
+5001 - mockserver (http)
 
 ### Использование code-quality инструментов
 Когда проект собирается с использованием `build` задачи gradle detekt и ktlint проверки проходят автоматически,

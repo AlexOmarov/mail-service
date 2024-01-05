@@ -1,23 +1,4 @@
-# Following ports are served on host machine:
-
-# localhost:8080 - service (http)
-# localhost:9090 - service (grpc)
-
-# localhost:7000 - postgres (odbc) + (нужно добавить в dbeaver)
-# localhost:4002 - pgadmin (http) + (нужно добавить db:5432)
-
-# localhost:2181 - zookeeper (tcp) +
-# localhost:9092 - kafka cluster (tcp) +
-# localhost:6005 - schema registry (tcp/http) +
-# localhost:9001 - kafka ui (http) +
-
-# localhost:9411 - zipkin (http/tcp) +
-# localhost:3000 - grafana (http/tcp)
-# localhost:9090 - prometheus (http/tcp)
-
-# localhost:25826 / localhost:5046 - logstash (tcp)
-# localhost:9200 - elastic (tcp/http)
-# localhost:5601 - kibana (http)
+version: '3.9'
 
 services:
   service:
@@ -38,7 +19,7 @@ services:
       spring.profiles.active: dev
     ports:
       - "8080:8080"
-      - "9090:9090"
+      - "9091:9090"
 
   db:
     image: postgres
@@ -177,6 +158,17 @@ services:
       - 'GF_SECURITY_ADMIN_PASSWORD=admin'
     volumes:
       - grafana_data:/var/lib/grafana
+
+  mock-server:
+    image: mockserver/mockserver
+    ports:
+      - "5001:1080"
+    environment:
+      MOCKSERVER_LOG_LEVEL: TRACE
+      MOCKSERVER_PROPERTY_FILE: /config/mockserver.properties
+      MOCKSERVER_INITIALIZATION_JSON_PATH: /config/init.json
+    volumes:
+      - ./config/mockserver:/config
 
 volumes:
   pg_data: { }

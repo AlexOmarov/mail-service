@@ -18,10 +18,10 @@ message RegisterMailRequest {
 }
 
 message RegisterMailResponse {
-  Mail mail = 1;
+  MailDto mail = 1;
 }
 
-message Mail {
+message MailDto {
   string id = 1;
   string text = 2;
 }

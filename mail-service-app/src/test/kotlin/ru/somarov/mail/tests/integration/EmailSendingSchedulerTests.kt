@@ -8,8 +8,8 @@ import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.verifyBlocking
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.TestPropertySource
+import ru.somarov.mail.application.service.EmailService
 import ru.somarov.mail.base.BaseIntegrationTest
-import ru.somarov.mail.infrastructure.service.EmailService
 import java.time.OffsetDateTime
 
 private const val DELAY = 300L
@@ -17,15 +17,15 @@ private const val DELAY = 300L
 @TestPropertySource(properties = ["contour.scheduling.email-sending.delay = $DELAY"])
 private class EmailSendingSchedulerTests : BaseIntegrationTest() {
     @SpyBean
-    lateinit var emailService: EmailService
+    lateinit var service: EmailService
 
     @Test
-    fun `When scheduler starts it calls email service for sendEmailsForLatestMails method`() {
+    fun `When scheduler starts it calls email service for sendNewEmails method`() {
         runBlocking { delay(DELAY + 100) }
 
         val captor = argumentCaptor<OffsetDateTime>()
 
-        verifyBlocking(emailService, atLeastOnce()) {
+        verifyBlocking(service, atLeastOnce()) {
             sendNewEmails(captor.capture())
         }
 

@@ -6,6 +6,7 @@ import ru.somarov.mail.infrastructure.db.entity.Mail
 import ru.somarov.mail.infrastructure.db.entity.MailChannel
 import ru.somarov.mail.infrastructure.db.entity.MailStatus
 import ru.somarov.mail.infrastructure.db.repo.MailRepo
+import ru.somarov.mail.presentation.grpc.MailDto
 import ru.somarov.mail.presentation.grpc.RegisterMailRequest
 import ru.somarov.mail.presentation.grpc.RegisterMailResponse
 import java.time.OffsetDateTime
@@ -17,7 +18,16 @@ class MailRegistrationService(private val appealRepo: MailRepo) {
     suspend fun registerMail(request: RegisterMailRequest): RegisterMailResponse {
         log.info("Gor registerAppeal request with following text: ${request.text}, and mail: ${request.email}")
 
-        val newMail = Mail(
+        val newMail = createMail(request)
+        appealRepo.save(newMail)
+
+        return RegisterMailResponse.newBuilder()
+            .setMail(MailDto.newBuilder().setId(newMail.id.toString()))
+            .build()
+    }
+
+    private fun createMail(request: RegisterMailRequest): Mail {
+        return Mail(
             id = UUID.randomUUID(),
             clientEmail = request.email,
             text = request.text,
@@ -26,11 +36,5 @@ class MailRegistrationService(private val appealRepo: MailRepo) {
             lastUpdateDate = OffsetDateTime.now(),
             mailChannelId = MailChannel.Companion.MailChannelCode.MOBILE.id
         )
-
-        appealRepo.save(newMail)
-
-        return RegisterMailResponse.newBuilder()
-            .setMail(ru.somarov.mail.presentation.grpc.Mail.newBuilder().setId(newMail.id.toString()))
-            .build()
     }
 }

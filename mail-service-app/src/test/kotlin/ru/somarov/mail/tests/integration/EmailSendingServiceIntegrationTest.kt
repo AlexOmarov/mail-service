@@ -1,13 +1,12 @@
 package ru.somarov.mail.tests.integration
 
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.reduce
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.TestPropertySource
-import ru.somarov.mail.infrastructure.service.EmailService
+import ru.somarov.mail.application.service.EmailService
 import ru.somarov.mail.base.BaseIntegrationTest
 import ru.somarov.mail.infrastructure.db.entity.Mail
 import ru.somarov.mail.infrastructure.db.entity.MailChannel
@@ -20,24 +19,26 @@ import java.util.UUID
 private class EmailSendingServiceIntegrationTest : BaseIntegrationTest() {
 
     @Autowired
-    lateinit var emailService: EmailService
+    lateinit var service: EmailService
 
     @Autowired
     lateinit var repository: MailRepo
 
     @Test
-    fun `When email service gets send email request then`() = runBlocking {
+    fun `When emails are sent then email status changes to SENT`() {
         generateMails()
 
-        emailService.sendNewEmails(OffsetDateTime.now().minusHours(24))
+        val kk = runBlocking {
+            service.sendNewEmails(OffsetDateTime.now().minusHours(24))
+            repository.findAll().map { it.mailStatusId == MailStatus.Companion.MailStatusCode.SENT.id }.toList()
+        }
 
-        assert(repository.findAll().map { it.mailStatusId == MailStatus.Companion.MailStatusCode.SENT.id }
-            .reduce { accumulator, value -> accumulator && value })
+        assert(kk.size == MAILS_AMOUNT)
     }
 
-    private fun generateMails(elements: Int = 10) = runBlocking {
+    private fun generateMails() = runBlocking {
         repository.saveAll(
-            (1..elements).map {
+            (1..MAILS_AMOUNT).map {
                 Mail(
                     id = UUID.randomUUID(),
                     clientEmail = "qwerty$it@email.com",
@@ -49,5 +50,9 @@ private class EmailSendingServiceIntegrationTest : BaseIntegrationTest() {
                 )
             }
         ).toList()
+    }
+
+    companion object {
+        const val MAILS_AMOUNT = 10
     }
 }

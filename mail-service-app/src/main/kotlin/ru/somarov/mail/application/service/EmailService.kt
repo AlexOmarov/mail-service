@@ -1,22 +1,22 @@
-package ru.somarov.mail.infrastructure.service
+package ru.somarov.mail.application.service
 
 import kotlinx.coroutines.flow.toList
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
-import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
 import ru.somarov.mail.infrastructure.config.ServiceProps
 import ru.somarov.mail.infrastructure.db.entity.Mail
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.NEW
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.SENT
 import ru.somarov.mail.infrastructure.db.repo.MailRepo
+import ru.somarov.mail.infrastructure.mail.EmailSenderFacade
 import java.time.OffsetDateTime
 
 @Service
 class EmailService(
     private val props: ServiceProps,
     private val mailRepo: MailRepo,
-    private val emailSender: JavaMailSender
+    private val emailSenderFacade: EmailSenderFacade
 ) {
     private val log = LoggerFactory.getLogger(EmailService::class.java)
     suspend fun sendNewEmails(startDate: OffsetDateTime): Int {
@@ -50,7 +50,7 @@ class EmailService(
         ).toList()
 
         if (mails.isNotEmpty()) {
-            val sent = sendMimeMessages(mails)
+            val sent = emailSenderFacade.sendMimeMessages(mails)
             if (sent) {
                 saveSendingResult(mails)
             }
@@ -68,23 +68,5 @@ class EmailService(
                 mail
             }
         ).toList()
-    }
-
-    // Have to do TooGenericExceptionCaught to catch all types of network exceptions
-    // Have to do SpreadOperator because it is java mail sender specification
-    @Suppress("TooGenericExceptionCaught", "SpreadOperator")
-    private fun sendMimeMessages(mails: List<Mail>): Boolean {
-        mails.forEach { log.info("Sending message for mail $it") }
-
-        var result = true
-
-        try {
-            emailSender.send(*(mails.map { it.createMimeMessage(props.contour.mail, emailSender) }.toTypedArray()))
-        } catch (e: Exception) {
-            log.error("Got exception while sending emails for mails $mails: $e")
-            result = false
-        }
-
-        return result
     }
 }

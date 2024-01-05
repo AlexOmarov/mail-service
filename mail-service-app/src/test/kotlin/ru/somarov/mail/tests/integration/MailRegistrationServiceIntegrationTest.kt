@@ -18,7 +18,7 @@ private class MailRegistrationServiceIntegrationTest : BaseIntegrationTest() {
     lateinit var mailRepo: MailRepo
 
     @Test
-    fun `When registerMail() add new Mail success`() = runBlocking {
+    fun `When registerMail() add new Mail success`() {
 
         val text = "text"
         val email = "test@test.ru"
@@ -28,10 +28,11 @@ private class MailRegistrationServiceIntegrationTest : BaseIntegrationTest() {
             .setEmail(email)
             .build()
 
-        val result = service.registerMail(request)
+        val mail = runBlocking {
+            val result = service.registerMail(request)
+            mailRepo.findById(UUID.fromString(result.mail.id))!!
+        }
 
-        val verify = mailRepo.findById(UUID.fromString(result.mail.id))
-
-        assert(verify!!.text == text)
+        assert(mail.text == text)
     }
 }

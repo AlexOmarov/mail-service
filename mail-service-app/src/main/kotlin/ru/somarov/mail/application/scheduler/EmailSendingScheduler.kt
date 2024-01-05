@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import ru.somarov.mail.infrastructure.service.EmailService
+import ru.somarov.mail.application.service.EmailService
 import ru.somarov.mail.infrastructure.config.ServiceProps
 import java.time.OffsetDateTime
 
@@ -23,10 +23,8 @@ private class EmailSendingScheduler(private val service: EmailService, private v
     fun launch() {
         runBlocking {
             logger.info("Started EmailSendingScheduler")
-            val count = service.sendNewEmails(
-                OffsetDateTime.now()
-                    .minusDays(props.contour.scheduling.emailSending.daysToCheckForUnsentEmails.toLong())
-            )
+            val daysDepth = props.contour.scheduling.emailSending.daysToCheckForUnsentEmails
+            val count = service.sendNewEmails(OffsetDateTime.now().minusDays(daysDepth.toLong()))
             logger.info("EmailSendingScheduler has been completed. Send $count emails")
         }
     }
