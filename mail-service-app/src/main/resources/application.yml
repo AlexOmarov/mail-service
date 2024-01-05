@@ -2,6 +2,11 @@ contour:
   instance: unknown
   grpc-port: 9090
   http-port: 8080
+  auth:
+    user: user
+    password: password
+    roles:
+      - USER
   mail:
     destination-email: test@yandex.ru
     host: smtp.yandex.ru

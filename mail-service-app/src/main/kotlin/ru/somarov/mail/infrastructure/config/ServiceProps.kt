@@ -4,7 +4,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties
 data class ServiceProps(val contour: ContourProps) {
-    data class ContourProps(val instance: String, val scheduling: SchedulingProps, val mail: MailProps)
+    data class ContourProps(
+        val instance: String,
+        val scheduling: SchedulingProps,
+        val mail: MailProps,
+        val auth: AuthProps
+    )
+
     data class MailProps(
         val host: String,
         val destinationEmail: String,
@@ -21,6 +27,12 @@ data class ServiceProps(val contour: ContourProps) {
         val enabled: Boolean,
         val emailSending: EmailSendingSchedulerProps,
         val threadPoolSize: Int,
+    )
+
+    data class AuthProps(
+        val user: String,
+        val roles: List<String>,
+        val password: String
     )
 
     data class EmailSendingSchedulerProps(val enabled: Boolean, val daysToCheckForUnsentEmails: Int, val batchSize: Int)

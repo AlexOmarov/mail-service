@@ -1,7 +1,5 @@
 package ru.somarov.mail.infrastructure.grpc.error.grpc
 
-import ru.somarov.mail.infrastructure.grpc.error.exception.technical.TechnicalException
-import ru.somarov.mail.infrastructure.grpc.error.exception.technical.TechnicalExceptionRegistryMember
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.grpc.ForwardingServerCall
 import io.grpc.ServerCall
@@ -14,9 +12,13 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.boot.info.BuildProperties
 import org.springframework.core.annotation.Order
+import ru.somarov.mail.infrastructure.grpc.error.exception.technical.TechnicalException
+import ru.somarov.mail.infrastructure.grpc.error.exception.technical.TechnicalExceptionRegistryMember
+
+private const val INTERCEPTOR_ORDER = 9
 
 @GrpcGlobalServerInterceptor
-@Order(InterceptorOrder.ORDER_TRACING_METRICS + 9)
+@Order(InterceptorOrder.ORDER_TRACING_METRICS + INTERCEPTOR_ORDER)
 @ConditionalOnClass(value = [GrpcGlobalServerInterceptor::class])
 class GrpcExceptionServerInterceptor(
     private val mapper: ObjectMapper,
@@ -45,7 +47,10 @@ class GrpcExceptionServerInterceptor(
             }
             log.info("Got exception while processing grpc request: ${status.cause}")
             val ex = when (status.cause?.javaClass) {
-                TechnicalException::class.java -> handler.createStatusRuntimeException(status.cause as TechnicalException)
+                TechnicalException::class.java -> handler.createStatusRuntimeException(
+                    status.cause as TechnicalException
+                )
+
                 null -> handler.createStatusRuntimeException()
                 else -> handler.createStatusRuntimeException(
                     status.cause as Exception,

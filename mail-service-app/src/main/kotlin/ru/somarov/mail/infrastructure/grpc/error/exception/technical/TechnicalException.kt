@@ -15,6 +15,8 @@ data class TechnicalException(
 
     companion object {
         private const val MAX_EXCEPTION_NESTING = 100
+        private const val TRACE_UPPER_BOUND = 6
+        private const val TRACE_LOWER_BOUND = 0
 
         fun getRootCause(ex: TechnicalException): TechnicalException {
             var rootCause = ex
@@ -27,7 +29,7 @@ data class TechnicalException(
         }
 
         fun generateTrace(): String {
-            return UUID.randomUUID().toString().substring(0..6)
+            return UUID.randomUUID().toString().substring(TRACE_LOWER_BOUND..TRACE_UPPER_BOUND)
         }
     }
 }

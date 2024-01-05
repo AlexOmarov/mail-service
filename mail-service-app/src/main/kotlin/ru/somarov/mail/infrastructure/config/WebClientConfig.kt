@@ -9,8 +9,8 @@ import org.springframework.web.reactive.function.client.DefaultClientRequestObse
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.netty.http.client.HttpClient
 import reactor.netty.resources.ConnectionProvider
-import ru.somarov.mail.infrastructure.webflux.WebClientLoggingFilter
-import ru.somarov.mail.infrastructure.webflux.WebClientTracingFilter
+import ru.somarov.mail.infrastructure.webclient.WebClientLoggingFilter
+import ru.somarov.mail.infrastructure.webclient.WebClientTracingFilter
 
 @Configuration
 private class WebClientConfig(private val registry: ObservationRegistry) {

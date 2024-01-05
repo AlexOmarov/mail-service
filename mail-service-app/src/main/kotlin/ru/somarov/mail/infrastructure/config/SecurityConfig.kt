@@ -13,10 +13,9 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.server.SecurityWebFilterChain
 import java.security.SecureRandom
 
-
 @Configuration
 @EnableWebFluxSecurity
-private class SecurityConfig {
+private class SecurityConfig(private val props: ServiceProps) {
 
     @Bean
     fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
@@ -32,12 +31,13 @@ private class SecurityConfig {
     }
 
     @Bean
+    @Suppress("SpreadOperator") // Due to User builder spec, is executed once per launch
     fun userDetailsService(encoder: PasswordEncoder): ReactiveUserDetailsService {
         val userDetails = User.builder()
             .passwordEncoder { encoder.encode(it) }
-            .username("user")
-            .password("user")
-            .roles("USER")
+            .username(props.contour.auth.user)
+            .password(props.contour.auth.password)
+            .roles(*(props.contour.auth.roles.toTypedArray()))
             .build()
         return MapReactiveUserDetailsService(userDetails)
     }

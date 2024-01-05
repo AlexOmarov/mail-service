@@ -1,4 +1,4 @@
-package ru.somarov.mail.infrastructure.webflux
+package ru.somarov.mail.infrastructure.webclient
 
 import io.micrometer.observation.Observation
 import io.micrometer.observation.ObservationRegistry

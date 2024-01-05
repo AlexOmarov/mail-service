@@ -8,6 +8,9 @@ private class MailServiceGrpcServer(
     private val service: MailService
 ) : MailServiceGrpcKt.MailServiceCoroutineImplBase() {
     override suspend fun registerMail(request: RegisterMailRequest): RegisterMailResponse {
-        return service.registerMail(request)
+        val mail = service.registerMail(request)
+        return RegisterMailResponse.newBuilder()
+            .setMail(MailDto.newBuilder().setId(mail.id.toString()).setText(mail.text))
+            .build()
     }
 }

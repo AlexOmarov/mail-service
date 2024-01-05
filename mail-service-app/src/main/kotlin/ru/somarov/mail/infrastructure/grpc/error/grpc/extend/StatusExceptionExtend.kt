@@ -1,11 +1,11 @@
 package ru.somarov.mail.infrastructure.grpc.error.grpc.extend
 
-import ru.somarov.mail.infrastructure.grpc.error.exception.technical.TechnicalException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.rpc.ErrorInfo
 import io.grpc.StatusException
 import io.grpc.protobuf.StatusProto
 import org.slf4j.Logger
+import ru.somarov.mail.infrastructure.grpc.error.exception.technical.TechnicalException
 
 fun StatusException.unpackDetails(): ErrorInfo? {
     return StatusProto.fromThrowable(this)?.detailsList
@@ -14,6 +14,7 @@ fun StatusException.unpackDetails(): ErrorInfo? {
         ?.firstOrNull()
 }
 
+@Suppress("TooGenericExceptionCaught") // Should be able to swallow every exception
 fun StatusException.toTechnicalException(mapper: ObjectMapper, logger: Logger): TechnicalException? {
     try {
         val details = this.unpackDetails()

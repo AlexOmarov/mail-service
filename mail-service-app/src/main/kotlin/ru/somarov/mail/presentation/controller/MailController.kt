@@ -17,7 +17,7 @@ import java.util.UUID
 @RestController
 @RequestMapping("/mails")
 @Validated
-class MailController(private val service: MailService) : ISwaggerMailController {
+private class MailController(private val service: MailService) : ISwaggerMailController {
     private val logger = LoggerFactory.getLogger(MailController::class.java)
 
     @GetMapping("{id}")

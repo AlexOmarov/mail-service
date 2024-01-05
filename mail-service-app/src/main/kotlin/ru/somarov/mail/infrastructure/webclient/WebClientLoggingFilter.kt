@@ -1,4 +1,4 @@
-package ru.somarov.mail.infrastructure.webflux
+package ru.somarov.mail.infrastructure.webclient
 
 import org.reactivestreams.Publisher
 import org.slf4j.LoggerFactory

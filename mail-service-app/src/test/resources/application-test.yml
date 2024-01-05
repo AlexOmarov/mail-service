@@ -3,10 +3,10 @@ logging:
 
 grpc:
   server:
-    port: 9090
+    port: 9095
   client:
     mail-service:
-      address: localhost:9090
+      address: localhost:9095
       enableKeepAlive: true
       keepAliveWithoutCalls: true
       setKeepAliveTime: 6m

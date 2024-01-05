@@ -7,7 +7,6 @@ import ru.somarov.mail.application.service.MailService
 import ru.somarov.mail.base.BaseIntegrationTest
 import ru.somarov.mail.infrastructure.db.repo.MailRepo
 import ru.somarov.mail.presentation.grpc.RegisterMailRequest
-import java.util.UUID
 
 private class MailRegistrationServiceIntegrationTest : BaseIntegrationTest() {
 
@@ -18,7 +17,7 @@ private class MailRegistrationServiceIntegrationTest : BaseIntegrationTest() {
     lateinit var mailRepo: MailRepo
 
     @Test
-    fun `When registerMail() add new Mail success`() {
+    fun `When registerMail method is called then mail is saved with valid text`() {
 
         val text = "text"
         val email = "test@test.ru"
@@ -30,7 +29,7 @@ private class MailRegistrationServiceIntegrationTest : BaseIntegrationTest() {
 
         val mail = runBlocking {
             val result = service.registerMail(request)
-            mailRepo.findById(UUID.fromString(result.mail.id))!!
+            mailRepo.findById(result.id)!!
         }
 
         assert(mail.text == text)
