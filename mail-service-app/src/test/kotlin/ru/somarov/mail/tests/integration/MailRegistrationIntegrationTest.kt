@@ -9,7 +9,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verifyBlocking
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.TestPropertySource
-import ru.somarov.mail.application.service.MailRegistrationService
+import ru.somarov.mail.application.service.MailService
 import ru.somarov.mail.base.BaseIntegrationTest
 import ru.somarov.mail.infrastructure.db.entity.Mail
 import ru.somarov.mail.infrastructure.db.entity.MailStatus
@@ -20,7 +20,7 @@ import ru.somarov.mail.util.DefaultEntitiesGenerator.createRegisterMailRequest
 @TestPropertySource(properties = ["contour.scheduling.enabled = false"])
 private class MailRegistrationIntegrationTest : BaseIntegrationTest() {
     @SpyBean
-    lateinit var service: MailRegistrationService
+    lateinit var service: MailService
 
     @SpyBean
     lateinit var mailRepo: MailRepo

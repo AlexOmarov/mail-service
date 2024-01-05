@@ -3,7 +3,7 @@ package ru.somarov.mail.tests.integration
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import ru.somarov.mail.application.service.MailRegistrationService
+import ru.somarov.mail.application.service.MailService
 import ru.somarov.mail.base.BaseIntegrationTest
 import ru.somarov.mail.infrastructure.db.repo.MailRepo
 import ru.somarov.mail.presentation.grpc.RegisterMailRequest
@@ -12,7 +12,7 @@ import java.util.UUID
 private class MailRegistrationServiceIntegrationTest : BaseIntegrationTest() {
 
     @Autowired
-    lateinit var service: MailRegistrationService
+    lateinit var service: MailService
 
     @Autowired
     lateinit var mailRepo: MailRepo

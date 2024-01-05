@@ -1,5 +1,5 @@
-package ru.somarov.mail.request
+package ru.somarov.mail.presentation.http.request
 
-data class StubRequest(
-    val token: String
-)
+import java.util.UUID
+
+data class StubRequest(val id: UUID)

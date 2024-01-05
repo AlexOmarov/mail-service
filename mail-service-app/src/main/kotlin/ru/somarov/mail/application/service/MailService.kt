@@ -13,17 +13,21 @@ import java.time.OffsetDateTime
 import java.util.UUID
 
 @Service
-class MailRegistrationService(private val appealRepo: MailRepo) {
-    private val log = LoggerFactory.getLogger(MailRegistrationService::class.java)
+class MailService(private val repo: MailRepo) {
+    private val log = LoggerFactory.getLogger(MailService::class.java)
+
     suspend fun registerMail(request: RegisterMailRequest): RegisterMailResponse {
         log.info("Gor registerAppeal request with following text: ${request.text}, and mail: ${request.email}")
 
         val newMail = createMail(request)
-        appealRepo.save(newMail)
+        repo.save(newMail)
 
         return RegisterMailResponse.newBuilder()
             .setMail(MailDto.newBuilder().setId(newMail.id.toString()))
             .build()
+    }
+    suspend fun getMail(id: UUID): Mail {
+        return repo.findById(id)!!
     }
 
     private fun createMail(request: RegisterMailRequest): Mail {
