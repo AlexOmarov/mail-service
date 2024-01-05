@@ -1,0 +1,4 @@
+- pipeline.id: DEFAULT
+  pipeline.workers: 1
+  pipeline.batch.size: 1
+  path.config: "././pipeline/pipeline.conf"

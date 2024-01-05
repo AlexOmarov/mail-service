@@ -1,4 +1,24 @@
-version: '3.8'
+# Following ports are served on host machine:
+
+# localhost:8080 - service (http)
+# localhost:9090 - service (grpc)
+
+# localhost:7000 - postgres (odbc) + (нужно добавить в dbeaver)
+# localhost:4002 - pgadmin (http) + (нужно добавить db:5432)
+
+# localhost:2181 - zookeeper (tcp) +
+# localhost:9092 - kafka cluster (tcp) +
+# localhost:6005 - schema registry (tcp/http) +
+# localhost:9001 - kafka ui (http) +
+
+# localhost:9411 - zipkin (http/tcp) +
+# localhost:3000 - grafana (http/tcp)
+# localhost:9090 - prometheus (http/tcp)
+
+# localhost:25826 / localhost:5046 - logstash (tcp)
+# localhost:9200 - elastic (tcp/http)
+# localhost:5601 - kibana (http)
+
 services:
   service:
     build:
@@ -6,8 +26,10 @@ services:
     container_name: service
     depends_on:
       - db
+      - kafka
+      - zipkin
     environment:
-      contour.database.host: appeal-db
+      contour.database.host: db
       contour.database.port: 5432
       contour.database.name: mail_service
       contour.database.schema: mail_service
@@ -90,15 +112,6 @@ services:
     volumes:
       - schema-registry-secrets:/etc/schema-registry/secrets
 
-  sonarqube:
-    image: sonarqube
-    volumes:
-      - sonarqube_data:/opt/sonarqube/data
-      - sonarqube_extensions:/opt/sonarqube/extensions
-      - sonarqube_logs:/opt/sonarqube/logs
-    ports:
-      - "4001:9000"
-
   pgadmin:
     image: dpage/pgadmin4
     environment:
@@ -108,15 +121,65 @@ services:
     volumes:
       - pgadmin:/var/lib/pgadmin
     ports:
-      - "${PGADMIN_PORT:-4002}:80"
+      - "4002:80"
 
   zipkin:
     image: openzipkin/zipkin
     ports:
       - "9411:9411"
+  kibana:
+    image: kibana:8.10.2
+    ports:
+      - "5601:5601"
+    expose:
+      - "5601"
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+
+  elasticsearch:
+    image: elasticsearch:8.10.2
+    environment:
+      - discovery.type=single-node
+      - node.name=elastic
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+
+  logstash:
+    image: logstash:8.10.2
+    ports:
+      - '25826:25826'
+      - '5046:5046'
+    volumes:
+      - ./config/elk/logstash/pipelines.yaml:/usr/share/logstash/config/pipelines.yml:ro
+      - ./config/elk/logstash/pipelines:/usr/share/logstash/pipeline:ro
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
+      - prometheus_data:/var/lib/prometheus
+
+  grafana:
+    image: grafana/grafana-enterprise
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      - 'GF_INSTALL_PLUGINS=grafana-clock-panel'
+      - 'GF_SECURITY_ADMIN_USER=admin'
+      - 'GF_SECURITY_ADMIN_PASSWORD=admin'
+    volumes:
+      - grafana_data:/var/lib/grafana
 
 volumes:
-  pg_data: {}
+  pg_data: { }
   zk-data: { }
   zk-txn-logs: { }
   zk-secrets: { }
@@ -128,3 +191,7 @@ volumes:
   kafka-secrets: { }
 
   schema-registry-secrets: { }
+
+  grafana_data: { }
+  prometheus_data: { }
+  elasticsearch_data: { }
