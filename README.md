@@ -64,6 +64,7 @@ Following ports are served on host machine
 
 8080 - service (http)
 9091 - service (grpc)
+7001 - service (rsocket)
 
 7000 - postgres (odbc) (нужно добавить в dbeaver)
 4002 - pgadmin (http) (нужно добавить db:5432)

@@ -8,6 +8,7 @@ data class ServiceProps(val contour: ContourProps) {
         val instance: String,
         val scheduling: SchedulingProps,
         val mail: MailProps,
+        val rsocket: RSocketProps,
         val auth: AuthProps
     )
 
@@ -27,6 +28,10 @@ data class ServiceProps(val contour: ContourProps) {
         val enabled: Boolean,
         val emailSending: EmailSendingSchedulerProps,
         val threadPoolSize: Int,
+    )
+
+    data class RSocketProps(
+        val uri: String,
     )
 
     data class AuthProps(

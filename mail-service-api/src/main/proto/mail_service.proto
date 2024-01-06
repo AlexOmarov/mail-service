@@ -9,15 +9,20 @@ package ru.somarov.mail.presentation.grpc;
 option java_multiple_files = true;
 
 service MailService {
-  rpc registerMail (RegisterMailRequest) returns (RegisterMailResponse) {}
+  rpc createMail (CreateMailRequest) returns (MailResponse) {}
+  rpc getMail (GetMailRequest) returns (MailResponse) {}
 }
 
-message RegisterMailRequest {
+message CreateMailRequest {
   string email = 1;
   string text = 2;
 }
 
-message RegisterMailResponse {
+message GetMailRequest {
+  string id = 1;
+}
+
+message MailResponse {
   MailDto mail = 1;
 }
 

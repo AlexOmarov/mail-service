@@ -7,10 +7,10 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.server.ServerWebInputException
-import ru.somarov.mail.presentation.http.response.standard.ErrorResponse
-import ru.somarov.mail.presentation.http.response.standard.ResponseMetadata
-import ru.somarov.mail.presentation.http.response.standard.ResultCode
-import ru.somarov.mail.presentation.http.response.standard.StandardResponse
+import ru.somarov.mail.presentation.rsocket.response.standard.ErrorResponse
+import ru.somarov.mail.presentation.rsocket.response.standard.ResponseMetadata
+import ru.somarov.mail.presentation.rsocket.response.standard.ResultCode
+import ru.somarov.mail.presentation.rsocket.response.standard.StandardResponse
 
 @RestControllerAdvice
 class GlobalControllerExceptionHandler {

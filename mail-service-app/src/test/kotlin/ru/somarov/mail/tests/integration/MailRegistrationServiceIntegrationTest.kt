@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import ru.somarov.mail.application.service.MailService
 import ru.somarov.mail.base.BaseIntegrationTest
 import ru.somarov.mail.infrastructure.db.repo.MailRepo
-import ru.somarov.mail.presentation.grpc.RegisterMailRequest
 
 private class MailRegistrationServiceIntegrationTest : BaseIntegrationTest() {
 
@@ -22,13 +21,8 @@ private class MailRegistrationServiceIntegrationTest : BaseIntegrationTest() {
         val text = "text"
         val email = "test@test.ru"
 
-        val request = RegisterMailRequest.newBuilder()
-            .setText(text)
-            .setEmail(email)
-            .build()
-
         val mail = runBlocking {
-            val result = service.registerMail(request)
+            val result = service.createMail(email, text)
             mailRepo.findById(result.id)!!
         }
 

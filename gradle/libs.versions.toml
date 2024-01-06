@@ -31,6 +31,7 @@ spring-grpc = "2.14.0.RELEASE"
 springdoc = "2.2.0"
 testcontainers = "1.19.3"
 janino = "3.1.11"
+hessian = "4.0.66"
 
 [libraries]
 awaitility = { group = "org.awaitility", name = "awaitility-kotlin", version.ref = "awaitility" }
@@ -59,6 +60,7 @@ micrometer-tracing-brave = { group = "io.micrometer", name = "micrometer-tracing
 micrometer-tracing-otel = { group = "io.micrometer", name = "micrometer-tracing-bridge-otel", version.ref = "micrometer-tracing" }
 mockito = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockito" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+hessian = { group = "com.caucho", name = "hessian", version.ref = "hessian" }
 postgresql = { group = "org.postgresql", name = "postgresql", version = "" }
 protobuf-kotlin = { group = "com.google.protobuf", name = "protobuf-kotlin", version.ref = "protobuf-kotlin" }
 r2dbc-postgresql = { group = "org.postgresql", name = "r2dbc-postgresql", version.ref = "r2dbc-postgresql" }
@@ -70,6 +72,7 @@ spring-boot-starter-actuator = { group = "org.springframework.boot", name = "spr
 spring-boot-starter-security = { group = "org.springframework.boot", name = "spring-boot-starter-security", version.ref = "spring-boot" }
 spring-boot-starter-aop = { group = "org.springframework.boot", name = "spring-boot-starter-aop", version.ref = "spring-boot" }
 spring-boot-starter-cache = { group = "org.springframework.boot", name = "spring-boot-starter-cache", version.ref = "spring-boot" }
+spring-boot-starter-rsocket = { group = "org.springframework.boot", name = "spring-boot-starter-rsocket", version.ref = "spring-boot" }
 spring-boot-starter-data-r2dbc = { group = "org.springframework.boot", name = "spring-boot-starter-data-r2dbc", version.ref = "spring-boot" }
 spring-boot-starter-mail = { group = "org.springframework.boot", name = "spring-boot-starter-mail", version.ref = "spring-boot" }
 spring-boot-starter-validation = { group = "org.springframework.boot", name = "spring-boot-starter-validation", version.ref = "spring-boot" }
@@ -83,7 +86,7 @@ testcontainers-postgres = { group = "org.testcontainers", name = "postgresql", v
 janino = { group = "org.codehaus.janino", name = "janino", version.ref = "janino" }
 
 [bundles]
-reactive-service-base = ["logstash-logback-encoder", "spring-boot-starter-webflux", "spring-boot-starter-security", "spring-boot-starter-validation", "spring-boot-starter-cache", "spring-boot-starter-actuator", "spring-boot-starter-aop", "kotlin-coroutines-core", "kotlin-coroutines-reactive", "kotlin-coroutines-reactor", "kotlin-extensions", "kotlin-jackson", "jackson-databind", "jackson-core", "jackson-annotations", "micrometer", "micrometer-registry-prometheus", "micrometer-reactor", "micrometer-tracing", "micrometer-tracing-otel", "micrometer-context-propagation", "janino"]
+reactive-service-base = ["logstash-logback-encoder", "spring-boot-starter-webflux", "spring-boot-starter-security", "spring-boot-starter-validation", "spring-boot-starter-cache", "spring-boot-starter-actuator", "spring-boot-starter-aop", "kotlin-coroutines-core", "kotlin-coroutines-reactive", "kotlin-coroutines-reactor", "kotlin-extensions", "kotlin-jackson", "jackson-databind", "jackson-core", "jackson-annotations", "micrometer", "micrometer-registry-prometheus", "micrometer-reactor", "micrometer-tracing", "micrometer-tracing-otel", "micrometer-context-propagation", "janino", "spring-boot-starter-rsocket", "hessian"]
 reactive-service-test = ["junit-api", "junit-engine", "testcontainers-junit", "mockito", "mockk", "reactor-test", "awaitility", "spring-starter-test"]
 database-postgresql = ["spring-boot-starter-data-r2dbc", "r2dbc-postgresql", "r2dbc-proxy", "flyway-core", "postgresql"]
 grpc-client = ["grpc-client-spring-boot-starter", "grpc-kotlin-stub", "protobuf-kotlin"]

@@ -21,7 +21,7 @@ private class SchedulingConfig(private val props: ServiceProps) : SchedulingConf
         val threadPoolTaskScheduler = ThreadPoolTaskScheduler()
 
         threadPoolTaskScheduler.poolSize = props.contour.scheduling.threadPoolSize
-        threadPoolTaskScheduler.setThreadNamePrefix("scheduled-task-pool-")
+        threadPoolTaskScheduler.threadNamePrefix = "scheduled-task-pool-"
         threadPoolTaskScheduler.initialize()
 
         taskRegistrar.setTaskScheduler(threadPoolTaskScheduler)

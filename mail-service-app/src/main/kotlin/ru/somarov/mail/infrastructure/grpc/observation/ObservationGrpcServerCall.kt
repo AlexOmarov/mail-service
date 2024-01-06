@@ -22,7 +22,7 @@ internal class ObservationGrpcServerCall<ReqT, RespT>(
             observation.error(status.cause!!)
         }
         val context = observation.context as GrpcServerObservationContext
-        context.setStatusCode(status.code)
+        context.statusCode = status.code
         super.close(status, trailers)
     }
 }

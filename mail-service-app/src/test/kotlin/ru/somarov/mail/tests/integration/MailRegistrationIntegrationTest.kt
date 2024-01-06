@@ -14,8 +14,8 @@ import ru.somarov.mail.base.BaseIntegrationTest
 import ru.somarov.mail.infrastructure.db.entity.Mail
 import ru.somarov.mail.infrastructure.db.entity.MailStatus
 import ru.somarov.mail.infrastructure.db.repo.MailRepo
-import ru.somarov.mail.presentation.grpc.RegisterMailRequest
-import ru.somarov.mail.util.DefaultEntitiesGenerator.createRegisterMailRequest
+import ru.somarov.mail.presentation.grpc.CreateMailRequest
+import ru.somarov.mail.util.DefaultEntitiesGenerator.createCreateMailRequest
 
 @TestPropertySource(properties = ["contour.scheduling.enabled = false"])
 private class MailRegistrationIntegrationTest : BaseIntegrationTest() {
@@ -35,7 +35,7 @@ private class MailRegistrationIntegrationTest : BaseIntegrationTest() {
         val captor = argumentCaptor<Mail>()
 
         runBlocking {
-            grpcTestClient.registerMail(RegisterMailRequest.newBuilder().build())
+            grpcTestClient.createMail(CreateMailRequest.newBuilder().build())
         }
 
         verifyBlocking(mailRepo, times(1)) {
@@ -49,20 +49,20 @@ private class MailRegistrationIntegrationTest : BaseIntegrationTest() {
     @Test
     fun `When register mail request comes then call service to process new mail`() {
         runBlocking {
-            grpcTestClient.registerMail(
-                createRegisterMailRequest()
+            grpcTestClient.createMail(
+                createCreateMailRequest()
             )
         }
         verifyBlocking(service, times(1)) {
-            registerMail(any())
+            createMail(any(), any())
         }
     }
 
     @Test
     fun `When mail service gets mail registration request it calls db to save mail`() {
         runBlocking {
-            grpcTestClient.registerMail(
-                createRegisterMailRequest()
+            grpcTestClient.createMail(
+                createCreateMailRequest()
             )
         }
         verifyBlocking(mailRepo, times(1)) {
@@ -76,8 +76,8 @@ private class MailRegistrationIntegrationTest : BaseIntegrationTest() {
         val captor = argumentCaptor<Mail>()
 
         runBlocking {
-            grpcTestClient.registerMail(
-                createRegisterMailRequest(email = email)
+            grpcTestClient.createMail(
+                createCreateMailRequest(email = email)
             )
         }
         verifyBlocking(mailRepo, times(1)) {

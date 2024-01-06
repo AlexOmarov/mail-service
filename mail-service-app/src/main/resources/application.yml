@@ -7,6 +7,13 @@ contour:
     password: password
     roles:
       - USER
+  rsocket:
+    port: 7001
+    ssl:
+      enabled: true
+    uri: 'http://localhost:7000/rsocket' # only for self-requesting, remove if use service as template
+    trust-store: classpath:certs/rsocket/wss.p12
+    trust-store-password: wsswss
   mail:
     destination-email: test@yandex.ru
     host: smtp.yandex.ru
@@ -81,6 +88,19 @@ messages:
   basename: 'classpath:messages/messages'
 
 spring:
+  rsocket:
+    server:
+      port: '${contour.rsocket.port}'
+      transport: websocket
+      mapping-path: /rsocket
+      ssl:
+        enabled: '${contour.rsocket.ssl.enabled}'
+        protocol: TLS
+        client-auth: none
+        key-store: classpath:certs/rsocket/wss.p12
+        key-store-type: pkcs12
+        key-store-password: wsswss
+        key-alias: wss
   mail:
     host: '${contour.mail.host}'
     port: '${contour.mail.port}'

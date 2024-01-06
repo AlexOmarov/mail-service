@@ -6,7 +6,6 @@ import ru.somarov.mail.infrastructure.db.entity.Mail
 import ru.somarov.mail.infrastructure.db.entity.MailChannel
 import ru.somarov.mail.infrastructure.db.entity.MailStatus
 import ru.somarov.mail.infrastructure.db.repo.MailRepo
-import ru.somarov.mail.presentation.grpc.RegisterMailRequest
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -14,9 +13,9 @@ import java.util.UUID
 class MailService(private val repo: MailRepo) {
     private val log = LoggerFactory.getLogger(MailService::class.java)
 
-    suspend fun registerMail(request: RegisterMailRequest): Mail {
-        log.info("Got register mail request with following text: ${request.text}, and mail: ${request.email}")
-        return repo.save(createMail(request))
+    suspend fun createMail(email: String, text: String): Mail {
+        log.info("Got register mail request with following text: $text, and mail: $email")
+        return repo.save(createMailEntity(email, text))
     }
 
     suspend fun getMail(id: UUID): Mail {
@@ -24,11 +23,11 @@ class MailService(private val repo: MailRepo) {
         return repo.findById(id) ?: throw IllegalArgumentException("Got id $id which doesn't exist")
     }
 
-    private fun createMail(request: RegisterMailRequest): Mail {
+    private fun createMailEntity(email: String, text: String): Mail {
         return Mail(
             id = UUID.randomUUID(),
-            clientEmail = request.email,
-            text = request.text,
+            clientEmail = email,
+            text = text,
             mailStatusId = MailStatus.Companion.MailStatusCode.NEW.id,
             creationDate = OffsetDateTime.now(),
             lastUpdateDate = OffsetDateTime.now(),

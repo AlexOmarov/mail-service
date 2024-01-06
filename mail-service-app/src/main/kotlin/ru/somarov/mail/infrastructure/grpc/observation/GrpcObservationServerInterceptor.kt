@@ -66,14 +66,8 @@ class GrpcObservationServerInterceptor(private val registry: ObservationRegistry
     }
 
     private fun createGrpcServerObservationContext(): GrpcServerObservationContext {
-        return GrpcServerObservationContext { carrier: Metadata, keyName: String ->
-            val key = keyCache.computeIfAbsent(
-                keyName
-            ) { _: String? ->
-                Metadata.Key.of(
-                    keyName, Metadata.ASCII_STRING_MARSHALLER
-                )
-            }
+        return GrpcServerObservationContext { carrier, keyName ->
+            val key = keyCache.computeIfAbsent(keyName) { Metadata.Key.of(keyName, Metadata.ASCII_STRING_MARSHALLER) }
             carrier[key]
         }
     }
@@ -87,10 +81,12 @@ class GrpcObservationServerInterceptor(private val registry: ObservationRegistry
     ): ObservationGrpcServerCallListener<ReqT> {
         val serverCall = ObservationGrpcServerCall(call, observation)
         return try {
-            observation.scoped(Supplier {
-                val result = next.startCall(serverCall, headers)
-                ObservationGrpcServerCallListener(result, observation)
-            })
+            observation.scoped(
+                Supplier {
+                    val result = next.startCall(serverCall, headers)
+                    ObservationGrpcServerCallListener(result, observation)
+                }
+            )
         } catch (ex: Exception) {
             observation.error(ex).stop()
             throw ex
