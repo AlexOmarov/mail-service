@@ -11,6 +11,8 @@ import org.springframework.security.authentication.ProviderManager
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.Customizer.withDefaults
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
+import org.springframework.security.config.annotation.rsocket.EnableRSocketSecurity
+import org.springframework.security.config.annotation.rsocket.RSocketSecurity
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.core.userdetails.MapReactiveUserDetailsService
@@ -19,11 +21,13 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
+import org.springframework.security.rsocket.core.PayloadSocketAcceptorInterceptor
 import org.springframework.security.web.server.SecurityWebFilterChain
 import java.security.SecureRandom
 
 @Configuration
 @EnableWebFluxSecurity
+@EnableRSocketSecurity
 @EnableReactiveMethodSecurity
 private class SecurityConfig(private val props: ServiceProps) {
 
@@ -38,6 +42,17 @@ private class SecurityConfig(private val props: ServiceProps) {
     @Bean
     fun passwordEncoder(): PasswordEncoder {
         return BCryptPasswordEncoder(ENCODER_STRENGTH, SecureRandom())
+    }
+
+    @Bean
+    fun rsocketInterceptor(rsocket: RSocketSecurity): PayloadSocketAcceptorInterceptor {
+        rsocket
+            .authorizePayload { authorize -> authorize
+                .anyRequest().authenticated()
+                .anyExchange().permitAll()
+            }
+            .simpleAuthentication(withDefaults())
+        return rsocket.build()
     }
 
     @Bean

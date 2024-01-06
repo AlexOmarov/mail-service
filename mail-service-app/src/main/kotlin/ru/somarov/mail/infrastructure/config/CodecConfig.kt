@@ -7,7 +7,7 @@ import ru.somarov.mail.infrastructure.hessian.impl.HessianReader
 import ru.somarov.mail.infrastructure.hessian.impl.HessianWriter
 
 @Configuration
-class CodecConfig {
+private class CodecConfig {
     @Bean
     fun hessianCodec(): CodecCustomizer {
         return CodecCustomizer {
