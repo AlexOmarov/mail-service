@@ -1,6 +1,7 @@
 package ru.somarov.mail.infrastructure.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
+import java.time.Duration
 
 @ConfigurationProperties
 data class ServiceProps(val contour: ContourProps) {
@@ -8,6 +9,7 @@ data class ServiceProps(val contour: ContourProps) {
         val instance: String,
         val scheduling: SchedulingProps,
         val mail: MailProps,
+        val cache: CacheProps,
         val rsocket: RSocketProps,
         val auth: AuthProps
     )
@@ -37,6 +39,13 @@ data class ServiceProps(val contour: ContourProps) {
     data class AuthProps(
         val user: String,
         val roles: List<String>,
+        val password: String
+    )
+
+    data class CacheProps(
+        val defaultTtl: Duration,
+        val host: String,
+        val port: Int,
         val password: String
     )
 

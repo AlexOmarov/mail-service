@@ -1,5 +1,6 @@
 package ru.somarov.mail.base
 
+import com.redis.testcontainers.RedisContainer
 import io.mockk.every
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
@@ -27,6 +28,7 @@ import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.util.ReflectionUtils
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Testcontainers
+import org.testcontainers.utility.DockerImageName
 import ru.somarov.mail.util.GrpcTestClient
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -101,8 +103,14 @@ class BaseIntegrationTest {
             withReuse(true)
             start()
         }
+        private var redis = RedisContainer(DockerImageName.parse("redis:6.2.6")).apply {
+            start()
+        }
 
         init {
+            System.setProperty("spring.redis.host", redis.host)
+            System.setProperty("spring.redis.port", redis.firstMappedPort.toString())
+
             System.setProperty("spring.flyway.url", postgresql.jdbcUrl)
             System.setProperty("spring.flyway.user", postgresql.username)
             System.setProperty("spring.flyway.password", postgresql.password)

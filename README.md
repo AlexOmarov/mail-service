@@ -84,6 +84,8 @@ Following ports are served on host machine
 
 5001 - mockserver (http)
 
+6379 - redis (tcp)
+
 ### Использование code-quality инструментов
 Когда проект собирается с использованием `build` задачи gradle detekt и ktlint проверки проходят автоматически,
 и detekt xml отчет формируется по путям `./build/app/reports/detekt`, `./build/api/reports/detekt`.
