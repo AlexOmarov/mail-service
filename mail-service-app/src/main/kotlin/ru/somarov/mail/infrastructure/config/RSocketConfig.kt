@@ -29,6 +29,7 @@ private class RSocketConfig(private val props: ServiceProps) {
 
     @Bean
     fun rSocketRequester(): RSocketRequester {
+        // TODO: rsocket observation
         val builder = RSocketRequester.builder()
         return builder
             .rsocketConnector { rSocketConnector: RSocketConnector ->

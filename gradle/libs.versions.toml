@@ -36,6 +36,7 @@ testcontainers = "1.19.3"
 testcontainers-redis = "2.0.1"
 janino = "3.1.11"
 hessian = "4.0.66"
+rsocket-micrometer = "1.1.4"
 
 [libraries]
 awaitility = { group = "org.awaitility", name = "awaitility-kotlin", version.ref = "awaitility" }
@@ -93,8 +94,11 @@ testcontainers-postgres = { group = "org.testcontainers", name = "postgresql", v
 testcontainers-redis = { group = "com.redis", name = "testcontainers-redis", version.ref = "testcontainers-redis" }
 janino = { group = "org.codehaus.janino", name = "janino", version.ref = "janino" }
 kafka = { module = "io.projectreactor.kafka:reactor-kafka", version.ref = "kafka" }
+
+rsocket-micrometer = { module = "io.rsocket:rsocket-micrometer", version.ref = "rsocket-micrometer" }
+
 [bundles]
-reactive-service-base = ["logstash-logback-encoder", "spring-boot-starter-webflux", "spring-boot-starter-security", "spring-boot-starter-validation", "spring-boot-starter-cache", "spring-boot-starter-actuator", "spring-boot-starter-aop", "kotlin-coroutines-core", "kotlin-coroutines-reactive", "kotlin-coroutines-reactor", "kotlin-extensions", "kotlin-jackson", "jackson-databind", "jackson-core", "jackson-annotations", "micrometer", "micrometer-registry-prometheus", "micrometer-reactor", "micrometer-tracing", "micrometer-tracing-otel", "micrometer-context-propagation", "janino", "spring-boot-starter-rsocket", "hessian", "spring-security-rsocket", "spring-boot-starter-data-redis-reactive", "kafka", "spring-starter-kafka"]
+reactive-service-base = ["rsocket-micrometer", "logstash-logback-encoder", "spring-boot-starter-webflux", "spring-boot-starter-security", "spring-boot-starter-validation", "spring-boot-starter-cache", "spring-boot-starter-actuator", "spring-boot-starter-aop", "kotlin-coroutines-core", "kotlin-coroutines-reactive", "kotlin-coroutines-reactor", "kotlin-extensions", "kotlin-jackson", "jackson-databind", "jackson-core", "jackson-annotations", "micrometer", "micrometer-registry-prometheus", "micrometer-reactor", "micrometer-tracing", "micrometer-tracing-otel", "micrometer-context-propagation", "janino", "spring-boot-starter-rsocket", "hessian", "spring-security-rsocket", "spring-boot-starter-data-redis-reactive", "kafka", "spring-starter-kafka"]
 reactive-service-test = ["junit-api", "junit-engine", "testcontainers-junit", "testcontainers-redis", "testcontainers-kafka", "testcontainers-postgres", "mockito", "mockk", "reactor-test", "awaitility", "spring-starter-test"]
 database-postgresql = ["spring-boot-starter-data-r2dbc", "r2dbc-postgresql", "r2dbc-proxy", "flyway-core", "postgresql"]
 grpc-client = ["grpc-client-spring-boot-starter", "grpc-kotlin-stub", "protobuf-kotlin"]

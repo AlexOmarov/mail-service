@@ -1,5 +1,6 @@
 package ru.somarov.mail.application.scheduler
 
+import io.micrometer.observation.ObservationRegistry
 import io.rsocket.metadata.WellKnownMimeType
 import kotlinx.coroutines.runBlocking
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
@@ -19,7 +20,11 @@ import ru.somarov.mail.presentation.rsocket.response.standard.StandardResponse
 
 @Component
 @ConditionalOnExpression("\${contour.scheduling.rsocket-requester.enabled} and \${contour.scheduling.enabled}")
-private class RsocketLoadScheduler(private val requester: RSocketRequester, private val props: ServiceProps) {
+private class RsocketLoadScheduler(
+    private val requester: RSocketRequester,
+    private val props: ServiceProps,
+    private val observationRegistry: ObservationRegistry
+) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     @SchedulerLock(
@@ -43,5 +48,8 @@ private class RsocketLoadScheduler(private val requester: RSocketRequester, priv
     companion object {
         val RSOCKET_AUTHENTICATION_MIME_TYPE: MimeType =
             MimeTypeUtils.parseMimeType(WellKnownMimeType.MESSAGE_RSOCKET_AUTHENTICATION.string)
+
+        val RSOCKET_TRACING_MIME_TYPE: MimeType =
+            MimeTypeUtils.parseMimeType(WellKnownMimeType.MESSAGE_RSOCKET_TRACING_ZIPKIN.string)
     }
 }

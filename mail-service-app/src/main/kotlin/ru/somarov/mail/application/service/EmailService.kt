@@ -43,6 +43,7 @@ class EmailService(
         val batchSize = props.contour.scheduling.emailSending.batchSize
 
         // TODO: if error occurred then endless loop
+        // TODO: mailslurper email sending
         val mails = mailRepo.findAllByMailStatusIdAndCreationDateAfter(
             NEW.id,
             startDate,

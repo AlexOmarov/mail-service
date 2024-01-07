@@ -4,5 +4,15 @@ RUN groupadd --system --gid 800 appuser && \
     useradd --system --uid 800 --gid 800 appuser
 USER appuser
 COPY .build/app/libs/app.jar /app.jar
-EXPOSE 8080 9090 7000
-ENTRYPOINT ["java", "-XX:+HeapDumpOnOutOfMemoryError", "-XX:HeapDumpPath=/var/dumps", "-Djava.security.egd=file:/dev/./urandom","-jar","/app.jar"]
+EXPOSE 8080 9010 9090 7000
+ENTRYPOINT ["java", \
+    "-XX:+HeapDumpOnOutOfMemoryError", "-XX:HeapDumpPath=/var/dumps", \
+    "-Djava.security.egd=file:/dev/./urandom", \
+    "-Dcom.sun.management.jmxremote", \
+    "-Dcom.sun.management.jmxremote.port=9010", \
+    "-Dcom.sun.management.jmxremote.local.only=false", \
+    "-Dcom.sun.management.jmxremote.authenticate=false", \
+    "-Dcom.sun.management.jmxremote.ssl=false", \
+    "-Djava.rmi.server.hostname=jmxhost", \
+    "-jar","/app.jar"
+]
