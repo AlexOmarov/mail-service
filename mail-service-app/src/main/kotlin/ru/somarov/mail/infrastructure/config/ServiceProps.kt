@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import java.time.Duration
 
 @ConfigurationProperties
-data class ServiceProps(val contour: ContourProps) {
+data class ServiceProps(val contour: ContourProps, val kafka: KafkaProps) {
     data class ContourProps(
         val instance: String,
         val scheduling: SchedulingProps,
@@ -34,6 +34,37 @@ data class ServiceProps(val contour: ContourProps) {
 
     data class RSocketProps(
         val uri: String,
+    )
+
+    data class KafkaProps(
+        val brokers: String,
+        val healthTimeoutMillis: Long,
+        val healthWarmupTimeoutMillis: Long,
+        val consumingEnabled: Boolean,
+        val retryConsumingEnabled: Boolean,
+        val createMailCommandConsumingEnabled: Boolean,
+        val receiversRetrySettings: ReceiversRetryProps,
+        val groupId: String,
+        val maxPollRecords: Int,
+        val offsetResetConfig: String,
+        val commitInterval: Long,
+        val retryHandlingInterval: Long,
+        val retryResendNumber: Int,
+        val sender: SenderProps,
+        val mailBroadcastTopic: String,
+        val createMailCommandTopic: String,
+        val retryTopic: String,
+        val dlqTopic: String
+    )
+
+    data class ReceiversRetryProps(
+        val attempts: Long,
+        val periodSeconds: Long,
+        val jitter: Double,
+    )
+
+    data class SenderProps(
+        val maxInFlight: Int
     )
 
     data class AuthProps(

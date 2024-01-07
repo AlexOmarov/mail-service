@@ -59,7 +59,6 @@ dependencies {
     implementation(libs.bundles.grpc.server)
 
     testImplementation(libs.bundles.reactive.service.test)
-    testImplementation(libs.testcontainers.postgres)
 }
 springBoot {
     buildInfo()

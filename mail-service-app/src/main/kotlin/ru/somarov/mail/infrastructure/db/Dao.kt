@@ -1,6 +1,8 @@
 package ru.somarov.mail.infrastructure.db
 
-import org.springframework.cache.annotation.Cacheable
+import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
+import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Component
 import ru.somarov.mail.infrastructure.db.entity.Mail
 import ru.somarov.mail.infrastructure.db.entity.MailChannel
@@ -10,10 +12,22 @@ import java.time.OffsetDateTime
 import java.util.UUID
 
 @Component
-class Dao(private val mailRepo: MailRepo) {
-    @Cacheable(value = ["mails"], key = "#id")
+class Dao(
+    private val mailRepo: MailRepo,
+    private val template: ReactiveRedisTemplate<String, Mail>
+) {
+    // Cached operation
     suspend fun getMail(id: UUID): Mail {
-        return mailRepo.findById(id) ?: throw IllegalArgumentException("Got id $id which doesn't exist")
+        val ops = template.opsForValue()
+        val cachedMail = ops.get("mails:$id").awaitSingleOrNull()
+        val result = if (cachedMail == null) {
+            val mail = mailRepo.findById(id) ?: throw IllegalArgumentException("Got id $id which doesn't exist")
+            template.opsForSet().add("mails:$id", mail).awaitSingle()
+            mail
+        } else {
+            cachedMail
+        }
+        return result
     }
 
     suspend fun createMail(email: String, text: String): Mail {

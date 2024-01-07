@@ -2,6 +2,12 @@ contour:
   instance: unknown
   grpc-port: 9090
   http-port: 8080
+  kafka:
+    brokers: localhost:9092
+    mail-broadcast-topic: mail_service_mail_broadcast
+    create-mail-command-topic: mail_service_create_mail_command
+    retry-topic: mail_service_retry
+    dlq-topic: mail_service_dlq
   cache:
     host: localhost
     port: 6379
@@ -151,3 +157,32 @@ spring:
 logging:
   level:
     root: INFO
+
+kafka:
+  consuming-enabled: true
+  retry-consuming-enabled: true
+  create-mail-command-consuming-enabled: true
+
+  create-mail-command-topic: '${contour.kafka.create-mail-command-topic}'
+  mail-broadcast-topic: '${contour.kafka.mail-broadcast-topic}'
+  retry-topic: '${contour.kafka.retry-topic}'
+  dlq-topic: '${contour.kafka.dlq-topic}'
+  health-timeout-millis: 50
+  health-warmup-timeout-millis: 2000
+
+  sender:
+    max-in-flight: 64
+
+  receivers-retry-settings:
+    attempts: 10
+    period-seconds: 2
+    jitter: 0.75
+
+  offset-reset-config: 'latest'
+  brokers: '${contour.kafka.brokers}'
+  group-id: 'mail-service'
+  max-poll-records: 50
+  commit-interval: 3 # in seconds
+
+  retry-handling-interval: 10 # in seconds
+  retry-resend-number: 5

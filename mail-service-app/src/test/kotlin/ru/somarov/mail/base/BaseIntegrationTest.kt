@@ -6,7 +6,10 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import jakarta.mail.Session
 import jakarta.mail.internet.MimeMessage
+import org.awaitility.kotlin.await
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import org.junit.runner.RunWith
@@ -14,24 +17,30 @@ import org.mockito.kotlin.anyVararg
 import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.reset
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.aop.AopInvocationException
 import org.springframework.aop.support.AopUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.util.ReflectionUtils
+import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
+import ru.somarov.mail.presentation.kafka.consumers.CreateMailCommandConsumer
 import ru.somarov.mail.util.GrpcTestClient
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
+import java.time.Duration
 import java.util.Properties
 
 @Testcontainers
@@ -50,6 +59,20 @@ class BaseIntegrationTest {
 
     @MockBean
     lateinit var emailSender: JavaMailSenderImpl
+
+    @SpyBean
+    lateinit var createMailConsumer: CreateMailCommandConsumer
+
+    @BeforeAll
+    fun setUp() {
+        // Wait for consumer to load (not to start consuming)
+        await.await().timeout(Duration.ofSeconds(360)).atMost(Duration.ofSeconds(360))
+            .untilAsserted {
+                Assertions.assertAll(
+                    { verify(createMailConsumer, times(1)).getReceiver() }
+                )
+            }
+    }
 
     @BeforeEach
     fun setup() {
@@ -104,10 +127,17 @@ class BaseIntegrationTest {
             start()
         }
         private var redis = RedisContainer(DockerImageName.parse("redis:6.2.6")).apply {
+            withReuse(true)
+            start()
+        }
+        private var kafka = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.3.3")).apply {
+            withReuse(true)
             start()
         }
 
         init {
+            System.setProperty("kafka.brokers", kafka.bootstrapServers)
+
             System.setProperty("spring.redis.host", redis.host)
             System.setProperty("spring.redis.port", redis.firstMappedPort.toString())
 

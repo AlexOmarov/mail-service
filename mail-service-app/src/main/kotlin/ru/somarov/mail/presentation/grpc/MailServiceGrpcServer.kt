@@ -9,7 +9,6 @@ private class MailServiceGrpcServer(
     private val service: MailService
 ) : MailServiceGrpcKt.MailServiceCoroutineImplBase() {
 
-    // TODO: make reactive grpc authorization
     // For now DefaultAuthenticatingServerInterceptor relies on ThreadLocal, which doesn't
     // stack with an AuthorizationManagerBeforeReactiveMethodInterceptor of reactive spring security.
     // It is tricky, because interceptors are executed in separate thread pool,
