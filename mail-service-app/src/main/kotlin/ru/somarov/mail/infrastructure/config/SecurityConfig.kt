@@ -1,16 +1,24 @@
+@file:Suppress("DEPRECATION") // Had to do it because grpc supports only deprecated spring security integration
+
 package ru.somarov.mail.infrastructure.config
 
 import io.micrometer.observation.ObservationRegistry
 import net.devh.boot.grpc.server.security.authentication.BasicGrpcAuthenticationReader
 import net.devh.boot.grpc.server.security.authentication.CompositeGrpcAuthenticationReader
 import net.devh.boot.grpc.server.security.authentication.GrpcAuthenticationReader
+import net.devh.boot.grpc.server.security.check.AccessPredicate
+import net.devh.boot.grpc.server.security.check.AccessPredicateVoter
+import net.devh.boot.grpc.server.security.check.GrpcSecurityMetadataSource
+import net.devh.boot.grpc.server.security.check.ManualGrpcSecurityMetadataSource
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.security.access.AccessDecisionManager
+import org.springframework.security.access.AccessDecisionVoter
+import org.springframework.security.access.vote.UnanimousBased
 import org.springframework.security.authentication.ObservationAuthenticationManager
 import org.springframework.security.authentication.ProviderManager
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.Customizer.withDefaults
-import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
 import org.springframework.security.config.annotation.rsocket.EnableRSocketSecurity
 import org.springframework.security.config.annotation.rsocket.RSocketSecurity
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
@@ -23,12 +31,12 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.rsocket.core.PayloadSocketAcceptorInterceptor
 import org.springframework.security.web.server.SecurityWebFilterChain
+import ru.somarov.mail.presentation.grpc.MailServiceGrpcKt
 import java.security.SecureRandom
 
 @Configuration
 @EnableWebFluxSecurity
 @EnableRSocketSecurity
-@EnableReactiveMethodSecurity
 private class SecurityConfig(private val props: ServiceProps) {
 
     @Bean
@@ -47,9 +55,10 @@ private class SecurityConfig(private val props: ServiceProps) {
     @Bean
     fun rsocketInterceptor(rsocket: RSocketSecurity): PayloadSocketAcceptorInterceptor {
         rsocket
-            .authorizePayload { authorize -> authorize
-                .anyRequest().authenticated()
-                .anyExchange().permitAll()
+            .authorizePayload { authorize ->
+                authorize
+                    .anyRequest().authenticated()
+                    .anyExchange().permitAll()
             }
             .simpleAuthentication(withDefaults())
         return rsocket.build()
@@ -98,6 +107,22 @@ private class SecurityConfig(private val props: ServiceProps) {
                 )
             })
         )
+    }
+
+    @Bean
+    fun grpcSecurityMetadataSource(): GrpcSecurityMetadataSource {
+        val source = ManualGrpcSecurityMetadataSource()
+        source.set(MailServiceGrpcKt.getMailMethod, AccessPredicate.authenticated())
+        source.set(MailServiceGrpcKt.createMailMethod, AccessPredicate.hasRole("ROLE_USER"))
+        source.setDefault(AccessPredicate.denyAll())
+        return source
+    }
+
+    @Bean
+    fun accessDecisionManager(): AccessDecisionManager {
+        val voters: MutableList<AccessDecisionVoter<*>> = ArrayList()
+        voters.add(AccessPredicateVoter())
+        return UnanimousBased(voters)
     }
 
     companion object {

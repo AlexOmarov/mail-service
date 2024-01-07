@@ -19,7 +19,6 @@ private class MailServiceGrpcServer(
     // It can work with suspend functions, even pass given context to proxied coroutine
     // (CoroutineUtils#invokeSuspendingFunction).
     // But it doesn't fill reactive security context holder there
-
     // @PreAuthorize("hasAuthority('ROLE_USER')")
     override suspend fun createMail(request: CreateMailRequest): MailResponse {
         val mail = service.createMail(request.email, request.text)
