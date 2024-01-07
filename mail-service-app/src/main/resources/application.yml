@@ -21,14 +21,14 @@ contour:
   rsocket:
     port: 7001
     ssl:
-      enabled: true
-    uri: 'http://localhost:7000/rsocket' # only for self-requesting, remove if use service as template
+      enabled: false
+    uri: 'http://localhost:7001/rsocket' # only for self-requesting, remove if use service as template
     trust-store: classpath:certs/rsocket/wss.p12
     trust-store-password: wsswss
   mail:
     destination-email: test@yandex.ru
-    host: smtp.yandex.ru
-    port: 465
+    host: localhost
+    port: 25
     username: test@yandex.ru
     password: 1111
     protocol: smtp

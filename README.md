@@ -86,6 +86,10 @@ Following ports are served on host machine
 
 6379 - redis (tcp)
 
+2500 - slurper (tcp)
+8085 - slurper (tcp)
+8083 - slurper (http)
+
 ### Использование code-quality инструментов
 Когда проект собирается с использованием `build` задачи gradle detekt и ktlint проверки проходят автоматически,
 и detekt xml отчет формируется по путям `./build/app/reports/detekt`, `./build/api/reports/detekt`.

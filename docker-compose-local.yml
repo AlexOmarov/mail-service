@@ -12,6 +12,10 @@ services:
     environment:
       contour.cache.host: redis
       contour.cache.port: 6379
+      contour.mail.host: mailslurper
+      contour.mail.username: user@mail.ru
+      contour.mail.password: password
+      contour.mail.port: 2500
       contour.database.host: db
       contour.database.port: 5432
       contour.database.name: mail_service
@@ -60,7 +64,7 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -183,6 +187,15 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+  mailslurper:
+    container_name: mailslurper
+    image: marcopas/docker-mailslurper:latest
+    restart: always
+    ports:
+      - "25:25"
+      - "2500:2500"
+      - "8085:8085"
+      - "8083:8080"
 
 
 volumes:

@@ -5,4 +5,4 @@ import java.util.UUID
 data class MailDto(
     val id: UUID,
     val text: String
-)
+) : java.io.Serializable

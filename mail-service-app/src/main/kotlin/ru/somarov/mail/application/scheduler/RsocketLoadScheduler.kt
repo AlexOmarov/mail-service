@@ -32,7 +32,7 @@ private class RsocketLoadScheduler(private val requester: RSocketRequester, priv
             logger.info("Started RsocketLoadScheduler")
             val credentials = UsernamePasswordMetadata(props.contour.auth.user, props.contour.auth.password)
             val response = requester
-                .route("main")
+                .route("mail")
                 .metadata(credentials, RSOCKET_AUTHENTICATION_MIME_TYPE)
                 .data(CreateMailRequest("text", "email"))
                 .retrieveAndAwaitOrNull<StandardResponse<MailResponse>>()
