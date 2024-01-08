@@ -28,7 +28,7 @@ contour:
   mail:
     destination-email: test@yandex.ru
     host: localhost
-    port: 25
+    port: 2500
     username: test@yandex.ru
     password: 1111
     protocol: smtp

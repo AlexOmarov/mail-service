@@ -15,6 +15,10 @@ services:
       contour.mail.host: mailslurper
       contour.mail.username: user@mail.ru
       contour.mail.password: password
+      contour.mail.ssl-enabled: false
+      contour.mail.tls-enabled: false
+      contour.mail.tls-required: false
+      contour.mail.auth-enabled: false
       contour.mail.port: 2500
       contour.database.host: db
       contour.database.port: 5432
@@ -193,7 +197,6 @@ services:
     image: marcopas/docker-mailslurper:latest
     restart: always
     ports:
-      - "25:25"
       - "2500:2500"
       - "8085:8085"
       - "8083:8080"

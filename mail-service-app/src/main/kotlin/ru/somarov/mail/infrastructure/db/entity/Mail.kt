@@ -47,7 +47,7 @@ data class Mail(
 
         message.setFrom(mailProps.username)
         message.setRecipient(Message.RecipientType.TO, InternetAddress(mailProps.destinationEmail))
-        message.subject = "Обращение клиента ${this.clientEmail}"
+        message.subject = "Client ${this.clientEmail}"
         message.setContent(fillHtmlTemplate(this), "text/html; charset=UTF-8")
 
         return message
@@ -60,11 +60,11 @@ data class Mail(
                    <h1>Email от ${mail.creationDate}</h1>    
                    
                    <p><b>Email: ${mail.clientEmail}</b></p>
-                   <p><b>Канал обращения: $channel</b></p>
-                   <p>Текст: </p>
+                   <p><b>Channel: $channel</b></p>
+                   <p>Text: </p>
                    <p>${mail.text}</p>
                    
-                   <p><small>ID обращения: ${mail.id}</small></p>
+                   <p><small>ID: ${mail.id}</small></p>
                </div>
         """.trimIndent()
     }
