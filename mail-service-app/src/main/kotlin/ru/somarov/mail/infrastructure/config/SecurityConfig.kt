@@ -112,8 +112,8 @@ private class SecurityConfig(private val props: ServiceProps) {
     @Bean
     fun grpcSecurityMetadataSource(): GrpcSecurityMetadataSource {
         val source = ManualGrpcSecurityMetadataSource()
-        source.set(MailServiceGrpcKt.getMailMethod, AccessPredicate.hasRole("ROLE_USER"))
-        source.set(MailServiceGrpcKt.createMailMethod, AccessPredicate.hasRole("ROLE_USER"))
+        source[MailServiceGrpcKt.getMailMethod] = AccessPredicate.hasRole("ROLE_USER")
+        source[MailServiceGrpcKt.createMailMethod] = AccessPredicate.hasRole("ROLE_USER")
         source.setDefault(AccessPredicate.denyAll())
         return source
     }

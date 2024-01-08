@@ -1,46 +1,102 @@
 package ru.somarov.mail.infrastructure.kafka
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.micrometer.tracing.Tracer
 import io.opentelemetry.api.trace.SpanId
 import io.opentelemetry.api.trace.TraceId
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactive.asFlow
+import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.header.Header
 import org.apache.kafka.common.header.internals.RecordHeader
+import org.apache.kafka.common.serialization.Serializer
+import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.kafka.sender.KafkaSender
+import reactor.kafka.sender.SenderOptions
 import reactor.kafka.sender.SenderRecord
 import reactor.kafka.sender.SenderResult
 import ru.somarov.mail.infrastructure.config.ServiceProps
+import ru.somarov.mail.infrastructure.kafka.serde.dlq.DlqMessageSerializer
+import ru.somarov.mail.infrastructure.kafka.serde.mailbroadcast.MailBroadcastSerializer
+import ru.somarov.mail.infrastructure.kafka.serde.retry.RetryMessageSerializer
 import ru.somarov.mail.presentation.kafka.DlqMessage
 import ru.somarov.mail.presentation.kafka.RetryMessage
 import ru.somarov.mail.presentation.kafka.event.EventType
+import ru.somarov.mail.presentation.kafka.event.broadcast.MailBroadcast
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.random.Random
 
 @Component
 class KafkaSenderDecorator(
-    private val retrySender: KafkaSender<String, RetryMessage<Any>>,
-    private val dlqSender: KafkaSender<String, DlqMessage<Any>>,
+    mapper: ObjectMapper,
     private val tracer: Tracer,
     private val props: ServiceProps,
 ) {
     private val log = LoggerFactory.getLogger(KafkaSender::class.java)
 
-    suspend fun <T> send(
+    private val retrySender = KafkaSender.create(senderProps(RetryMessageSerializer(mapper)))
+    private val dlqSender = KafkaSender.create(senderProps(DlqMessageSerializer(mapper)))
+    private val mailSender = KafkaSender.create(senderProps(MailBroadcastSerializer(mapper)))
+
+    suspend fun sendMailBroadcast(
+        event: MailBroadcast,
+        metadata: MessageMetadata,
+        topic: String
+    ): SenderResult<MailBroadcast> {
+        return sendMessage(event, metadata, props.kafka.mailBroadcastTopic, mailSender)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    suspend fun <T : Any> sendRetry(
         event: T,
+        metadata: MessageMetadata,
+        payloadType: EventType
+    ): SenderResult<RetryMessage<T>> {
+        return sendMessage(
+            RetryMessage(
+                payload = event,
+                key = metadata.key,
+                payloadType = payloadType,
+                processingAttemptNumber = metadata.attempt + 1
+            ),
+            metadata,
+            props.kafka.retryTopic,
+            retrySender
+        ) as SenderResult<RetryMessage<T>>
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    suspend fun <T : Any> sendDlq(
+        event: T,
+        metadata: MessageMetadata,
+        payloadType: EventType
+    ): SenderResult<DlqMessage<T>> {
+        return sendMessage(
+            DlqMessage(
+                payload = event,
+                key = metadata.key,
+                payloadType = payloadType,
+                processingAttemptNumber = metadata.attempt + 1
+            ),
+            metadata,
+            props.kafka.dlqTopic,
+            dlqSender
+        ) as SenderResult<DlqMessage<T>>
+    }
+
+    private suspend fun <T : Any> sendMessage(
+        message: T,
         metadata: MessageMetadata,
         topic: String,
         sender: KafkaSender<String, T>
-    ) {
+    ): SenderResult<T> {
         val partition = null
         val timestamp = null
         val traceParent = getTraceParentHeader()
@@ -51,115 +107,13 @@ class KafkaSenderDecorator(
             /* partition = */ partition,
             /* timestamp = */ timestamp,
             /* key = */ metadata.key,
-            /* value = */ event,
-            /* headers = */ headers
-        )
-        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch(EmptyCoroutineContext) {
-            val result = sender.send(Flux.just(SenderRecord.create(record as ProducerRecord<String, T>, event)))
-                .doOnError { e -> log.error("Send failed", e) }
-                .asFlow()
-                .first()
-
-            log.info(
-                "Message has been sent: ${result.correlationMetadata()} " +
-                    "traceParent: $traceParent, " +
-                    "topic/partition: ${result.recordMetadata().topic()}/${result.recordMetadata().partition()}, " +
-                    "offset: ${result.recordMetadata().offset()}, " +
-                    "timestamp: ${result.recordMetadata().timestamp()}"
-            )
-        }.join()
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    suspend fun <T : Any> sendRetry(
-        event: T,
-        metadata: MessageMetadata,
-        payloadType: EventType
-    ): SenderResult<RetryMessage<T>> {
-        val partition = null
-        val timestamp = null
-        val traceParent = getTraceParentHeader()
-        val headers = mutableListOf<Header>(RecordHeader(TRACE_HEADER_KEY, traceParent.toByteArray()))
-
-        val retryMessage = RetryMessage(
-            payload = event,
-            key = metadata.key,
-            payloadType = payloadType,
-            processingAttemptNumber = metadata.attempt + 1
-        )
-
-        val record = ProducerRecord(
-            /* topic = */ props.kafka.retryTopic,
-            /* partition = */ partition,
-            /* timestamp = */ timestamp,
-            /* key = */ metadata.key,
-            /* value = */ retryMessage,
+            /* value = */ message,
             /* headers = */ headers
         )
 
         val result =
             CoroutineScope(SupervisorJob()).async(EmptyCoroutineContext) {
-                retrySender.send(
-                    Flux.just(
-                        SenderRecord.create(
-                            record as ProducerRecord<String, RetryMessage<Any>>,
-                            retryMessage
-                        )
-                    )
-                )
-                    .doOnError { e -> log.error("Send failed", e) }
-                    .asFlow()
-                    .first()
-            }.await()
-
-        log.info(
-            "Message has been sent: ${result.correlationMetadata()} " +
-                "traceParent: $traceParent, " +
-                "topic/partition: ${result.recordMetadata().topic()}/${result.recordMetadata().partition()}, " +
-                "offset: ${result.recordMetadata().offset()}, " +
-                "timestamp: ${result.recordMetadata().timestamp()}"
-        )
-
-        return result
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    suspend fun <T : Any> sendDlq(
-        event: T,
-        metadata: MessageMetadata,
-        payloadType: EventType
-    ): SenderResult<DlqMessage<T>> {
-        val partition = null
-        val timestamp = null
-        val traceParent = getTraceParentHeader()
-        val headers = mutableListOf<Header>(RecordHeader(TRACE_HEADER_KEY, traceParent.toByteArray()))
-
-        val dlqMessage = DlqMessage(
-            payload = event,
-            key = metadata.key,
-            payloadType = payloadType,
-            processingAttemptNumber = metadata.attempt + 1
-        )
-
-        val record = ProducerRecord(
-            /* topic = */ props.kafka.dlqTopic,
-            /* partition = */ partition,
-            /* timestamp = */ timestamp,
-            /* key = */ metadata.key,
-            /* value = */ dlqMessage,
-            /* headers = */ headers
-        )
-
-        val result =
-            CoroutineScope(SupervisorJob()).async(EmptyCoroutineContext) {
-                dlqSender.send(
-                    Flux.just(
-                        SenderRecord.create(
-                            record as ProducerRecord<String, DlqMessage<Any>>,
-                            dlqMessage
-                        )
-                    )
-                )
+                sender.send(Flux.just(SenderRecord.create(record, message)))
                     .doOnError { e -> log.error("Send failed", e) }
                     .asFlow()
                     .first()
@@ -189,6 +143,17 @@ class KafkaSenderDecorator(
         }
 
         return "00-$traceId-$spanId-01"
+    }
+
+    private fun <T> senderProps(serializer: Serializer<T>): SenderOptions<String, T> {
+        val producerProps: MutableMap<String, Any> = HashMap()
+        producerProps[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = props.kafka.brokers
+        producerProps[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
+        producerProps[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
+
+        return SenderOptions.create<String, T>(producerProps)
+            .withValueSerializer(serializer)
+            .maxInFlight(props.kafka.sender.maxInFlight)
     }
 
     companion object {

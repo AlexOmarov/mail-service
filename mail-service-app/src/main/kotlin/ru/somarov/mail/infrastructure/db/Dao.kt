@@ -19,7 +19,7 @@ class Dao(
     // Cached operation
     suspend fun getMail(id: UUID): Mail {
         val ops = template.opsForValue()
-        val cachedMail = ops.get("mails:$id").awaitSingleOrNull()
+        val cachedMail = ops["mails:$id"].awaitSingleOrNull()
         val result = if (cachedMail == null) {
             val mail = mailRepo.findById(id) ?: throw IllegalArgumentException("Got id $id which doesn't exist")
             template.opsForSet().add("mails:$id", mail).awaitSingle()

@@ -9,13 +9,18 @@ import ru.somarov.mail.infrastructure.db.entity.Mail
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.NEW
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.SENT
 import ru.somarov.mail.infrastructure.db.repo.MailRepo
+import ru.somarov.mail.infrastructure.kafka.KafkaSenderDecorator
+import ru.somarov.mail.infrastructure.kafka.MessageMetadata
 import ru.somarov.mail.infrastructure.mail.EmailSenderFacade
+import ru.somarov.mail.presentation.kafka.event.broadcast.MailBroadcast
+import ru.somarov.mail.presentation.kafka.event.broadcast.dto.MailStatus
 import java.time.OffsetDateTime
 
 @Service
 class EmailService(
     private val props: ServiceProps,
     private val mailRepo: MailRepo,
+    private val kafkaSenderDecorator: KafkaSenderDecorator,
     private val emailSenderFacade: EmailSenderFacade
 ) {
     private val log = LoggerFactory.getLogger(EmailService::class.java)
@@ -61,7 +66,7 @@ class EmailService(
 
     private suspend fun saveSendingResult(mails: List<Mail>) {
         log.info("Emails for mails $mails have been sent. Updating mail data.")
-        mailRepo.saveAll(
+        val savedMails = mailRepo.saveAll(
             mails.map { mail ->
                 mail.mailStatusId = SENT.id
                 mail.lastUpdateDate = OffsetDateTime.now()
@@ -69,5 +74,15 @@ class EmailService(
                 mail
             }
         ).toList()
+        savedMails.forEach { mail ->
+            val statusDto =
+                ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.entries
+                    .first { it.id == mail.mailStatusId }
+            kafkaSenderDecorator.sendMailBroadcast(
+                MailBroadcast(mail.id, MailStatus.valueOf(statusDto.name)),
+                MessageMetadata(attempt = 0, datetime = OffsetDateTime.now(), key = mail.id.toString()),
+                props.kafka.mailBroadcastTopic
+            )
+        }
     }
 }

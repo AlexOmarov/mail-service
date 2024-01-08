@@ -19,9 +19,9 @@ class DlqMessageDeserializer(private val mapper: ObjectMapper) : Deserializer<Dl
     @Suppress("TooGenericExceptionCaught")
     override fun deserialize(topic: String, data: ByteArray): DlqMessage<Any>? {
         val rootNode = mapper.readValue(data, JsonNode::class.java)
-        val payloadType = EventType.valueOf(rootNode.get(PAYLOAD_TYPE_NODE_NAME).textValue())
+        val payloadType = EventType.valueOf(rootNode[PAYLOAD_TYPE_NODE_NAME].textValue())
         val key = rootNode[KEY_NODE_NAME].textValue()
-        val processingAttempts = rootNode.get(ATTEMPTS_TYPE_NODE_NAME).intValue()
+        val processingAttempts = rootNode[ATTEMPTS_TYPE_NODE_NAME].intValue()
 
         return try {
             val type: JavaType = when (payloadType) {
