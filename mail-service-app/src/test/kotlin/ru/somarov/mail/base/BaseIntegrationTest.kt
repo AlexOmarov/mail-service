@@ -80,6 +80,8 @@ class BaseIntegrationTest {
 
     @BeforeEach
     fun setup() {
+        // Schedulers can start when after cleanup is already done
+        // So we need to clean table up in before method as well
         dbClient.sql { "TRUNCATE mail CASCADE" }.then().block()
         spyBeanWorkAround() // For SpyBean usage https://github.com/spring-projects/spring-framework/issues/31713
 
