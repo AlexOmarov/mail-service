@@ -1,12 +1,13 @@
 package ru.somarov.mail.application.scheduler
 
 import io.rsocket.metadata.WellKnownMimeType
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.runBlocking
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.messaging.rsocket.RSocketRequester
-import org.springframework.messaging.rsocket.retrieveAndAwaitOrNull
+import org.springframework.messaging.rsocket.retrieveMono
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.security.rsocket.metadata.UsernamePasswordMetadata
 import org.springframework.stereotype.Component
@@ -34,12 +35,15 @@ private class RsocketLoadScheduler(
         runBlocking {
             logger.info("Started RsocketLoadScheduler")
             val credentials = UsernamePasswordMetadata(props.contour.auth.user, props.contour.auth.password)
-            val response = requester
+            // Had to use retrieveMono contextCapture to capture observation,
+            // because observation requester proxy creates mono for request using mono defer contextual
+            val result = requester
                 .route("mail")
                 .metadata(credentials, RSOCKET_AUTHENTICATION_MIME_TYPE)
                 .data(CreateMailRequest("text", "email"))
-                .retrieveAndAwaitOrNull<StandardResponse<MailResponse>>()
-            logger.info("RsocketLoadScheduler has been completed, got $response")
+                .retrieveMono<StandardResponse<MailResponse>>()
+                .contextCapture().awaitSingleOrNull()
+            logger.info("RsocketLoadScheduler has been completed, got $result")
         }
     }
 

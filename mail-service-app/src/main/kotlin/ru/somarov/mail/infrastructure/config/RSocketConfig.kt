@@ -31,14 +31,7 @@ private class RSocketConfig(private val props: ServiceProps) {
     ): RSocketServerCustomizer {
         return RSocketServerCustomizer { server ->
             server.interceptors {
-                it.forRequester(MicrometerRSocketInterceptor(meterRegistry))
                 it.forResponder(MicrometerRSocketInterceptor(meterRegistry))
-                it.forRequester(RSocketInterceptor { socket ->
-                    ObservationRequesterRSocketProxy(
-                        socket,
-                        observationRegistry
-                    )
-                })
                 it.forResponder(RSocketInterceptor { socket ->
                     ObservationResponderRSocketProxy(
                         socket,
@@ -56,7 +49,6 @@ private class RSocketConfig(private val props: ServiceProps) {
             .encoders { it.add(HessianEncoder()) }
             .decoders { it.add(HessianDecoder()) }
             .build()
-        handler
         return handler
     }
 
@@ -68,15 +60,8 @@ private class RSocketConfig(private val props: ServiceProps) {
                 rSocketConnector
                     .interceptors {
                         it.forRequester(MicrometerRSocketInterceptor(meterRegistry))
-                        it.forResponder(MicrometerRSocketInterceptor(meterRegistry))
                         it.forRequester(RSocketInterceptor { socket ->
                             ObservationRequesterRSocketProxy(
-                                socket,
-                                observationRegistry
-                            )
-                        })
-                        it.forResponder(RSocketInterceptor { socket ->
-                            ObservationResponderRSocketProxy(
                                 socket,
                                 observationRegistry
                             )
