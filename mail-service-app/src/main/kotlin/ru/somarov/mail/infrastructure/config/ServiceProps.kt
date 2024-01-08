@@ -11,6 +11,7 @@ data class ServiceProps(val contour: ContourProps, val kafka: KafkaProps) {
         val mail: MailProps,
         val cache: CacheProps,
         val rsocket: RSocketProps,
+        val database: DbProps,
         val auth: AuthProps
     )
 
@@ -78,6 +79,10 @@ data class ServiceProps(val contour: ContourProps, val kafka: KafkaProps) {
         val host: String,
         val port: Int,
         val password: String
+    )
+
+    data class DbProps(
+        val schema: String
     )
 
     data class EmailSendingSchedulerProps(val enabled: Boolean, val daysToCheckForUnsentEmails: Int, val batchSize: Int)

@@ -15,7 +15,7 @@ import ru.somarov.mail.infrastructure.db.repo.MailRepo
 import java.time.OffsetDateTime
 import java.util.UUID
 
-@TestPropertySource(properties = ["contour.scheduling.email-sending.enabled = false"])
+@TestPropertySource(properties = ["contour.scheduling.enabled = false"])
 private class EmailSendingServiceIntegrationTest : BaseIntegrationTest() {
 
     @Autowired

@@ -36,6 +36,7 @@ import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
+import ru.somarov.mail.infrastructure.config.ServiceProps
 import ru.somarov.mail.presentation.kafka.consumers.CreateMailCommandConsumer
 import ru.somarov.mail.util.GrpcTestClient
 import java.lang.reflect.InvocationTargetException
@@ -57,6 +58,9 @@ class BaseIntegrationTest {
     @Autowired
     lateinit var dbClient: DatabaseClient
 
+    @Autowired
+    lateinit var props: ServiceProps
+
     @MockBean
     lateinit var emailSender: JavaMailSenderImpl
 
@@ -76,6 +80,7 @@ class BaseIntegrationTest {
 
     @BeforeEach
     fun setup() {
+        dbClient.sql { "TRUNCATE mail CASCADE" }.then().block()
         spyBeanWorkAround() // For SpyBean usage https://github.com/spring-projects/spring-framework/issues/31713
 
         val message = MimeMessage(Session.getDefaultInstance(Properties()))
