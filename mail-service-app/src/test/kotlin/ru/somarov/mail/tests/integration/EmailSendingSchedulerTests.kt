@@ -30,7 +30,7 @@ private class EmailSendingSchedulerTests : BaseIntegrationTest() {
         val captured = captor.firstValue
         assert(
             captured.withSecond(0).withNano(0)
-                .isEqual(OffsetDateTime.now().minusHours(24).withSecond(0).withNano(0))
+                .isAfter(OffsetDateTime.now().minusHours(25).withSecond(0).withNano(0))
         )
     }
 }

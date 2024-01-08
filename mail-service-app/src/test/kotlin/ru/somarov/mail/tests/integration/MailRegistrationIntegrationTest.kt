@@ -35,7 +35,7 @@ private class MailRegistrationIntegrationTest : BaseIntegrationTest() {
         val captor = argumentCaptor<Mail>()
 
         runBlocking {
-            grpcTestClient.createMail(CreateMailRequest.newBuilder().build())
+            createMail(CreateMailRequest.newBuilder().build())
         }
 
         verifyBlocking(mailRepo, times(1)) {
@@ -49,7 +49,7 @@ private class MailRegistrationIntegrationTest : BaseIntegrationTest() {
     @Test
     fun `When register mail request comes then call service to process new mail`() {
         runBlocking {
-            grpcTestClient.createMail(
+            createMail(
                 createCreateMailRequest()
             )
         }
@@ -61,7 +61,7 @@ private class MailRegistrationIntegrationTest : BaseIntegrationTest() {
     @Test
     fun `When mail service gets mail registration request it calls db to save mail`() {
         runBlocking {
-            grpcTestClient.createMail(
+            createMail(
                 createCreateMailRequest()
             )
         }
@@ -76,7 +76,7 @@ private class MailRegistrationIntegrationTest : BaseIntegrationTest() {
         val captor = argumentCaptor<Mail>()
 
         runBlocking {
-            grpcTestClient.createMail(
+            createMail(
                 createCreateMailRequest(email = email)
             )
         }
