@@ -85,7 +85,6 @@ Following ports are served on host machine
 5001 - mockserver (http)
 
 6379 - redis (tcp)
-
 2500 - slurper (tcp)
 8085 - slurper (tcp)
 8083 - slurper (http)
