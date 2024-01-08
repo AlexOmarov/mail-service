@@ -85,5 +85,10 @@ data class ServiceProps(val contour: ContourProps, val kafka: KafkaProps) {
         val schema: String
     )
 
-    data class EmailSendingSchedulerProps(val enabled: Boolean, val daysToCheckForUnsentEmails: Int, val batchSize: Int)
+    data class EmailSendingSchedulerProps(
+        val enabled: Boolean,
+        val daysToCheckForUnsentEmails: Int,
+        val delay: Duration,
+        val batchSize: Int
+    )
 }
