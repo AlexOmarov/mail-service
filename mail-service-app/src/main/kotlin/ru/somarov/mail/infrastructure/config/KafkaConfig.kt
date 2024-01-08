@@ -34,7 +34,7 @@ import ru.somarov.mail.presentation.kafka.DlqMessage
 import ru.somarov.mail.presentation.kafka.RetryMessage
 
 @Configuration
-class KafkaConfig(private val props: ServiceProps) {
+private class KafkaConfig(private val props: ServiceProps) {
     private val logger = LoggerFactory.getLogger(KafkaConfig::class.java)
 
     @Bean

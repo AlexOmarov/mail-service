@@ -32,10 +32,10 @@ contour:
     username: test@yandex.ru
     password: 1111
     protocol: smtp
-    ssl-enabled: true
-    tls-enabled: true
-    tls-required: true
-    auth-enabled: true
+    ssl-enabled: false
+    tls-enabled: false
+    tls-required: false
+    auth-enabled: false
     debug-enabled: true
   scheduling:
     enabled: true
