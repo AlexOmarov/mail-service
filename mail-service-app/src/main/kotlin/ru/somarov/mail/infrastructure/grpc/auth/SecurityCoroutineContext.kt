@@ -1,29 +1,36 @@
 package ru.somarov.mail.infrastructure.grpc.auth
 
+import io.micrometer.context.ContextRegistry
+import io.micrometer.context.ContextSnapshot
+import io.micrometer.context.ContextSnapshotFactory
 import kotlinx.coroutines.ThreadContextElement
-import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import kotlin.coroutines.CoroutineContext
 
-class SecurityCoroutineContext(
-    private val securityContext: SecurityContext = SecurityContextHolder.getContext()
-) : ThreadContextElement<SecurityContext?> {
+class SecurityCoroutineContext : ThreadContextElement<ContextSnapshot.Scope> {
+    private val contextSnapshot: ContextSnapshot
+    private val registry = ContextRegistry.getInstance()
+    private val securityContext = SecurityContextHolder.getContext()
+    override val key: CoroutineContext.Key<SecurityCoroutineContext> =
+        object : CoroutineContext.Key<SecurityCoroutineContext> {}
 
-    companion object Key : CoroutineContext.Key<SecurityCoroutineContext>
-
-    override val key: CoroutineContext.Key<SecurityCoroutineContext> get() = Key
-
-    override fun updateThreadContext(context: CoroutineContext): SecurityContext? {
-        val previousSecurityContext = SecurityContextHolder.getContext()
-        SecurityContextHolder.setContext(securityContext)
-        return previousSecurityContext.takeIf { it.authentication != null }
+    init {
+        this.contextSnapshot = ContextSnapshotFactory.builder()
+            .captureKeyPredicate { KEY == it }
+            .contextRegistry(registry)
+            .build()
+            .captureAll()
     }
 
-    override fun restoreThreadContext(context: CoroutineContext, oldState: SecurityContext?) {
-        if (oldState == null) {
-            SecurityContextHolder.clearContext()
-        } else {
-            SecurityContextHolder.setContext(oldState)
-        }
+    override fun restoreThreadContext(context: CoroutineContext, oldState: ContextSnapshot.Scope) {
+        SecurityContextHolder.setContext(securityContext)
+    }
+
+    override fun updateThreadContext(context: CoroutineContext): ContextSnapshot.Scope {
+        return this.contextSnapshot.setThreadLocals { KEY == it }
+    }
+
+    companion object {
+        const val KEY = "security.context"
     }
 }
