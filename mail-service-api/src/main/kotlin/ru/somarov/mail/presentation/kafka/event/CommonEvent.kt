@@ -1,5 +1,5 @@
 package ru.somarov.mail.presentation.kafka.event
 
-interface AbstractCommonEvent {
+fun interface CommonEvent {
     fun getType(): EventType
 }
