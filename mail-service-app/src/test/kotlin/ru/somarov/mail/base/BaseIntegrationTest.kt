@@ -6,7 +6,10 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import jakarta.mail.Session
 import jakarta.mail.internet.MimeMessage
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.awaitility.kotlin.await
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -69,6 +72,11 @@ class BaseIntegrationTest {
 
     @BeforeAll
     fun setUp() {
+        // TODO: investigate problem
+        // Workaround for all the spring context being restored properly
+        // For some reason got Coroutine completed exception when executing grpc requests after switching to
+        // second test class
+        runBlocking { delay(5000L) }
         // Wait for consumer to load (not to start consuming)
         await.await().timeout(Duration.ofSeconds(360)).atMost(Duration.ofSeconds(360))
             .untilAsserted {
@@ -76,6 +84,11 @@ class BaseIntegrationTest {
                     { verify(createMailConsumer, times(1)).getReceiver() }
                 )
             }
+    }
+
+    @AfterAll
+    fun teardown() {
+        reset(createMailConsumer)
     }
 
     @BeforeEach
