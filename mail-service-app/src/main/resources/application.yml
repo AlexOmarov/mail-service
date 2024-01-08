@@ -1,6 +1,6 @@
 contour:
   instance: unknown
-  grpc-port: 9090
+  grpc-port: 9091
   http-port: 8080
   kafka:
     brokers: localhost:9092
