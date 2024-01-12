@@ -11,6 +11,7 @@ import ru.somarov.mail.presentation.http.response.MailResponse
 import ru.somarov.mail.presentation.rsocket.response.standard.StandardResponse
 import java.util.UUID
 
+// TODO: expand swagger description
 @SecurityRequirement(name = "basicAuth")
 interface ISwaggerMailController {
 

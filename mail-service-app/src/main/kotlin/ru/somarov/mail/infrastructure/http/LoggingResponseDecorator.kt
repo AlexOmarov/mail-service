@@ -16,7 +16,7 @@ internal class LoggingResponseDecorator internal constructor(
     delegate: ServerHttpResponse,
     private val httpLogger: HttpLogger
 ) : ServerHttpResponseDecorator(delegate) {
-    @Suppress("kotlin:S6508")
+    @Suppress("kotlin:S6508") // Spring based class, cannot change Void to Unit
     override fun writeWith(body: Publisher<out DataBuffer>): Mono<Void> {
         return super.writeWith(
             Flux.from(body)

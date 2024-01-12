@@ -17,7 +17,7 @@ class HessianWriter : HessianCodecSupport(), HttpMessageWriter<Any> {
         return mediaType != null && HESSIAN_MEDIA_TYPES.contains(mediaType)
     }
 
-    @Suppress("kotlin:S6508")
+    @Suppress("kotlin:S6508") // Hessian based class, cannot change Void to Unit
     override fun write(
         inputStream: Publisher<out Any>,
         elementType: ResolvableType,

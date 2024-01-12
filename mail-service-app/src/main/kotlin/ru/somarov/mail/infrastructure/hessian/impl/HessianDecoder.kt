@@ -9,7 +9,6 @@ import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.util.MimeType
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.core.publisher.SynchronousSink
 import ru.somarov.mail.infrastructure.hessian.HessianCodecSupport
 
 class HessianDecoder : HessianCodecSupport(), HttpMessageDecoder<Any> {
@@ -20,9 +19,8 @@ class HessianDecoder : HessianCodecSupport(), HttpMessageDecoder<Any> {
         mimeType: MimeType?,
         hints: MutableMap<String, Any>?
     ): Flux<Any> {
-        return Flux.from(inputStream).handle { buffer: DataBuffer, sink: SynchronousSink<Any> ->
-            sink.next(decode(elementType.toClass(), buffer))
-        }
+        return Flux.from(inputStream)
+            .handle { buffer, sink -> sink.next(decode(elementType.toClass(), buffer)) }
     }
 
     override fun canDecode(elementType: ResolvableType, mimeType: MimeType?): Boolean {

@@ -15,8 +15,12 @@ internal class HttpLogger(private val filters: List<HttpLoggerFilter>) {
         var preparedBody = body
         val matchedFilters = filters.filter { it.pattern().matches(path) }
 
-        val isRequestLoggable = shouldLog(filters = matchedFilters, path = path, request = request, body = preparedBody)
-        if (!isRequestLoggable) {
+        val shouldLog = shouldLog(
+            filters = matchedFilters,
+            request = request,
+            body = preparedBody
+        )
+        if (!shouldLog) {
             return
         }
 
@@ -27,9 +31,7 @@ internal class HttpLogger(private val filters: List<HttpLoggerFilter>) {
         val fullPath = getFullPath(request.uri.query ?: "", path)
 
         if (preparedBody != null) {
-            log.info(
-                "Body of incoming HTTP request $method $fullPath: headers=$headers, params=$params, body=$preparedBody"
-            )
+            log.info("Incoming HTTP request -> $method $fullPath: headers=$headers, params=$params, body=$preparedBody")
         } else {
             log.info("Incoming HTTP request -> $method $fullPath: headers=$headers, params=$params")
         }
@@ -40,10 +42,16 @@ internal class HttpLogger(private val filters: List<HttpLoggerFilter>) {
         val status = response.statusCode
         var preparedBody = body
         val matchedFilters = filters.filter { it.pattern().matches(path) }
-        val isRequestLoggable = shouldLog(filters = matchedFilters, path = path, request = request, body = preparedBody)
+
+        val isRequestLoggable = shouldLog(
+            filters = matchedFilters,
+            request = request,
+            body = preparedBody
+        )
         if (!isRequestLoggable) {
             return
         }
+
         matchedFilters.forEach { preparedBody = it.prepareResponseBody(preparedBody) }
         val method = Optional.ofNullable(request.method).orElse(HttpMethod.GET).name()
         val headers = response.headers
@@ -52,28 +60,11 @@ internal class HttpLogger(private val filters: List<HttpLoggerFilter>) {
         log.info("Outgoing HTTP response <- $method $fullPath $status: headers=$headers, body=$preparedBody")
     }
 
-    private fun excluded(path: String): Boolean {
-        return Regex("/actuator.*").matches(path)
-    }
-
     private fun getFullPath(query: String, path: String): String {
         return path + (if (StringUtils.hasText(query)) "?$query" else "")
     }
 
-    private fun shouldLog(
-        filters: List<HttpLoggerFilter>?,
-        path: String,
-        request: ServerHttpRequest,
-        body: String?
-    ): Boolean {
-        if (excluded(path)) {
-            return false
-        }
-        filters?.forEach {
-            if (it.skipRequestLogging(request, body)) {
-                return false
-            }
-        }
-        return true
+    private fun shouldLog(filters: List<HttpLoggerFilter>, request: ServerHttpRequest, body: String?): Boolean {
+        return filters.none { it.skipRequestLogging(request, body) }
     }
 }

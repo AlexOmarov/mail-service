@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono
 @Component
 private class LoggingWebFilter(private val filters: List<HttpLoggerFilter>) : WebFilter {
 
-    @Suppress("kotlin:S6508")
+    @Suppress("kotlin:S6508") // Spring based class, cannot change Void to Unit
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         val logger = HttpLogger(filters)
         return Mono.just(LoggingWebExchange(logger, exchange))

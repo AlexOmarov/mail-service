@@ -1,3 +1,4 @@
+# Contour section stores values, that almost always vary from environment to environment
 contour:
   instance: unknown
   grpc-port: 9091

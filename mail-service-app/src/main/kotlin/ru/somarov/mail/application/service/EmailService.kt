@@ -5,11 +5,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import ru.somarov.mail.infrastructure.config.ServiceProps
+import ru.somarov.mail.infrastructure.db.Dao
 import ru.somarov.mail.infrastructure.db.entity.Mail
+import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.FAILED
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.NEW
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.SENT
-import ru.somarov.mail.infrastructure.db.repo.MailRepo
 import ru.somarov.mail.infrastructure.kafka.KafkaSenderDecorator
 import ru.somarov.mail.infrastructure.kafka.MessageMetadata
 import ru.somarov.mail.infrastructure.mail.EmailSenderFacade
@@ -20,7 +21,7 @@ import java.time.OffsetDateTime
 @Service
 class EmailService(
     private val props: ServiceProps,
-    private val mailRepo: MailRepo,
+    private val dao: Dao,
     private val kafkaSenderDecorator: KafkaSenderDecorator,
     private val emailSenderFacade: EmailSenderFacade
 ) {
@@ -31,11 +32,13 @@ class EmailService(
         var iteration = 0
         var amountOfSentEmails = 0
         var mails: List<Mail>?
+        val batchSize = props.contour.scheduling.emailSending.batchSize
 
         do {
             log.info("Mail sending, iteration $iteration")
 
-            mails = processIteration(startDate)
+            mails = getMailsByCreationDate(startDate, batchSize)
+            sendMails(mails)
             amountOfSentEmails += mails.size
 
             iteration++
@@ -45,54 +48,34 @@ class EmailService(
         return amountOfSentEmails
     }
 
-    private suspend fun processIteration(startDate: OffsetDateTime): List<Mail> {
-        val batchSize = props.contour.scheduling.emailSending.batchSize
-
-        val mails = mailRepo.findAllByMailStatusIdAndCreationDateAfter(
+    private suspend fun getMailsByCreationDate(startDate: OffsetDateTime, batchSize: Int): List<Mail> {
+        return dao.findAllByMailStatusIdAndCreationDateAfter(
             NEW.id,
             startDate,
             Pageable.ofSize(batchSize).withPage(0)
         ).toList()
-
-        if (mails.isNotEmpty()) {
-            val sent = emailSenderFacade.sendMimeMessages(mails)
-            if (sent) {
-                saveSendingResult(mails)
-            } else {
-                // Here we can create retry mechanism instead of saving all batch in failed status.
-                // Now it is for the sake of simplicity
-                mailRepo.saveAll(
-                    mails.map { mail ->
-                        mail.mailStatusId = FAILED.id
-                        mail.lastUpdateDate = OffsetDateTime.now()
-                        mail.new = false
-                        mail
-                    }
-                ).toList()
-
-            }
-        }
-        return mails
     }
 
-    private suspend fun saveSendingResult(mails: List<Mail>) {
+    private suspend fun sendMails(mails: List<Mail>) {
+        if (mails.isNotEmpty()) {
+            val sent = emailSenderFacade.sendMimeMessages(mails)
+            saveSendingResult(mails, sent)
+        }
+    }
+
+    private suspend fun saveSendingResult(mails: List<Mail>, sent: Boolean) {
         log.info("Emails for mails $mails have been sent. Updating mail data.")
-        val savedMails = mailRepo.saveAll(
-            mails.map { mail ->
-                mail.mailStatusId = SENT.id
-                mail.lastUpdateDate = OffsetDateTime.now()
-                mail.new = false
-                mail
-            }
+        // Here we can create retry mechanism instead of saving all batch with failed status.
+        // Now it is for the sake of simplicity.
+        val savedMails = dao.updateMails(
+            mails.map { it.also { it.mailStatusId = if (sent) SENT.id else FAILED.id } }
         ).toList()
         savedMails.forEach { mail ->
-            val statusDto =
-                ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.entries
-                    .first { it.id == mail.mailStatusId }
+            val statusDto = MailStatusCode.entries.first { it.id == mail.mailStatusId }
             kafkaSenderDecorator.sendMailBroadcast(
-                MailBroadcast(mail.id, MailStatus.valueOf(statusDto.name)),
-                MessageMetadata(attempt = 0, datetime = OffsetDateTime.now(), key = mail.id.toString()),
-                props.kafka.mailBroadcastTopic
+                event = MailBroadcast(id = mail.id, status = MailStatus.valueOf(statusDto.name)),
+                metadata = MessageMetadata(attempt = 0, datetime = OffsetDateTime.now(), key = mail.id.toString()),
+                topic = props.kafka.mailBroadcastTopic
             )
         }
     }

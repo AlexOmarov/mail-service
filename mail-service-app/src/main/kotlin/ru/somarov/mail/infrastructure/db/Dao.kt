@@ -1,7 +1,9 @@
 package ru.somarov.mail.infrastructure.db
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import org.springframework.data.domain.Pageable
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Component
 import ru.somarov.mail.infrastructure.db.entity.Mail
@@ -32,6 +34,18 @@ class Dao(
 
     suspend fun createMail(email: String, text: String): Mail {
         return mailRepo.save(createMailEntity(email, text))
+    }
+
+    fun findAllByMailStatusIdAndCreationDateAfter(
+        mailStatusId: UUID,
+        creationDate: OffsetDateTime,
+        page: Pageable
+    ): Flow<Mail> {
+        return mailRepo.findAllByMailStatusIdAndCreationDateAfter(mailStatusId, creationDate, page)
+    }
+
+    fun updateMails(mails: List<Mail>): Flow<Mail> {
+        return mailRepo.saveAll(mails.map { it.also { it.lastUpdateDate = OffsetDateTime.now(); it.new = false } })
     }
 
     private fun createMailEntity(email: String, text: String): Mail {

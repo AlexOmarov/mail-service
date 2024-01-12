@@ -12,6 +12,7 @@ import ru.somarov.mail.infrastructure.kafka.MessageMetadata
 import ru.somarov.mail.infrastructure.kafka.serde.createmailcommand.CreateMailCommandDeserializer
 import ru.somarov.mail.presentation.kafka.event.command.CreateMailCommand
 
+// TODO: redo kafka processing
 @Component
 class CreateMailCommandConsumer(
     mapper: ObjectMapper,

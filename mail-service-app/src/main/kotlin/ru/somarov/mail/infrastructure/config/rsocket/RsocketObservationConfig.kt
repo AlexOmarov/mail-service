@@ -1,4 +1,4 @@
-package ru.somarov.mail.infrastructure.config
+package ru.somarov.mail.infrastructure.config.rsocket
 
 import io.micrometer.observation.ObservationRegistry
 import io.micrometer.tracing.Tracer

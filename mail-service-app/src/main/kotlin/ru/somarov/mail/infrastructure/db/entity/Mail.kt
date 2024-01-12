@@ -53,6 +53,7 @@ data class Mail(
         return message
     }
 
+    // TODO: move out template
     private fun fillHtmlTemplate(mail: Mail): String {
         val channel = MailChannelCode.entries.first { it.id == mail.mailChannelId }.name
         return """

@@ -1,4 +1,4 @@
-package ru.somarov.mail.infrastructure.config
+package ru.somarov.mail.infrastructure.config.grpc
 
 import io.micrometer.observation.ObservationRegistry
 import net.devh.boot.grpc.common.util.InterceptorOrder

@@ -1,4 +1,4 @@
-package ru.somarov.mail.infrastructure.config
+package ru.somarov.mail.infrastructure.config.grpc
 
 import net.devh.boot.grpc.common.util.InterceptorOrder
 import net.devh.boot.grpc.server.interceptor.GrpcGlobalServerInterceptor

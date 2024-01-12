@@ -1,4 +1,4 @@
-package ru.somarov.mail.infrastructure.config
+package ru.somarov.mail.infrastructure.config.grpc
 
 import io.grpc.ClientInterceptor
 import io.micrometer.core.instrument.binder.grpc.ObservationGrpcClientInterceptor

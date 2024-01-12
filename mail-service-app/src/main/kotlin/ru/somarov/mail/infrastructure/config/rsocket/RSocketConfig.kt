@@ -1,4 +1,4 @@
-package ru.somarov.mail.infrastructure.config
+package ru.somarov.mail.infrastructure.config.rsocket
 
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.observation.ObservationRegistry
@@ -15,6 +15,7 @@ import org.springframework.messaging.rsocket.RSocketStrategies
 import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler
 import org.springframework.security.rsocket.metadata.SimpleAuthenticationEncoder
 import reactor.util.retry.Retry
+import ru.somarov.mail.infrastructure.config.ServiceProps
 import ru.somarov.mail.infrastructure.hessian.HessianCodecSupport.Companion.HESSIAN_MIME_TYPE
 import ru.somarov.mail.infrastructure.hessian.impl.HessianDecoder
 import ru.somarov.mail.infrastructure.hessian.impl.HessianEncoder

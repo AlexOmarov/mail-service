@@ -19,7 +19,8 @@ class EmailSenderFacade(private val props: ServiceProps, private val emailSender
         var result = true
 
         try {
-            emailSender.send(*(mails.map { it.createMimeMessage(props.contour.mail, emailSender) }.toTypedArray()))
+            val mailsArray = mails.map { it.createMimeMessage(props.contour.mail, emailSender) }.toTypedArray()
+            emailSender.send(*mailsArray)
         } catch (e: Exception) {
             log.error("Got exception while sending emails for mails $mails: $e")
             result = false

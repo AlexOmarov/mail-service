@@ -14,7 +14,7 @@ open class HessianCodecSupport {
 
     fun <T> decode(clazz: Class<T>, dataBuffer: DataBuffer): T {
         val inpStr = dataBuffer.asInputStream()
-        val message = dec(clazz, HessianSerializerInput(inpStr))
+        val message = readMessage(clazz, HessianSerializerInput(inpStr))
         inpStr.close()
         DataBufferUtils.release(dataBuffer)
         return message
@@ -22,28 +22,34 @@ open class HessianCodecSupport {
 
     fun <T> decode(clazz: Class<T>, inputMessage: HttpInputMessage): T {
         val inpStr = inputMessage.body
-        val message = dec(clazz, HessianSerializerInput(inpStr))
+        val message = readMessage(clazz, HessianSerializerInput(inpStr))
         inpStr.close()
         return message
     }
 
     fun encode(obj: Any, bufferFactory: DataBufferFactory): DataBuffer {
-        val dataBuffer = bufferFactory.allocateBuffer(capacity)
+        val dataBuffer = bufferFactory.allocateBuffer(CAPACITY)
         val outStr = dataBuffer.asOutputStream()
-        enc(obj, HessianSerializerOutput(outStr))
+        HessianSerializerOutput(outStr).also {
+            it.startMessage()
+            it.writeObject(obj)
+            it.completeMessage()
+            it.close()
+        }
         outStr.close()
         return dataBuffer
     }
 
     fun encode(obj: Any, outputMessage: HttpOutputMessage) {
-        enc(obj, HessianSerializerOutput(outputMessage.body))
+        HessianSerializerOutput(outputMessage.body).also {
+            it.startMessage()
+            it.writeObject(obj)
+            it.completeMessage()
+            it.close()
+        }
     }
 
-    private fun enc(obj: Any, out: HessianSerializerOutput) {
-        out.also { it.startMessage(); it.writeObject(obj); it.completeMessage(); it.close() }
-    }
-
-    private fun <T> dec(clazz: Class<T>, inp: HessianSerializerInput): T {
+    private fun <T> readMessage(clazz: Class<T>, inp: HessianSerializerInput): T {
         inp.startMessage()
         val message = inp.readObject()
         inp.completeMessage()
@@ -55,6 +61,6 @@ open class HessianCodecSupport {
         val HESSIAN_MIME_TYPE = MimeType("application", "x-hessian")
         val HESSIAN_MEDIA_TYPES = mutableListOf(MediaType.asMediaType(HESSIAN_MIME_TYPE))
         val HESSIAN_MIME_TYPES = mutableListOf(HESSIAN_MIME_TYPE)
-        const val capacity = 2048
+        const val CAPACITY = 2048
     }
 }

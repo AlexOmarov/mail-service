@@ -1,14 +1,12 @@
 package ru.somarov.mail.base
 
 import com.redis.testcontainers.RedisContainer
-import io.grpc.Metadata
 import io.mockk.every
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import jakarta.mail.Session
 import jakarta.mail.internet.MimeMessage
 import net.devh.boot.grpc.client.inject.GrpcClient
-import net.devh.boot.grpc.common.security.SecurityConstants
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -41,21 +39,18 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
 import ru.somarov.mail.infrastructure.config.ServiceProps
-import ru.somarov.mail.presentation.grpc.CreateMailRequest
-import ru.somarov.mail.presentation.grpc.MailResponse
 import ru.somarov.mail.presentation.grpc.MailServiceGrpcKt
 import ru.somarov.mail.presentation.kafka.consumers.CreateMailCommandConsumer
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.time.Duration
-import java.util.Base64
 import java.util.Properties
 
 @Testcontainers
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @ActiveProfiles("test")
 @RunWith(SpringRunner::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class BaseIntegrationTest {
 
@@ -69,7 +64,7 @@ class BaseIntegrationTest {
     lateinit var emailSender: JavaMailSenderImpl
 
     @GrpcClient("mail-service")
-    private lateinit var currentServiceClient: MailServiceGrpcKt.MailServiceCoroutineStub
+    lateinit var currentServiceClient: MailServiceGrpcKt.MailServiceCoroutineStub
 
     @SpyBean
     lateinit var createMailConsumer: CreateMailCommandConsumer
@@ -93,7 +88,7 @@ class BaseIntegrationTest {
     @BeforeEach
     fun setup() {
         // Schedulers can start when after cleanup is already done
-        // So we need to clean table up in before method as well
+        // So we need to clean table up in beforeEach method as well
         dbClient.sql { "TRUNCATE mail CASCADE" }.then().block()
         spyBeanWorkAround() // For SpyBean usage https://github.com/spring-projects/spring-framework/issues/31713
 
@@ -112,14 +107,6 @@ class BaseIntegrationTest {
     fun cleanAfterEach() {
         dbClient.sql { "TRUNCATE mail CASCADE" }.then().block()
         reset(emailSender)
-    }
-
-    suspend fun createMail(request: CreateMailRequest): MailResponse {
-        val auth = props.contour.auth.user + ":" + props.contour.auth.password
-        val encodedAuth = Base64.getEncoder().encode(auth.encodeToByteArray())
-        val authHeader = "Basic " + String(encodedAuth)
-        val metadata = Metadata().also { it.put(SecurityConstants.AUTHORIZATION_HEADER, authHeader) }
-        return currentServiceClient.createMail(request, metadata)
     }
 
     // Remove when https://github.com/spring-projects/spring-framework/issues/31713 will be fixed

@@ -17,7 +17,8 @@ private class MailServiceGrpcServer(
     // PreAuthorize CGLIB proxy is invoked.
     // It can work with suspend functions, even pass given context to proxied coroutine
     // (CoroutineUtils#invokeSuspendingFunction).
-    // But it doesn't fill reactive security context holder there
+    // But it doesn't fill reactive security context holder there.
+    // So we need to use custom config in @Configuration class instead of PreAuthorize annotation
     // @PreAuthorize("hasAuthority('ROLE_USER')")
     override suspend fun createMail(request: CreateMailRequest): MailResponse {
         val mail = service.createMail(request.email, request.text)
