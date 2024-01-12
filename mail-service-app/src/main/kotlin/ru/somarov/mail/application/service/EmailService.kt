@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import ru.somarov.mail.infrastructure.config.ServiceProps
 import ru.somarov.mail.infrastructure.db.entity.Mail
+import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.FAILED
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.NEW
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.SENT
 import ru.somarov.mail.infrastructure.db.repo.MailRepo
@@ -47,8 +48,6 @@ class EmailService(
     private suspend fun processIteration(startDate: OffsetDateTime): List<Mail> {
         val batchSize = props.contour.scheduling.emailSending.batchSize
 
-        // TODO: if error occurred then endless loop
-        // TODO: mailslurper email sending
         val mails = mailRepo.findAllByMailStatusIdAndCreationDateAfter(
             NEW.id,
             startDate,
@@ -59,6 +58,18 @@ class EmailService(
             val sent = emailSenderFacade.sendMimeMessages(mails)
             if (sent) {
                 saveSendingResult(mails)
+            } else {
+                // Here we can create retry mechanism instead of saving all batch in failed status.
+                // Now it is for the sake of simplicity
+                mailRepo.saveAll(
+                    mails.map { mail ->
+                        mail.mailStatusId = FAILED.id
+                        mail.lastUpdateDate = OffsetDateTime.now()
+                        mail.new = false
+                        mail
+                    }
+                ).toList()
+
             }
         }
         return mails

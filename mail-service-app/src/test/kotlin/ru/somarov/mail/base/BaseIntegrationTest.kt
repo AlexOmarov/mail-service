@@ -7,8 +7,6 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import jakarta.mail.Session
 import jakarta.mail.internet.MimeMessage
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import net.devh.boot.grpc.client.inject.GrpcClient
 import net.devh.boot.grpc.common.security.SecurityConstants
 import org.awaitility.kotlin.await
@@ -78,11 +76,6 @@ class BaseIntegrationTest {
 
     @BeforeAll
     fun setUp() {
-        // TODO: investigate problem
-        // Workaround for all the spring context being restored properly
-        // For some reason got Coroutine completed exception when executing grpc requests after switching to
-        // second test class
-        runBlocking { delay(5000L) }
         // Wait for consumer to load (not to start consuming)
         await.await().timeout(Duration.ofSeconds(360)).atMost(Duration.ofSeconds(360))
             .untilAsserted {
@@ -129,7 +122,7 @@ class BaseIntegrationTest {
         return currentServiceClient.createMail(request, metadata)
     }
 
-    // TODO: Remove when https://github.com/spring-projects/spring-framework/issues/31713 will be fixed
+    // Remove when https://github.com/spring-projects/spring-framework/issues/31713 will be fixed
     @Suppress("ThrowsCount")
     private fun spyBeanWorkAround() {
         mockkStatic(AopUtils::class)

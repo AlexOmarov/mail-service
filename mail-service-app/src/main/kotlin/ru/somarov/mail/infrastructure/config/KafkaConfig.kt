@@ -14,6 +14,7 @@ import org.springframework.boot.actuate.health.CompositeReactiveHealthContributo
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
@@ -36,7 +37,6 @@ private class KafkaConfig(private val props: ServiceProps) {
         return handler
     }
 
-    // TODO: empty check if kafka is disabled
     @Bean
     fun kafkaClusterHealth(props: ServiceProps): ReactiveHealthIndicator {
         val indicator = KafkaClusterHealthIndicator(props.kafka)

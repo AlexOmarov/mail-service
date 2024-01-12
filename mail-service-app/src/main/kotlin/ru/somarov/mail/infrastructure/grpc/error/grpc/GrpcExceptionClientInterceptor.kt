@@ -68,7 +68,7 @@ class GrpcExceptionClientInterceptor(private val mapper: ObjectMapper, private v
             message = status.asException().message + ". Cause: ${status.cause?.message}",
             code = BASE_TECHNICAL_EXCEPTION.code,
             datetime = OffsetDateTime.now(),
-            serviceName = buildProps.name, // TODO: instead of own name set name of side service
+            serviceName = buildProps.name,
             cause = null,
             uniqueTrace = TechnicalException.generateTrace()
         )).also { it.stackTrace = arrayOf() }
