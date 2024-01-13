@@ -20,7 +20,11 @@ private class SecurityConfig(private val props: ServiceProps) {
     @Bean
     fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
         return http
-            .authorizeExchange { it.anyExchange().authenticated() }
+            .authorizeExchange {
+                it
+                    .pathMatchers("/webjars/**", "v3/api-docs/**").permitAll()
+                    .anyExchange().authenticated()
+            }
             .httpBasic(withDefaults())
             .build()
     }

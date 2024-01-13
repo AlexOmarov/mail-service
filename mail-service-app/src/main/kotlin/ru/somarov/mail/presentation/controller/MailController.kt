@@ -12,9 +12,9 @@ import ru.somarov.mail.application.service.MailService
 import ru.somarov.mail.presentation.http.request.CreateMailRequest
 import ru.somarov.mail.presentation.http.response.MailDto
 import ru.somarov.mail.presentation.http.response.MailResponse
-import ru.somarov.mail.presentation.rsocket.response.standard.ResponseMetadata
-import ru.somarov.mail.presentation.rsocket.response.standard.ResultCode
-import ru.somarov.mail.presentation.rsocket.response.standard.StandardResponse
+import ru.somarov.mail.presentation.http.response.standard.ResponseMetadata
+import ru.somarov.mail.presentation.http.response.standard.ResultCode
+import ru.somarov.mail.presentation.http.response.standard.StandardResponse
 import java.util.UUID
 
 @RestController

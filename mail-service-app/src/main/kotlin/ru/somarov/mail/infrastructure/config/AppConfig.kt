@@ -22,7 +22,6 @@ private class AppConfig(private val registry: MeterRegistry, private val buildPr
             .register(registry)
     }
 
-    // TODO: dynamic creation of HttpLoggerFilter for all regexes from service props
     companion object {
         private const val METER_VALUE = 1
         private const val TIMEZONE = "UTC"

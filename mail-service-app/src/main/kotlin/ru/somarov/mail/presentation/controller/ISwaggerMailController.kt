@@ -1,35 +1,60 @@
 package ru.somarov.mail.presentation.controller
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import ru.somarov.mail.presentation.http.request.CreateMailRequest
 import ru.somarov.mail.presentation.http.response.MailResponse
-import ru.somarov.mail.presentation.rsocket.response.standard.StandardResponse
+import ru.somarov.mail.presentation.http.response.standard.StandardResponse
 import java.util.UUID
 
-// TODO: expand swagger description
+@Tag(name = "Mail Controller", description = "Mail management APIs")
 @SecurityRequirement(name = "basicAuth")
 interface ISwaggerMailController {
-
-    @Operation(summary = "Get mail by id", description = "Returns 200 if successful")
-    @ApiResponses(
-        value = [ApiResponse(
-            responseCode = "200",
-            description = "Successful Operation"
-        )]
+    @Operation(
+        summary = "Retrieve a Mail by Id",
+        description = "Get a Mail object by specifying its id. The response is MailResponse object, inside it " +
+            "there is MailDto field with id and text."
     )
-    suspend fun getMail(@PathVariable id: UUID): StandardResponse<MailResponse>
-
-    @Operation(summary = "Create new mail", description = "Returns 200 if successful")
     @ApiResponses(
-        value = [ApiResponse(
-            responseCode = "200",
-            description = "Successful Operation"
-        )]
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Operation is successfully processed"
+            ),
+            ApiResponse(
+                responseCode = "456",
+                description = "Some error happened inside method."
+            )
+        ]
     )
-    suspend fun createMail(@RequestBody request: CreateMailRequest): StandardResponse<MailResponse>
+    suspend fun getMail(
+        @Parameter(description = "Mail uuid identificator") @PathVariable(required = true) id: UUID
+    ): StandardResponse<MailResponse>
+
+    @Operation(
+        summary = "Retrieve a Mail by Id",
+        description = "Get a Mail object by specifying its id. The response is MailResponse object, inside it " +
+            "there is MailDto field with id and text."
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Operation is successfully processed"
+            ),
+            ApiResponse(
+                responseCode = "456",
+                description = "Some error happened inside method."
+            )
+        ]
+    )
+    suspend fun createMail(
+        @Parameter(description = "Data for mail creation") @RequestBody request: CreateMailRequest
+    ): StandardResponse<MailResponse>
 }

@@ -1,15 +1,9 @@
 package ru.somarov.mail.infrastructure.db.entity
 
-import jakarta.mail.Message
-import jakarta.mail.internet.InternetAddress
-import jakarta.mail.internet.MimeMessage
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
 import org.springframework.data.domain.Persistable
 import org.springframework.data.relational.core.mapping.Table
-import org.springframework.mail.javamail.JavaMailSender
-import ru.somarov.mail.infrastructure.config.ServiceProps
-import ru.somarov.mail.infrastructure.db.entity.MailChannel.Companion.MailChannelCode
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -40,33 +34,5 @@ data class Mail(
 
     override fun isNew(): Boolean {
         return new
-    }
-
-    fun createMimeMessage(mailProps: ServiceProps.MailProps, mailSender: JavaMailSender): MimeMessage {
-        val message = mailSender.createMimeMessage()
-
-        message.setFrom(mailProps.username)
-        message.setRecipient(Message.RecipientType.TO, InternetAddress(mailProps.destinationEmail))
-        message.subject = "Client ${this.clientEmail}"
-        message.setContent(fillHtmlTemplate(this), "text/html; charset=UTF-8")
-
-        return message
-    }
-
-    // TODO: move out template
-    private fun fillHtmlTemplate(mail: Mail): String {
-        val channel = MailChannelCode.entries.first { it.id == mail.mailChannelId }.name
-        return """
-               <div style="vertical-align: middle">
-                   <h1>Email от ${mail.creationDate}</h1>    
-                   
-                   <p><b>Email: ${mail.clientEmail}</b></p>
-                   <p><b>Channel: $channel</b></p>
-                   <p>Text: </p>
-                   <p>${mail.text}</p>
-                   
-                   <p><small>ID: ${mail.id}</small></p>
-               </div>
-        """.trimIndent()
     }
 }

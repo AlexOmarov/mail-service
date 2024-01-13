@@ -24,6 +24,11 @@ contour:
     ssl:
       enabled: false
     uri: 'http://localhost:7001/rsocket' # only for self-requesting, remove if use service as template
+  http:
+    logging:
+      exclusions:
+        - /webjars.*
+        - /v3/api-docs.*
   mail:
     destination-email: test@yandex.ru
     host: localhost
@@ -36,6 +41,7 @@ contour:
     tls-required: false
     auth-enabled: false
     debug-enabled: true
+    template: full_template.html
   scheduling:
     enabled: true
     thread-pool-size: 5 # increase if new scheds are coming to not make race conditions
@@ -60,6 +66,7 @@ contour:
     name: mail_service
     user: mail_service
     password: mail_service
+
 
 management:
   health:

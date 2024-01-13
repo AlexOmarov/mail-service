@@ -4,9 +4,9 @@ import kotlinx.coroutines.flow.toList
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import ru.somarov.mail.application.aggregate.MailAggregate
 import ru.somarov.mail.infrastructure.config.ServiceProps
 import ru.somarov.mail.infrastructure.db.Dao
-import ru.somarov.mail.infrastructure.db.entity.Mail
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.FAILED
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.NEW
@@ -31,7 +31,7 @@ class EmailService(
 
         var iteration = 0
         var amountOfSentEmails = 0
-        var mails: List<Mail>?
+        var mails: List<MailAggregate>?
         val batchSize = props.contour.scheduling.emailSending.batchSize
 
         do {
@@ -48,27 +48,28 @@ class EmailService(
         return amountOfSentEmails
     }
 
-    private suspend fun getMailsByCreationDate(startDate: OffsetDateTime, batchSize: Int): List<Mail> {
-        return dao.findAllByMailStatusIdAndCreationDateAfter(
+    private suspend fun getMailsByCreationDate(startDate: OffsetDateTime, batchSize: Int): List<MailAggregate> {
+        val mails = dao.findAllByMailStatusIdAndCreationDateAfter(
             NEW.id,
             startDate,
             Pageable.ofSize(batchSize).withPage(0)
         ).toList()
+        return mails.map { mail -> MailAggregate(mail) }
     }
 
-    private suspend fun sendMails(mails: List<Mail>) {
+    private suspend fun sendMails(mails: List<MailAggregate>) {
         if (mails.isNotEmpty()) {
             val sent = emailSenderFacade.sendMimeMessages(mails)
             saveSendingResult(mails, sent)
         }
     }
 
-    private suspend fun saveSendingResult(mails: List<Mail>, sent: Boolean) {
+    private suspend fun saveSendingResult(mails: List<MailAggregate>, sent: Boolean) {
         log.info("Emails for mails $mails have been sent. Updating mail data.")
         // Here we can create retry mechanism instead of saving all batch with failed status.
         // Now it is for the sake of simplicity.
         val savedMails = dao.updateMails(
-            mails.map { it.also { it.mailStatusId = if (sent) SENT.id else FAILED.id } }
+            mails.map { it.mail }.map { it.also { it.mailStatusId = if (sent) SENT.id else FAILED.id } }
         ).toList()
         savedMails.forEach { mail ->
             val statusDto = MailStatusCode.entries.first { it.id == mail.mailStatusId }
