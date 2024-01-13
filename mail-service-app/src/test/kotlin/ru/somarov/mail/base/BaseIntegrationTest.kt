@@ -40,7 +40,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
 import ru.somarov.mail.infrastructure.config.ServiceProps
 import ru.somarov.mail.presentation.grpc.MailServiceGrpcKt
-import ru.somarov.mail.presentation.kafka.consumers.CreateMailCommandConsumer
+import ru.somarov.mail.presentation.kafka.consumers.CreateMailCommandConsumerWithRetrySupport
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.time.Duration
@@ -61,13 +61,13 @@ class BaseIntegrationTest {
     lateinit var props: ServiceProps
 
     @MockBean
-    lateinit var emailSender: JavaMailSenderImpl
+    lateinit var emailSenderImpl: JavaMailSenderImpl
 
     @GrpcClient("mail-service")
     lateinit var currentServiceClient: MailServiceGrpcKt.MailServiceCoroutineStub
 
     @SpyBean
-    lateinit var createMailConsumer: CreateMailCommandConsumer
+    lateinit var createMailConsumer: CreateMailCommandConsumerWithRetrySupport
 
     @BeforeAll
     fun setUp() {
@@ -94,8 +94,8 @@ class BaseIntegrationTest {
 
         val message = MimeMessage(Session.getDefaultInstance(Properties()))
 
-        doReturn(message).whenever(emailSender).createMimeMessage()
-        doNothing().whenever(emailSender).send(anyVararg<MimeMessage>())
+        doReturn(message).whenever(emailSenderImpl).createMimeMessage()
+        doNothing().whenever(emailSenderImpl).send(anyVararg<MimeMessage>())
     }
 
     @AfterEach
@@ -106,7 +106,7 @@ class BaseIntegrationTest {
 
     fun cleanAfterEach() {
         dbClient.sql { "TRUNCATE mail CASCADE" }.then().block()
-        reset(emailSender)
+        reset(emailSenderImpl)
     }
 
     // Remove when https://github.com/spring-projects/spring-framework/issues/31713 will be fixed

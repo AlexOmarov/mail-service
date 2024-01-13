@@ -11,8 +11,8 @@ import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusC
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.FAILED
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.NEW
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.SENT
-import ru.somarov.mail.infrastructure.kafka.KafkaSenderDecorator
-import ru.somarov.mail.infrastructure.kafka.MessageMetadata
+import ru.somarov.mail.infrastructure.kafka.KafkaProducerFacade
+import ru.somarov.mail.infrastructure.kafka.consumer.MessageMetadata
 import ru.somarov.mail.infrastructure.mail.EmailSenderFacade
 import ru.somarov.mail.presentation.kafka.event.broadcast.MailBroadcast
 import ru.somarov.mail.presentation.kafka.event.broadcast.dto.MailStatus
@@ -22,7 +22,7 @@ import java.time.OffsetDateTime
 class EmailService(
     private val props: ServiceProps,
     private val dao: Dao,
-    private val kafkaSenderDecorator: KafkaSenderDecorator,
+    private val kafkaProducerFacade: KafkaProducerFacade,
     private val emailSenderFacade: EmailSenderFacade
 ) {
     private val log = LoggerFactory.getLogger(EmailService::class.java)
@@ -73,9 +73,9 @@ class EmailService(
         ).toList()
         savedMails.forEach { mail ->
             val statusDto = MailStatusCode.entries.first { it.id == mail.mailStatusId }
-            kafkaSenderDecorator.sendMailBroadcast(
-                event = MailBroadcast(id = mail.id, status = MailStatus.valueOf(statusDto.name)),
-                metadata = MessageMetadata(attempt = 0, datetime = OffsetDateTime.now(), key = mail.id.toString()),
+            kafkaProducerFacade.sendMailBroadcast(
+                event = MailBroadcast(id = mail.uuid, status = MailStatus.valueOf(statusDto.name)),
+                metadata = MessageMetadata(attempt = 0, datetime = OffsetDateTime.now(), key = mail.uuid.toString()),
                 topic = props.kafka.mailBroadcastTopic
             )
         }

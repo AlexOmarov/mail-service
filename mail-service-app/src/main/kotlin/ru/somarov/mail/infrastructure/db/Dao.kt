@@ -50,7 +50,7 @@ class Dao(
 
     private fun createMailEntity(email: String, text: String): Mail {
         return Mail(
-            id = UUID.randomUUID(),
+            uuid = UUID.randomUUID(),
             clientEmail = email,
             text = text,
             mailStatusId = MailStatus.Companion.MailStatusCode.NEW.id,

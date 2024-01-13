@@ -1,10 +1,13 @@
 package ru.somarov.mail.presentation.kafka
 
-import ru.somarov.mail.presentation.kafka.event.EventType
+import jakarta.validation.Valid
+import jakarta.validation.constraints.NotBlank
+import ru.somarov.mail.presentation.kafka.event.CommonEvent
 
-data class DlqMessage<T>(
-    val payload: T?,
+data class DlqMessage<T : CommonEvent>(
+    @field:Valid
+    val payload: T,
+    @field:NotBlank
     val key: String,
-    val payloadType: EventType,
     var processingAttemptNumber: Int
 )

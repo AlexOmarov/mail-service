@@ -23,7 +23,7 @@ class RSocketController(val service: MailService) {
         logger.info("Got create mail rsocket request with payload $request")
         val mail = service.createMail(request.email, request.text)
         return StandardResponse(
-            MailResponse(MailDto(mail.id, mail.text)),
+            MailResponse(MailDto(mail.uuid, mail.text)),
             ResponseMetadata(ResultCode.OK, "")
         )
     }
@@ -33,7 +33,7 @@ class RSocketController(val service: MailService) {
         logger.info("Got get mail rsocket request with id $id")
         val mail = service.getMail(id)
         return StandardResponse(
-            MailResponse(MailDto(mail.id, mail.text)),
+            MailResponse(MailDto(mail.uuid, mail.text)),
             ResponseMetadata(ResultCode.OK, "")
         )
     }

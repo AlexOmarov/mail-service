@@ -28,7 +28,7 @@ private class MailController(private val service: MailService) : ISwaggerMailCon
         logger.info("Got getMail request for id $id")
         val mail = service.getMail(id)
         return StandardResponse(
-            MailResponse(MailDto(mail.id, mail.text)), ResponseMetadata(ResultCode.OK, "")
+            MailResponse(MailDto(mail.uuid, mail.text)), ResponseMetadata(ResultCode.OK, "")
         )
     }
     @PostMapping
@@ -36,7 +36,7 @@ private class MailController(private val service: MailService) : ISwaggerMailCon
         logger.info("Got create mail http request with body $request")
         val mail = service.createMail(request.email, request.text)
         return StandardResponse(
-            MailResponse(MailDto(mail.id, mail.text)), ResponseMetadata(ResultCode.OK, "")
+            MailResponse(MailDto(mail.uuid, mail.text)), ResponseMetadata(ResultCode.OK, "")
         )
     }
 }

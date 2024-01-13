@@ -23,14 +23,14 @@ private class MailServiceGrpcServer(
     override suspend fun createMail(request: CreateMailRequest): MailResponse {
         val mail = service.createMail(request.email, request.text)
         return MailResponse.newBuilder()
-            .setMail(MailDto.newBuilder().setId(mail.id.toString()).setText(mail.text))
+            .setMail(MailDto.newBuilder().setId(mail.uuid.toString()).setText(mail.text))
             .build()
     }
 
     override suspend fun getMail(request: GetMailRequest): MailResponse {
         val mail = service.getMail(UUID.fromString(request.id))
         return MailResponse.newBuilder()
-            .setMail(MailDto.newBuilder().setId(mail.id.toString()).setText(mail.text))
+            .setMail(MailDto.newBuilder().setId(mail.uuid.toString()).setText(mail.text))
             .build()
     }
 }

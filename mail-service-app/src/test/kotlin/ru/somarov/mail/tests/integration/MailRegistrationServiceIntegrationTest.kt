@@ -23,7 +23,7 @@ private class MailRegistrationServiceIntegrationTest : BaseIntegrationTest() {
 
         val mail = runBlocking {
             val result = service.createMail(email, text)
-            mailRepo.findById(result.id)!!
+            mailRepo.findById(result.uuid)!!
         }
 
         assert(mail.text == text)

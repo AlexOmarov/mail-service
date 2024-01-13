@@ -24,4 +24,20 @@ contour:
     auth-enabled: true
     debug-enabled: false
   scheduling:
-    max-email-sending-iterations: ${MAX_EMAIL_SENDING_ITERATIONS:10}
+    enabled: false
+    thread-pool-size: 5 # increase if new scheds are coming to not make race conditions
+    min-lock: 0
+    max-lock: 1h
+    email-sending:
+      enabled: false
+      delay: PT10S
+      batch-size: 20
+      lock-max-duration: PT1H
+      days-to-check-for-unsent-emails: 1
+    rsocket-requester:
+      enabled: false
+      delay: PT10S
+      batch-size: 20
+      lock-max-duration: PT1H
+      days-to-check-for-unsent-emails: 1
+

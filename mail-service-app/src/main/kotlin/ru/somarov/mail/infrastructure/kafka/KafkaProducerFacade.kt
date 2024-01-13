@@ -23,18 +23,22 @@ import reactor.kafka.sender.SenderOptions
 import reactor.kafka.sender.SenderRecord
 import reactor.kafka.sender.SenderResult
 import ru.somarov.mail.infrastructure.config.ServiceProps
+import ru.somarov.mail.infrastructure.kafka.Constants.PAYLOAD_TYPE_HEADER_NAME
+import ru.somarov.mail.infrastructure.kafka.consumer.MessageMetadata
 import ru.somarov.mail.infrastructure.kafka.serde.dlq.DlqMessageSerializer
 import ru.somarov.mail.infrastructure.kafka.serde.mailbroadcast.MailBroadcastSerializer
 import ru.somarov.mail.infrastructure.kafka.serde.retry.RetryMessageSerializer
 import ru.somarov.mail.presentation.kafka.DlqMessage
 import ru.somarov.mail.presentation.kafka.RetryMessage
-import ru.somarov.mail.presentation.kafka.event.EventType
+import ru.somarov.mail.presentation.kafka.event.CommonEvent
 import ru.somarov.mail.presentation.kafka.event.broadcast.MailBroadcast
+import java.time.OffsetDateTime
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.random.Random
+import kotlin.reflect.KClass
 
 @Component
-class KafkaSenderDecorator(
+class KafkaProducerFacade(
     mapper: ObjectMapper,
     private val tracer: Tracer,
     private val props: ServiceProps,
@@ -50,49 +54,50 @@ class KafkaSenderDecorator(
         metadata: MessageMetadata,
         topic: String
     ): SenderResult<MailBroadcast> {
-        return sendMessage(event, metadata, props.kafka.mailBroadcastTopic, mailSender)
+        return sendMessage(event, event::class, metadata, props.kafka.mailBroadcastTopic, mailSender)
     }
 
     @Suppress("UNCHECKED_CAST")
-    suspend fun <T : Any> sendRetry(
+    suspend fun <T : CommonEvent> sendRetry(
         event: T,
-        metadata: MessageMetadata,
-        payloadType: EventType
+        metadata: MessageMetadata
     ): SenderResult<RetryMessage<T>> {
+        val message = RetryMessage(
+            payload = event,
+            key = metadata.key,
+            processingAttemptNumber = metadata.attempt + 1
+        )
         return sendMessage(
-            RetryMessage(
-                payload = event,
-                key = metadata.key,
-                payloadType = payloadType,
-                processingAttemptNumber = metadata.attempt + 1
-            ),
-            metadata,
+            message,
+            message::class,
+            MessageMetadata(OffsetDateTime.now(), "retry_${metadata.key}", 0),
             props.kafka.retryTopic,
             retrySender
         ) as SenderResult<RetryMessage<T>>
     }
 
     @Suppress("UNCHECKED_CAST")
-    suspend fun <T : Any> sendDlq(
+    suspend fun <T : CommonEvent> sendDlq(
         event: T,
-        metadata: MessageMetadata,
-        payloadType: EventType
+        metadata: MessageMetadata
     ): SenderResult<DlqMessage<T>> {
+        val message = DlqMessage(
+            payload = event,
+            key = metadata.key,
+            processingAttemptNumber = metadata.attempt + 1
+        )
         return sendMessage(
-            DlqMessage(
-                payload = event,
-                key = metadata.key,
-                payloadType = payloadType,
-                processingAttemptNumber = metadata.attempt + 1
-            ),
-            metadata,
+            message,
+            message::class,
+            MessageMetadata(OffsetDateTime.now(), "dlq_${metadata.key}", 0),
             props.kafka.dlqTopic,
             dlqSender
         ) as SenderResult<DlqMessage<T>>
     }
 
-    private suspend fun <T : Any> sendMessage(
+    suspend fun <T : Any> sendMessage(
         message: T,
+        clazz: KClass<out T>,
         metadata: MessageMetadata,
         topic: String,
         sender: KafkaSender<String, T>
@@ -100,7 +105,10 @@ class KafkaSenderDecorator(
         val partition = null
         val timestamp = null
         val traceParent = getTraceParentHeader()
-        val headers = mutableListOf<Header>(RecordHeader(TRACE_HEADER_KEY, traceParent.toByteArray()))
+        val headers = mutableListOf<Header>(
+            RecordHeader(TRACE_HEADER_KEY, traceParent.toByteArray()),
+            RecordHeader(PAYLOAD_TYPE_HEADER_NAME, (clazz.qualifiedName ?: "").toByteArray())
+        )
 
         val record = ProducerRecord(
             /* topic = */ topic,

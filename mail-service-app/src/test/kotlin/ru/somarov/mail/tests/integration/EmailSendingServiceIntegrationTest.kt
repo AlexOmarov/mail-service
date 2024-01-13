@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.TestPropertySource
 import ru.somarov.mail.application.service.EmailService
 import ru.somarov.mail.base.BaseIntegrationTest
 import ru.somarov.mail.infrastructure.db.entity.Mail
@@ -15,7 +14,6 @@ import ru.somarov.mail.infrastructure.db.repo.MailRepo
 import java.time.OffsetDateTime
 import java.util.UUID
 
-@TestPropertySource(properties = ["contour.scheduling.enabled = false"])
 private class EmailSendingServiceIntegrationTest : BaseIntegrationTest() {
 
     @Autowired
@@ -40,7 +38,7 @@ private class EmailSendingServiceIntegrationTest : BaseIntegrationTest() {
         repository.saveAll(
             (1..MAILS_AMOUNT).map {
                 Mail(
-                    id = UUID.randomUUID(),
+                    uuid = UUID.randomUUID(),
                     clientEmail = "qwerty$it@email.com",
                     text = "any text",
                     mailStatusId = MailStatus.Companion.MailStatusCode.NEW.id,

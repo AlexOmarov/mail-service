@@ -1,9 +1,9 @@
-package ru.somarov.mail.infrastructure.kafka
+package ru.somarov.mail.infrastructure.kafka.consumer
 
 import reactor.kafka.receiver.KafkaReceiver
 
 interface IMessageConsumer<T> {
-    suspend fun handle(event: T, metadata: MessageMetadata): MessageConsumptionResult
+    suspend fun handle(message: T, metadata: MessageMetadata): MessageConsumptionResult
     fun getReceiver(): KafkaReceiver<String, T?>
     fun enabled(): Boolean
     fun getName(): String
