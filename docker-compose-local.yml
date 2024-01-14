@@ -145,8 +145,6 @@ services:
       ELASTICSEARCH_URL: http://elasticsearch:9200
   elasticsearch:
     image: elasticsearch:8.10.2
-    depends_on:
-      - service
     environment:
       - discovery.type=single-node
       - node.name=elastic
@@ -179,8 +177,6 @@ services:
   # Containers related to metrics/traces
   prometheus:
     image: prom/prometheus
-    depends_on:
-      - service
     ports:
       - "9090:9090"
     volumes:

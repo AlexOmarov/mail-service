@@ -1,8 +1,8 @@
 package ru.somarov.mail.infrastructure.db
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
-import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.data.redis.core.ReactiveRedisTemplate
@@ -20,10 +20,12 @@ class Dao(
     private val template: ReactiveRedisTemplate<String, Mail>
 ) {
     private val log = LoggerFactory.getLogger(this.javaClass)
+
     // Cached operation
+    @Suppress("kotlin:S6518") // Cannot replace get with index accessor, redis throws an error
     suspend fun getMail(id: UUID): Mail {
-        val ops = template.opsForValue()
-        val cachedMail = ops["mails:$id"].awaitSingleOrNull()
+        val ops = template.opsForSet()
+        val cachedMail = ops.scan("mails:$id").awaitFirstOrNull()
         log.info("Got $cachedMail from redis")
         val result = if (cachedMail == null) {
             val mail = mailRepo.findById(id) ?: throw IllegalArgumentException("Got id $id which doesn't exist")
