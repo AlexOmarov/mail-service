@@ -37,6 +37,7 @@ testcontainers-redis = "2.0.1"
 janino = "3.1.11"
 hessian = "4.0.66"
 rsocket-micrometer = "1.1.4"
+otel-zipkin="1.34.1"
 
 [libraries]
 awaitility = { group = "org.awaitility", name = "awaitility-kotlin", version.ref = "awaitility" }
@@ -61,8 +62,8 @@ micrometer-context-propagation = { group = "io.micrometer", name = "context-prop
 micrometer-reactor = { group = "io.projectreactor", name = "reactor-core-micrometer", version.ref = "micrometer-reactor" }
 micrometer-registry-prometheus = { group = "io.micrometer", name = "micrometer-registry-prometheus", version.ref = "micrometer" }
 micrometer-tracing = { group = "io.micrometer", name = "micrometer-tracing", version.ref = "micrometer-tracing" }
-micrometer-tracing-brave = { group = "io.micrometer", name = "micrometer-tracing-bridge-brave", version.ref = "micrometer-tracing" }
 micrometer-tracing-otel = { group = "io.micrometer", name = "micrometer-tracing-bridge-otel", version.ref = "micrometer-tracing" }
+otel-zipkin = { module = "io.opentelemetry:opentelemetry-exporter-zipkin", version.ref="otel-zipkin" }
 mockito = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockito" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 hessian = { group = "com.caucho", name = "hessian", version.ref = "hessian" }
@@ -98,7 +99,7 @@ kafka = { module = "io.projectreactor.kafka:reactor-kafka", version.ref = "kafka
 rsocket-micrometer = { module = "io.rsocket:rsocket-micrometer", version.ref = "rsocket-micrometer" }
 
 [bundles]
-reactive-service-base = ["rsocket-micrometer", "logstash-logback-encoder", "spring-boot-starter-webflux", "spring-boot-starter-security", "spring-boot-starter-validation", "spring-boot-starter-cache", "spring-boot-starter-actuator", "spring-boot-starter-aop", "kotlin-coroutines-core", "kotlin-coroutines-reactive", "kotlin-coroutines-reactor", "kotlin-extensions", "kotlin-jackson", "jackson-databind", "jackson-core", "jackson-annotations", "micrometer", "micrometer-registry-prometheus", "micrometer-reactor", "micrometer-tracing", "micrometer-tracing-otel", "micrometer-context-propagation", "janino", "spring-boot-starter-rsocket", "hessian", "spring-security-rsocket", "spring-boot-starter-data-redis-reactive", "kafka", "spring-starter-kafka"]
+reactive-service-base = ["rsocket-micrometer", "otel-zipkin", "logstash-logback-encoder", "spring-boot-starter-webflux", "spring-boot-starter-security", "spring-boot-starter-validation", "spring-boot-starter-cache", "spring-boot-starter-actuator", "spring-boot-starter-aop", "kotlin-coroutines-core", "kotlin-coroutines-reactive", "kotlin-coroutines-reactor", "kotlin-extensions", "kotlin-jackson", "jackson-databind", "jackson-core", "jackson-annotations", "micrometer", "micrometer-registry-prometheus", "micrometer-reactor", "micrometer-tracing", "micrometer-tracing-otel", "micrometer-context-propagation", "janino", "spring-boot-starter-rsocket", "hessian", "spring-security-rsocket", "spring-boot-starter-data-redis-reactive", "kafka", "spring-starter-kafka"]
 reactive-service-test = ["junit-api", "junit-engine", "testcontainers-junit", "testcontainers-redis", "testcontainers-kafka", "testcontainers-postgres", "mockito", "mockk", "reactor-test", "awaitility", "spring-starter-test"]
 database-postgresql = ["spring-boot-starter-data-r2dbc", "r2dbc-postgresql", "r2dbc-proxy", "flyway-core", "postgresql"]
 grpc-client = ["grpc-client-spring-boot-starter", "grpc-kotlin-stub", "protobuf-kotlin"]

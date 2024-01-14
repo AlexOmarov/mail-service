@@ -1,6 +1,7 @@
 version: '3.9'
 
 services:
+  # Our mail service
   service:
     build:
       context: .
@@ -20,6 +21,8 @@ services:
       contour.mail.tls-required: false
       contour.mail.auth-enabled: false
       contour.mail.port: 2500
+      contour.kafka.brokers: kafka:9092
+      contour.zipkin.endpoint: http://zipkin:9411/api/v2/spans
       contour.database.host: db
       contour.database.port: 5432
       contour.database.name: mail_service
@@ -33,7 +36,7 @@ services:
       - "9091:9091"
       - "9010:9010"
       - "7001:7001"
-
+  # Containers related to databases
   db:
     image: postgres
     container_name: db
@@ -46,7 +49,28 @@ services:
       POSTGRES_DB: mail_service
     volumes:
       - pg_data:/var/lib/postgresql/data
-
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_SERVER_JSON_FILE: /pgadmin4/config/servers.json
+    volumes:
+      - ./config/db/pgadmin:/pgadmin4/config
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "4002:80"
+  redis:
+    container_name: redis
+    image: redis:latest
+    restart: always
+    entrypoint: redis-server --appendonly yes --requirepass 123 --maxmemory 512mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+  # Containers related to kafka
   zookeeper:
     image: confluentinc/cp-zookeeper
     environment:
@@ -59,26 +83,24 @@ services:
       - zk-data:/var/lib/zookeeper/data
       - zk-txn-logs:/var/lib/zookeeper/log
       - zk-secrets:/etc/zookeeper/secrets
-
   kafka:
     image: confluentinc/cp-enterprise-kafka
     depends_on:
       - zookeeper
     ports:
-      - "9092:9092"
+      - "29092:9092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: LOCAL://localhost:29092, DOCKER://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LOCAL:PLAINTEXT,DOCKER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_DEFAULT_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
     volumes:
       - kafka-data:/var/lib/kafka/data
       - kafka-secrets:/etc/kafka/secrets
-
   kafka-ui:
     container_name: kafka-ui
     image: provectuslabs/kafka-ui
@@ -92,7 +114,6 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
       KAFKA_CLUSTERS_0_JMXPORT: 9997
-
   schema-registry:
     image: confluentinc/cp-schema-registry
     depends_on:
@@ -105,22 +126,7 @@ services:
       - "6005:6005"
     volumes:
       - schema-registry-secrets:/etc/schema-registry/secrets
-
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-    volumes:
-      - pgadmin:/var/lib/pgadmin
-    ports:
-      - "4002:80"
-
-  zipkin:
-    image: openzipkin/zipkin
-    ports:
-      - "9411:9411"
+  # Containers related to ELK stack for logs -
   kibana:
     image: kibana:8.10.2
     ports:
@@ -129,7 +135,6 @@ services:
       - "5601"
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
-
   elasticsearch:
     image: elasticsearch:8.10.2
     environment:
@@ -141,7 +146,6 @@ services:
       - elasticsearch_data:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
-
   logstash:
     image: logstash:8.10.2
     ports:
@@ -150,15 +154,14 @@ services:
     volumes:
       - ./config/elk/logstash/pipelines.yaml:/usr/share/logstash/config/pipelines.yml:ro
       - ./config/elk/logstash/pipelines:/usr/share/logstash/pipeline:ro
-
+  # Containers related to metrics/traces
   prometheus:
     image: prom/prometheus
     ports:
       - "9090:9090"
     volumes:
-      - ./config/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
+      - ./config/observability/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml
       - prometheus_data:/var/lib/prometheus
-
   grafana:
     image: grafana/grafana-enterprise
     container_name: grafana
@@ -166,12 +169,19 @@ services:
     ports:
       - '3000:3000'
     environment:
-      - 'GF_INSTALL_PLUGINS=grafana-clock-panel'
-      - 'GF_SECURITY_ADMIN_USER=admin'
-      - 'GF_SECURITY_ADMIN_PASSWORD=admin'
+      GF_INSTALL_PLUGINS: grafana-clock-panel
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
     volumes:
+      - ./config/observability/grafana/datasources/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - ./config/observability/grafana/dashboards/config.yml:/etc/grafana/provisioning/dashboards/config.yaml
+      - ./config/observability/grafana/dashboards/micrometer.json:/var/lib/grafana/dashboards/micrometer.json
       - grafana_data:/var/lib/grafana
-
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+      - "9411:9411"
+  # Containers with emulated side systems
   mock-server:
     image: mockserver/mockserver
     ports:
@@ -181,17 +191,7 @@ services:
       MOCKSERVER_PROPERTY_FILE: /config/mockserver.properties
       MOCKSERVER_INITIALIZATION_JSON_PATH: /config/init.json
     volumes:
-      - ./config/mockserver:/config
-
-  redis:
-    container_name: redis
-    image: redis:latest
-    restart: always
-    entrypoint: redis-server --appendonly yes --requirepass 123 --maxmemory 512mb --maxmemory-policy allkeys-lru
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
+      - ./config/sidesystems/mockserver:/config
   mailslurper:
     container_name: mailslurper
     image: marcopas/docker-mailslurper:latest

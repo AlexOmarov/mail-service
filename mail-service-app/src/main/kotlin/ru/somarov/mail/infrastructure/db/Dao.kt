@@ -3,6 +3,7 @@ package ru.somarov.mail.infrastructure.db
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Component
@@ -18,10 +19,12 @@ class Dao(
     private val mailRepo: MailRepo,
     private val template: ReactiveRedisTemplate<String, Mail>
 ) {
+    private val log = LoggerFactory.getLogger(this.javaClass)
     // Cached operation
     suspend fun getMail(id: UUID): Mail {
         val ops = template.opsForValue()
         val cachedMail = ops["mails:$id"].awaitSingleOrNull()
+        log.info("Got $cachedMail from redis")
         val result = if (cachedMail == null) {
             val mail = mailRepo.findById(id) ?: throw IllegalArgumentException("Got id $id which doesn't exist")
             template.opsForSet().add("mails:$id", mail).awaitSingle()

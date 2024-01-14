@@ -3,6 +3,8 @@ contour:
   instance: unknown
   grpc-port: 9091
   http-port: 8080
+  zipkin:
+    endpoint: http://localhost:9411/api/v2/spans
   kafka:
     brokers: localhost:9092
     mail-broadcast-topic: mail_service_mail_broadcast
@@ -28,6 +30,7 @@ contour:
     logging:
       exclusions:
         - /webjars.*
+        - /actuator.*
         - /v3/api-docs.*
   mail:
     destination-email: test@yandex.ru
@@ -91,6 +94,9 @@ management:
             requests: true
     health:
       show-details: always
+  zipkin:
+    tracing:
+      endpoint: '${contour.zipkin.endpoint}'
   tracing:
     sampling:
       probability: 1.0

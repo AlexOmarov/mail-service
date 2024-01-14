@@ -14,7 +14,7 @@ private class MicrometerConfig {
         MeterRegistryCustomizer<MeterRegistry> {
         return MeterRegistryCustomizer {
             it.config().commonTags(
-                "service", buildProperties.name,
+                "application", buildProperties.name,
                 "instance", props.contour.instance
             )
         }

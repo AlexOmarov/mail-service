@@ -67,10 +67,10 @@ Following ports are served on host machine
 7001 - service (rsocket)
 
 7000 - postgres (odbc) (нужно добавить в dbeaver)
-4002 - pgadmin (http) (нужно добавить db:5432)
+4002 - pgadmin (http) (нужно ввести пароль)
 
 2181 - zookeeper (tcp)
-9092 - kafka cluster (tcp)
+29092 - kafka cluster (tcp) - had to 2 frst because clash with kafka advertised listeners
 6005 - schema registry (tcp/http)
 9001 - kafka ui (http)
 
@@ -84,7 +84,7 @@ Following ports are served on host machine
 
 5001 - mockserver (http)
 
-6379 - redis (tcp)
+6379 - redis (tcp) (can be seen via this https://github.com/qishibo/AnotherRedisDesktopManager/releases)
 2500 - slurper (tcp)
 8085 - slurper (tcp)
 8083 - slurper (http)

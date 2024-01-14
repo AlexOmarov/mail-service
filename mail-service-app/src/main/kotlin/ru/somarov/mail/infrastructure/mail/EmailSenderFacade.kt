@@ -27,7 +27,7 @@ class EmailSenderFacade(
                     systemUser = props.contour.mail.username,
                     destinationUser = props.contour.mail.destinationEmail,
                     mailSender = emailSender,
-                    template = "${TEMPLATE_FOLDER_PATH}/${props.contour.mail.template}"
+                    templatePath = "${TEMPLATE_FOLDER_PATH}/${props.contour.mail.template}"
                 )
             }
             emailSender.send(*mimeMessages.toTypedArray())
