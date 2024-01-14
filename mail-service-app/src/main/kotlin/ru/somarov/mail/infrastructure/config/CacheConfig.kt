@@ -1,5 +1,6 @@
 package ru.somarov.mail.infrastructure.config
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -31,11 +32,11 @@ private class CacheConfig(private val props: ServiceProps) {
     }
 
     @Bean
-    fun reactiveRedisTemplate(): ReactiveRedisTemplate<String, Mail> {
-        val serializer: Jackson2JsonRedisSerializer<Mail> = Jackson2JsonRedisSerializer(Mail::class.java)
+    fun reactiveRedisTemplate(objectMapper: ObjectMapper): ReactiveRedisTemplate<String, Mail> {
+        val serializer: Jackson2JsonRedisSerializer<Mail> = Jackson2JsonRedisSerializer(objectMapper, Mail::class.java)
         val builder: RedisSerializationContextBuilder<String, Mail> =
             RedisSerializationContext.newSerializationContext(
-                Jackson2JsonRedisSerializer(String::class.java)
+                Jackson2JsonRedisSerializer(objectMapper, String::class.java)
             )
         val context: RedisSerializationContext<String, Mail> = builder.value(serializer).build()
         val template = ReactiveRedisTemplate(redisConnectionFactory(), context)
