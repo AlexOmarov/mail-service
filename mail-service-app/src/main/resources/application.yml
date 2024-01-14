@@ -3,10 +3,12 @@ contour:
   instance: unknown
   grpc-port: 9091
   http-port: 8080
+  logstash:
+    host: localhost:5046
   zipkin:
     endpoint: http://localhost:9411/api/v2/spans
   kafka:
-    brokers: localhost:9092
+    brokers: localhost:29092
     mail-broadcast-topic: mail_service_mail_broadcast
     create-mail-command-topic: mail_service_create_mail_command
     retry-topic: mail_service_retry

@@ -139,4 +139,4 @@ Following ports are served on host machine
   - password: ${contour.database.password:mail_service}
 
 Также имеется возможность настроить логирование:
-- CONSOLE_LOG_JSON (true/false) - включает json appender, который используется для импорта логов в elk стэк
+- LOGSTASH_HOST (true/false) - включает json appender, который используется для импорта логов в elk стэк

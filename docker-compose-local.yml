@@ -23,6 +23,7 @@ services:
       contour.mail.port: 2500
       contour.kafka.brokers: kafka:9092
       contour.zipkin.endpoint: http://zipkin:9411/api/v2/spans
+      contour.logstash.host: logstash:5046
       contour.database.host: db
       contour.database.port: 5432
       contour.database.name: mail_service
@@ -30,7 +31,6 @@ services:
       contour.database.password: mail_service
       contour.database.user: mail_service
       spring.profiles.active: dev
-      CONSOLE_LOG_JSON: true
     ports:
       - "8080:8080"
       - "9091:9091"
@@ -51,6 +51,8 @@ services:
       - pg_data:/var/lib/postgresql/data
   pgadmin:
     image: dpage/pgadmin4
+    depends_on:
+      - db
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
@@ -88,10 +90,11 @@ services:
     depends_on:
       - zookeeper
     ports:
-      - "29092:9092"
+      - "29092:29092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: LOCAL://kafka:29092,DOCKER://kafka:9092
       KAFKA_ADVERTISED_LISTENERS: LOCAL://localhost:29092, DOCKER://kafka:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LOCAL:PLAINTEXT,DOCKER:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
@@ -129,6 +132,8 @@ services:
   # Containers related to ELK stack for logs -
   kibana:
     image: kibana:8.10.2
+    depends_on:
+      - elasticsearch
     ports:
       - "5601:5601"
     expose:
@@ -148,6 +153,8 @@ services:
       - "9200:9200"
   logstash:
     image: logstash:8.10.2
+    depends_on:
+      - elasticsearch
     ports:
       - '25826:25826'
       - '5046:5046'
@@ -166,6 +173,8 @@ services:
     image: grafana/grafana-enterprise
     container_name: grafana
     restart: unless-stopped
+    depends_on:
+      - prometheus
     ports:
       - '3000:3000'
     environment:
