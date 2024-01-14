@@ -25,6 +25,7 @@ private class SecurityConfig(private val props: ServiceProps) {
                     .pathMatchers("/webjars/**", "v3/api-docs/**").permitAll()
                     .anyExchange().authenticated()
             }
+            .csrf { it.disable() }
             .httpBasic(withDefaults())
             .build()
     }
