@@ -17,7 +17,9 @@ class RsocketClientLoggingInterceptor : RSocketInterceptor {
                     .doOnSuccess { response -> logResponse(response) }
             }
 
+            @Suppress("kotlin:S1135") // Should fix it soon
             private fun logRequest(payload: Payload) {
+                // TODO: convert from hessian to json
                 log.info("Outgoing rsocket request <- payload: ${payload.dataUtf8}, metadata: ${payload.metadataUtf8}")
             }
 
