@@ -19,6 +19,8 @@ import ru.somarov.mail.infrastructure.config.ServiceProps
 import ru.somarov.mail.infrastructure.hessian.HessianCodecSupport.Companion.HESSIAN_MIME_TYPE
 import ru.somarov.mail.infrastructure.hessian.impl.HessianDecoder
 import ru.somarov.mail.infrastructure.hessian.impl.HessianEncoder
+import ru.somarov.mail.infrastructure.rsocket.RsocketClientLoggingInterceptor
+import ru.somarov.mail.infrastructure.rsocket.RsocketServerLoggingInterceptor
 import java.net.URI
 import java.time.Duration
 
@@ -30,8 +32,10 @@ private class RSocketConfig(private val props: ServiceProps) {
         meterRegistry: MeterRegistry,
         observationRegistry: ObservationRegistry
     ): RSocketServerCustomizer {
+        val loggingInterceptor = RsocketServerLoggingInterceptor()
         return RSocketServerCustomizer { server ->
             server.interceptors {
+                it.forResponder(loggingInterceptor)
                 it.forResponder(MicrometerRSocketInterceptor(meterRegistry))
                 it.forResponder(RSocketInterceptor { socket ->
                     ObservationResponderRSocketProxy(
@@ -60,6 +64,7 @@ private class RSocketConfig(private val props: ServiceProps) {
             .rsocketConnector { rSocketConnector: RSocketConnector ->
                 rSocketConnector
                     .interceptors {
+                        it.forRequester(RsocketClientLoggingInterceptor())
                         it.forRequester(MicrometerRSocketInterceptor(meterRegistry))
                         it.forRequester(RSocketInterceptor { socket ->
                             ObservationRequesterRSocketProxy(

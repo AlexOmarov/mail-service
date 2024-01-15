@@ -19,21 +19,21 @@ import ru.somarov.mail.presentation.rsocket.response.MailResponse
 import ru.somarov.mail.presentation.rsocket.response.standard.StandardResponse
 
 @Component
-@ConditionalOnExpression("\${contour.scheduling.rsocket-requester.enabled} and \${contour.scheduling.enabled}")
-private class RsocketLoadScheduler(
+@ConditionalOnExpression("\${contour.scheduling.load.enabled} and \${contour.scheduling.enabled}")
+private class LoadScheduler(
     private val requester: RSocketRequester,
     private val props: ServiceProps
 ) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     @SchedulerLock(
-        name = "RsocketLoadScheduler",
-        lockAtMostFor = "\${contour.scheduling.rsocket-requester.lock-max-duration}"
+        name = "LoadScheduler",
+        lockAtMostFor = "\${contour.scheduling.load.lock-max-duration}"
     )
-    @Scheduled(fixedDelayString = "\${contour.scheduling.rsocket-requester.delay}", zone = "UTC")
+    @Scheduled(fixedDelayString = "\${contour.scheduling.load.delay}", zone = "UTC")
     fun launch() {
         runBlocking {
-            logger.info("Started RsocketLoadScheduler")
+            logger.info("Started LoadScheduler")
             val credentials = UsernamePasswordMetadata(props.contour.auth.user, props.contour.auth.password)
             // Had to use retrieveMono contextCapture to capture observation,
             // because observation requester proxy creates mono for request using mono defer contextual

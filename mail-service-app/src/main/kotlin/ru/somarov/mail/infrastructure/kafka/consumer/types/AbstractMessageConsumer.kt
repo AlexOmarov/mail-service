@@ -1,5 +1,6 @@
 package ru.somarov.mail.infrastructure.kafka.consumer.types
 
+import jakarta.validation.ConstraintViolationException
 import jakarta.validation.Validation
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.Deserializer
@@ -25,6 +26,9 @@ abstract class AbstractMessageConsumer<T : Any>(
 
         val result = try {
             val constraintViolations = validator.validate(message)
+            if (constraintViolations.isNotEmpty()) {
+                throw ConstraintViolationException(constraintViolations)
+            }
             handleMessage(message, metadata)
         } catch (e: Exception) {
             log.error("Got exception while processing event $message with metadata $metadata", e)

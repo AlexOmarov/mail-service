@@ -34,10 +34,9 @@ contour:
       batch-size: 20
       lock-max-duration: PT1H
       days-to-check-for-unsent-emails: 1
-    rsocket-requester:
+    load:
       enabled: false
       delay: PT10S
       batch-size: 20
       lock-max-duration: PT1H
-      days-to-check-for-unsent-emails: 1
 
