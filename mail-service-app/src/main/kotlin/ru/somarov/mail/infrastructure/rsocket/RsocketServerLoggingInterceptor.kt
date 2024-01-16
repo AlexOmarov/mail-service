@@ -5,12 +5,10 @@ import io.rsocket.RSocket
 import io.rsocket.plugins.RSocketInterceptor
 import org.slf4j.LoggerFactory
 import reactor.core.publisher.Mono
-import ru.somarov.mail.infrastructure.hessian.HessianCodecSupport
 
 
 class RsocketServerLoggingInterceptor : RSocketInterceptor, RsocketPayloadDeserializer {
     private val log = LoggerFactory.getLogger(this.javaClass)
-    private val codec = HessianCodecSupport()
 
     override fun apply(rSocket: RSocket): RSocket {
         return object : RSocket {
@@ -21,7 +19,7 @@ class RsocketServerLoggingInterceptor : RSocketInterceptor, RsocketPayloadDeseri
             }
 
             private fun logRequest(payload: Payload) {
-                val deserializedPayload = getDeserializedPayload(payload, codec)
+                val deserializedPayload = getDeserializedPayload(payload)
                 log.info(
                     "Incoming rsocket request -> " +
                         "payload: ${deserializedPayload.first}, metadata: ${deserializedPayload.second}"
@@ -29,7 +27,7 @@ class RsocketServerLoggingInterceptor : RSocketInterceptor, RsocketPayloadDeseri
             }
 
             private fun logResponse(payload: Payload) {
-                val deserializedPayload = getDeserializedPayload(payload, codec)
+                val deserializedPayload = getDeserializedPayload(payload)
                 log.info(
                     "Outgoing rsocket response <- " +
                         "payload: ${deserializedPayload.first}, metadata: ${deserializedPayload.second}"

@@ -43,7 +43,7 @@ private class LoadScheduler(
                 .data(CreateMailRequest("text", "email"))
                 .retrieveMono<StandardResponse<MailResponse>>()
                 .contextCapture().awaitSingleOrNull()
-            logger.info("RsocketLoadScheduler has been completed, got $result")
+            logger.info("LoadScheduler has been completed, got $result")
         }
     }
 

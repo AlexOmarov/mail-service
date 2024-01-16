@@ -10,11 +10,12 @@ import java.io.ByteArrayInputStream
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 
+/**
+ * This Interface is experimental and may lead to bugs or memory leaks. For now it is in progress
+ * */
 interface RsocketPayloadDeserializer {
-    private val encoding: Charset
-        get() = Charset.forName("UTF8")
 
-    fun getDeserializedPayload(payload: Payload, codec: HessianCodecSupport): Pair<Any, List<String>> {
+    fun getDeserializedPayload(payload: Payload): Pair<Any, List<String>> {
         val dataByteArray = getByteArray(payload.data)
 
         val deserializedData = if (codec.isHessian(dataByteArray)) {
@@ -30,8 +31,6 @@ interface RsocketPayloadDeserializer {
             } else {
                 "Header(mime: $mimeType, content: Not text)"
             }
-            // Release the ByteBuf when done using it
-            content.release()
             result
         }
 
@@ -44,5 +43,10 @@ interface RsocketPayloadDeserializer {
         buffer.get(byteArray)
         buffer.rewind()
         return byteArray
+    }
+
+    companion object {
+        val codec = HessianCodecSupport()
+        val encoding: Charset = Charset.forName("UTF8")
     }
 }
