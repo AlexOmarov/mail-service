@@ -12,7 +12,6 @@ import org.springframework.util.MimeType
 import java.io.ByteArrayInputStream
 import java.io.IOException
 
-
 open class HessianCodecSupport {
 
     fun <T> decode(clazz: Class<T>, dataBuffer: DataBuffer): T {
