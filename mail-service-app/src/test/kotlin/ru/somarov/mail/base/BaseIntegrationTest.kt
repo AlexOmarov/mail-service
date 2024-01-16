@@ -57,7 +57,7 @@ import java.util.Properties
 class BaseIntegrationTest {
 
     init {
-        // TODO: Rsocket still doesn't add header to request with this, fix is needed
+        // Still doesn't add header to request with this, fix is needed
         Hooks.enableAutomaticContextPropagation()
     }
 

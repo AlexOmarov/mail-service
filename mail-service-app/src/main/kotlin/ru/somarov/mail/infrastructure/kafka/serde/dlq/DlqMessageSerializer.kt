@@ -12,7 +12,7 @@ class DlqMessageSerializer(private val mapper: ObjectMapper) : Serializer<DlqMes
         return try {
             mapper.writeValueAsBytes(data)
         } catch (e: Exception) {
-            throw SerializationException("Error when serializing ConversionUpdateRetryEvent to byte[]", e)
+            throw SerializationException("Error when serializing DlqMessage to byte[]", e)
         }
     }
 }

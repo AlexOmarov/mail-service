@@ -12,7 +12,7 @@ class RetryMessageSerializer(private val mapper: ObjectMapper) : Serializer<Retr
         return try {
             mapper.writeValueAsBytes(data)
         } catch (e: Exception) {
-            throw SerializationException("Error when serializing ConversionUpdateRetryEvent to byte[]", e)
+            throw SerializationException("Error when serializing CommonEvent to byte[]", e)
         }
     }
 }

@@ -2,7 +2,6 @@
 contour:
   instance: unknown
   grpc-port: 9091
-  http-port: 8080
   logstash:
     host: localhost:5046
   zipkin:
@@ -29,6 +28,7 @@ contour:
       enabled: false
     uri: 'http://localhost:7001/rsocket' # only for self-requesting, remove if use service as template
   http:
+    port: 8080
     logging:
       exclusions:
         - /webjars.*
@@ -109,9 +109,15 @@ management:
 grpc:
   server:
     port: '${contour.grpc-port}'
-
+  client:
+    mail-service:
+      address: 'localhost:${contour.grpc-port}'
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      setKeepAliveTime: 6m
+      negotiationType: plaintext
 server:
-  port: '${contour.http-port}'
+  port: '${contour.http.port}'
 
 messages:
   encoding: 'UTF-8'

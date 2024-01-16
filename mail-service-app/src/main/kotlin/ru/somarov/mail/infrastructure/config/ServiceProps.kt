@@ -21,6 +21,7 @@ data class ServiceProps(
 
     data class HttpProps(
         val logging: HttpLoggingProps,
+        val port: Int,
     )
 
     data class HttpLoggingProps(
