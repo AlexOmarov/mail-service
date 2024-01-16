@@ -5,9 +5,11 @@ import io.rsocket.RSocket
 import io.rsocket.plugins.RSocketInterceptor
 import org.slf4j.LoggerFactory
 import reactor.core.publisher.Mono
+import ru.somarov.mail.infrastructure.hessian.HessianCodecSupport
 
-class RsocketClientLoggingInterceptor : RSocketInterceptor {
+class RsocketClientLoggingInterceptor : RSocketInterceptor, RsocketPayloadDeserializer {
     private val log = LoggerFactory.getLogger(this.javaClass)
+    private val codec = HessianCodecSupport()
 
     override fun apply(rSocket: RSocket): RSocket {
         return object : RSocket {
@@ -17,16 +19,17 @@ class RsocketClientLoggingInterceptor : RSocketInterceptor {
                     .doOnSuccess { response -> logResponse(response) }
             }
 
-            @Suppress("kotlin:S1135") // Should fix it soon
             private fun logRequest(payload: Payload) {
-                // TODO: convert from hessian to json
-                log.info("Outgoing rsocket request <- payload: ${payload.dataUtf8}, metadata: ${payload.metadataUtf8}")
+                val deserializedPayload = getDeserializedPayload(payload, codec)
+                log.info("Outgoing rsocket request <- " +
+                    "payload: ${deserializedPayload.first}, metadata: ${deserializedPayload.second}")
             }
 
-            private fun logResponse(response: Payload) {
+            private fun logResponse(payload: Payload) {
+                val deserializedPayload = getDeserializedPayload(payload, codec)
                 log.info(
                     "Incoming rsocket response -> " +
-                        "payload: ${response.dataUtf8}, metadata: ${response.metadataUtf8}"
+                        "payload: ${deserializedPayload.first}, metadata: ${deserializedPayload.second}"
                 )
             }
         }

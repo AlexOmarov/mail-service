@@ -23,6 +23,7 @@ import java.util.UUID
     properties = [
         "contour.scheduling.enabled = true",
         "contour.scheduling.email-sending.enabled = true",
+        "contour.scheduling.load.enabled = true",
     ]
 )
 private class EmailSendingSchedulerTests : BaseIntegrationTest() {

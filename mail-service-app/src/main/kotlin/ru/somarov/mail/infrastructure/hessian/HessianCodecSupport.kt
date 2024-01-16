@@ -9,6 +9,9 @@ import org.springframework.http.HttpInputMessage
 import org.springframework.http.HttpOutputMessage
 import org.springframework.http.MediaType
 import org.springframework.util.MimeType
+import java.io.ByteArrayInputStream
+import java.io.IOException
+
 
 open class HessianCodecSupport {
 
@@ -49,11 +52,29 @@ open class HessianCodecSupport {
         }
     }
 
-    private fun <T> readMessage(clazz: Class<T>, inp: HessianSerializerInput): T {
+    // Thread-safe
+    fun readObject(inp: HessianSerializerInput): Any {
         inp.startMessage()
         val message = inp.readObject()
         inp.completeMessage()
         inp.close()
+        return message
+    }
+
+    // Thread-safe
+    fun isHessian(byteArray: ByteArray): Boolean {
+        return try {
+            val byteArrayInputStream = ByteArrayInputStream(byteArray)
+            val hessianInput = HessianSerializerInput(byteArrayInputStream)
+            readObject(hessianInput)
+            true
+        } catch (e: IOException) {
+            false
+        }
+    }
+
+    private fun <T> readMessage(clazz: Class<T>, inp: HessianSerializerInput): T {
+        val message = readObject(inp)
         return clazz.cast(message)
     }
 
