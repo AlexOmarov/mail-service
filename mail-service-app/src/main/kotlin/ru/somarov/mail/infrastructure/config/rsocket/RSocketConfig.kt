@@ -32,10 +32,9 @@ private class RSocketConfig(private val props: ServiceProps) {
         meterRegistry: MeterRegistry,
         observationRegistry: ObservationRegistry
     ): RSocketServerCustomizer {
-        val loggingInterceptor = RsocketServerLoggingInterceptor()
         return RSocketServerCustomizer { server ->
             server.interceptors {
-                it.forResponder(loggingInterceptor)
+                it.forResponder(RsocketServerLoggingInterceptor())
                 it.forResponder(MicrometerRSocketInterceptor(meterRegistry))
                 it.forResponder(RSocketInterceptor { socket ->
                     ObservationResponderRSocketProxy(

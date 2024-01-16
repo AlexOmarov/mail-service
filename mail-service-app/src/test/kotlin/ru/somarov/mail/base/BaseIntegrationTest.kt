@@ -38,6 +38,7 @@ import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
+import reactor.core.publisher.Hooks
 import ru.somarov.mail.infrastructure.config.ServiceProps
 import ru.somarov.mail.presentation.grpc.MailServiceGrpcKt
 import ru.somarov.mail.presentation.kafka.consumers.CreateMailCommandConsumerWithRetrySupport
@@ -52,7 +53,13 @@ import java.util.Properties
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Suppress("kotlin:S1135") // Should fix it soon
 class BaseIntegrationTest {
+
+    init {
+        // TODO: Rsocket still doesn't add header to request with this, fix is needed
+        Hooks.enableAutomaticContextPropagation()
+    }
 
     @Autowired
     lateinit var dbClient: DatabaseClient
