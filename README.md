@@ -5,7 +5,7 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=AlexOmarov_mail-service&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=AlexOmarov_mail-service)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=AlexOmarov_mail-service&metric=bugs)](https://sonarcloud.io/summary/new_code?id=AlexOmarov_mail-service)
 
-Сервис предназначен для формирования, хранения и обработки email сообщений. 
+Сервис предназначен для формирования, хранения и обработки email сообщений.
 
 ## Содержание
 - [Введение](#Введение)
