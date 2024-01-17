@@ -6,7 +6,6 @@ import io.rsocket.plugins.RSocketInterceptor
 import org.slf4j.LoggerFactory
 import reactor.core.publisher.Mono
 
-
 class RsocketServerLoggingInterceptor : RSocketInterceptor, RsocketPayloadDeserializer {
     private val log = LoggerFactory.getLogger(this.javaClass)
 

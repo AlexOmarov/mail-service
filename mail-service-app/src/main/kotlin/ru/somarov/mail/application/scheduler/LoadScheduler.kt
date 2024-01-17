@@ -46,7 +46,6 @@ import ru.somarov.mail.presentation.rsocket.request.CreateMailRequest as CreateM
 import ru.somarov.mail.presentation.rsocket.response.MailResponse as MailResponseRsocket
 import ru.somarov.mail.presentation.rsocket.response.standard.StandardResponse as StandardResponseRsocket
 
-
 @Component
 @ConditionalOnExpression("\${contour.scheduling.load.enabled} and \${contour.scheduling.enabled}")
 private class LoadScheduler(
@@ -79,6 +78,7 @@ private class LoadScheduler(
         lockAtMostFor = "\${contour.scheduling.load.lock-max-duration}"
     )
     @Scheduled(fixedDelayString = "\${contour.scheduling.load.delay}", zone = "UTC")
+    @Suppress("TooGenericExceptionCaught") // Have to catch each exception
     fun launch() {
         try {
             runBlocking {
