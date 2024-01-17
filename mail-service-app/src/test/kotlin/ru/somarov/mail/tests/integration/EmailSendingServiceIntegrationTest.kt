@@ -22,6 +22,10 @@ private class EmailSendingServiceIntegrationTest : BaseIntegrationTest() {
     @Autowired
     lateinit var repository: MailRepo
 
+    override fun beforeEach() {
+        println("before each")
+    }
+
     @Test
     fun `When emails are sent then email status changes to SENT`() {
         generateMails()

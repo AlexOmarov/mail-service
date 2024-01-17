@@ -32,6 +32,10 @@ private class EmailSendingSchedulerTests : BaseIntegrationTest() {
     @Autowired
     lateinit var mailRepo: MailRepo
 
+    override fun beforeEach() {
+        println("before each")
+    }
+
     @Test
     fun `When scheduler starts it calls email service for sendNewEmails method`() {
         runBlocking {

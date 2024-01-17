@@ -52,7 +52,7 @@ import java.util.Properties
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class BaseIntegrationTest {
+abstract class BaseIntegrationTest {
 
     init {
         // Still doesn't add header to request with this, fix is needed
@@ -101,6 +101,7 @@ class BaseIntegrationTest {
 
         doReturn(message).whenever(emailSenderImpl).createMimeMessage()
         doNothing().whenever(emailSenderImpl).send(anyVararg<MimeMessage>())
+        beforeEach()
     }
 
     @AfterEach
@@ -113,6 +114,8 @@ class BaseIntegrationTest {
         dbClient.sql { "TRUNCATE mail CASCADE" }.then().block()
         reset(emailSenderImpl)
     }
+
+    abstract fun beforeEach()
 
     // Remove when https://github.com/spring-projects/spring-framework/issues/31713 will be fixed
     @Suppress("ThrowsCount")

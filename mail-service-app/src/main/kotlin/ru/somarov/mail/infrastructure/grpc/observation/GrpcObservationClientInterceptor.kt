@@ -33,9 +33,7 @@ class GrpcObservationClientInterceptor(private val registry: ObservationRegistry
                         }
 
                         override fun onClose(status: Status?, trailers: Metadata?) {
-                            log.warn("!!! $status, $trailers")
                             observation.scoped {
-                                log.warn("!!! INSIDE")
                                 super.onClose(status, trailers)
                             }
                         }

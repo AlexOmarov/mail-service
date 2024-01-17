@@ -15,6 +15,10 @@ private class MailRegistrationServiceIntegrationTest : BaseIntegrationTest() {
     @Autowired
     lateinit var mailRepo: MailRepo
 
+    override fun beforeEach() {
+        println("before each")
+    }
+
     @Test
     fun `When registerMail method is called then mail is saved with valid text`() {
 

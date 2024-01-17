@@ -4,9 +4,12 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.reset
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verifyBlocking
+import org.mockito.kotlin.whenever
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.TestPropertySource
 import ru.somarov.mail.application.service.MailService
@@ -22,8 +25,14 @@ private class MailRegistrationIntegrationTest : BaseIntegrationTest() {
     @SpyBean
     lateinit var service: MailService
 
-    @SpyBean
+    @MockBean
     lateinit var mailRepo: MailRepo
+
+    override fun beforeEach() {
+        runBlocking {
+            doAnswer { it.arguments[0] }.whenever(mailRepo).save(any())
+        }
+    }
 
     override fun cleanAfterEach() {
         super.cleanAfterEach()

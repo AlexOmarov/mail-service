@@ -70,7 +70,6 @@ hessian = { group = "com.caucho", name = "hessian", version.ref = "hessian" }
 postgresql = { group = "org.postgresql", name = "postgresql", version = "" }
 protobuf-kotlin = { group = "com.google.protobuf", name = "protobuf-kotlin", version.ref = "protobuf-kotlin" }
 r2dbc-postgresql = { group = "org.postgresql", name = "r2dbc-postgresql", version.ref = "r2dbc-postgresql" }
-r2dbc-proxy = { group = "io.r2dbc", name = "r2dbc-proxy", version = "" }
 reactor-test = { group = "io.projectreactor", name = "reactor-test", version = "" }
 shedlock-provider-r2dbc = { group = "net.javacrumbs.shedlock", name = "shedlock-provider-r2dbc", version.ref = "shedlock" }
 shedlock-spring = { group = "net.javacrumbs.shedlock", name = "shedlock-spring", version.ref = "shedlock" }
@@ -101,7 +100,7 @@ rsocket-micrometer = { module = "io.rsocket:rsocket-micrometer", version.ref = "
 [bundles]
 reactive-service-base = ["rsocket-micrometer", "otel-zipkin", "logstash-logback-encoder", "spring-boot-starter-webflux", "spring-boot-starter-security", "spring-boot-starter-validation", "spring-boot-starter-cache", "spring-boot-starter-actuator", "spring-boot-starter-aop", "kotlin-coroutines-core", "kotlin-coroutines-reactive", "kotlin-coroutines-reactor", "kotlin-extensions", "kotlin-jackson", "jackson-databind", "jackson-core", "jackson-annotations", "micrometer", "micrometer-registry-prometheus", "micrometer-reactor", "micrometer-tracing", "micrometer-tracing-otel", "micrometer-context-propagation", "janino", "spring-boot-starter-rsocket", "hessian", "spring-security-rsocket", "spring-boot-starter-data-redis-reactive", "kafka", "spring-starter-kafka"]
 reactive-service-test = ["junit-api", "junit-engine", "testcontainers-junit", "testcontainers-redis", "testcontainers-kafka", "testcontainers-postgres", "mockito", "mockk", "reactor-test", "awaitility", "spring-starter-test"]
-database-postgresql = ["spring-boot-starter-data-r2dbc", "r2dbc-postgresql", "r2dbc-proxy", "flyway-core", "postgresql"]
+database-postgresql = ["spring-boot-starter-data-r2dbc", "r2dbc-postgresql", "flyway-core", "postgresql"]
 grpc-client = ["grpc-client-spring-boot-starter", "grpc-kotlin-stub", "protobuf-kotlin"]
 grpc-server = ["grpc-spring-boot-starter", "grpc-kotlin-stub"]
 shedlock = ["shedlock-spring", "shedlock-provider-r2dbc"]
