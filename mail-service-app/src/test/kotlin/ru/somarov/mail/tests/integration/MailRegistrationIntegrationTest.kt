@@ -99,6 +99,6 @@ private class MailRegistrationIntegrationTest : BaseIntegrationTest() {
         val encodedAuth = Base64.getEncoder().encode(auth.encodeToByteArray())
         val authHeader = "Basic " + String(encodedAuth)
         val metadata = Metadata().also { it.put(SecurityConstants.AUTHORIZATION_HEADER, authHeader) }
-        return currentServiceClient.createMail(request, metadata)
+        return grpcClient.currentServiceClient.createMail(request, metadata)
     }
 }

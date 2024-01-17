@@ -6,7 +6,6 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import jakarta.mail.Session
 import jakarta.mail.internet.MimeMessage
-import net.devh.boot.grpc.client.inject.GrpcClient
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -40,8 +39,8 @@ import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
 import reactor.core.publisher.Hooks
 import ru.somarov.mail.infrastructure.config.ServiceProps
-import ru.somarov.mail.presentation.grpc.MailServiceGrpcKt
 import ru.somarov.mail.presentation.kafka.consumers.CreateMailCommandConsumerWithRetrySupport
+import ru.somarov.mail.util.TestGrpcClient
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.time.Duration
@@ -70,8 +69,8 @@ class BaseIntegrationTest {
     @MockBean
     lateinit var emailSenderImpl: JavaMailSenderImpl
 
-    @GrpcClient("mail-service")
-    lateinit var currentServiceClient: MailServiceGrpcKt.MailServiceCoroutineStub
+    @Autowired
+    lateinit var grpcClient: TestGrpcClient
 
     @SpyBean
     lateinit var createMailConsumer: CreateMailCommandConsumerWithRetrySupport
