@@ -62,6 +62,7 @@ class GrpcExceptionClientInterceptor(private val mapper: ObjectMapper, private v
 
     private fun extractException(status: Status, trailers: Metadata): TechnicalException {
         val statusException = status.asException(trailers)
+        log.warn("Extracted exception from grpc status: $statusException")
         val extractedException = statusException.toTechnicalException(mapper, log)
         return (extractedException ?: TechnicalException(
             systemMessage = BASE_TECHNICAL_EXCEPTION.message,

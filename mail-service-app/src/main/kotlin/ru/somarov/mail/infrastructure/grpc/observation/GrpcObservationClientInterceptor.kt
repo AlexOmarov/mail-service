@@ -11,8 +11,10 @@ import io.grpc.MethodDescriptor
 import io.grpc.Status
 import io.micrometer.observation.Observation
 import io.micrometer.observation.ObservationRegistry
+import org.slf4j.LoggerFactory
 
 class GrpcObservationClientInterceptor(private val registry: ObservationRegistry) : ClientInterceptor {
+    private val log = LoggerFactory.getLogger(this.javaClass)
     override fun <ReqT : Any, RespT : Any> interceptCall(
         method: MethodDescriptor<ReqT, RespT>,
         callOptions: CallOptions?,
@@ -31,7 +33,11 @@ class GrpcObservationClientInterceptor(private val registry: ObservationRegistry
                         }
 
                         override fun onClose(status: Status?, trailers: Metadata?) {
-                            observation.scoped { super.onClose(status, trailers) }
+                            log.warn("!!! $status, $trailers")
+                            observation.scoped {
+                                log.warn("!!! INSIDE")
+                                super.onClose(status, trailers)
+                            }
                         }
                     }
 
