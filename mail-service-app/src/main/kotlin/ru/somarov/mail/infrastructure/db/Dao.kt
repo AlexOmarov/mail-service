@@ -38,7 +38,10 @@ class Dao(
     }
 
     suspend fun createMail(email: String, text: String): Mail {
-        return mailRepo.save(createMailEntity(email, text))
+        log.info("!!!!!")
+        val result = mailRepo.save(createMailEntity(email, text))
+        log.info("2 !!!!!")
+        return result
     }
 
     fun findAllByMailStatusIdAndCreationDateAfter(
