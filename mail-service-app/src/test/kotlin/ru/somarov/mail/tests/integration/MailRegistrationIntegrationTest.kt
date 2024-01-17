@@ -1,8 +1,6 @@
 package ru.somarov.mail.tests.integration
 
-import io.grpc.Metadata
 import kotlinx.coroutines.runBlocking
-import net.devh.boot.grpc.common.security.SecurityConstants
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
@@ -17,9 +15,7 @@ import ru.somarov.mail.infrastructure.db.entity.Mail
 import ru.somarov.mail.infrastructure.db.entity.MailStatus
 import ru.somarov.mail.infrastructure.db.repo.MailRepo
 import ru.somarov.mail.presentation.grpc.CreateMailRequest
-import ru.somarov.mail.presentation.grpc.MailResponse
 import ru.somarov.mail.util.DefaultEntitiesGenerator.createCreateMailRequest
-import java.util.Base64
 
 @TestPropertySource(properties = ["contour.scheduling.enabled = false"])
 private class MailRegistrationIntegrationTest : BaseIntegrationTest() {
@@ -39,7 +35,11 @@ private class MailRegistrationIntegrationTest : BaseIntegrationTest() {
         val captor = argumentCaptor<Mail>()
 
         runBlocking {
-            createMail(CreateMailRequest.newBuilder().build())
+            grpcClient.createMail(
+                CreateMailRequest.newBuilder().build(),
+                props.contour.auth.user,
+                props.contour.auth.password
+            )
         }
 
         verifyBlocking(mailRepo, times(1)) {
@@ -53,8 +53,10 @@ private class MailRegistrationIntegrationTest : BaseIntegrationTest() {
     @Test
     fun `When register mail request comes then call service to process new mail`() {
         runBlocking {
-            createMail(
-                createCreateMailRequest()
+            grpcClient.createMail(
+                createCreateMailRequest(),
+                props.contour.auth.user,
+                props.contour.auth.password
             )
         }
         verifyBlocking(service, times(1)) {
@@ -65,8 +67,10 @@ private class MailRegistrationIntegrationTest : BaseIntegrationTest() {
     @Test
     fun `When mail service gets mail registration request it calls db to save mail`() {
         runBlocking {
-            createMail(
-                createCreateMailRequest()
+            grpcClient.createMail(
+                createCreateMailRequest(),
+                props.contour.auth.user,
+                props.contour.auth.password
             )
         }
         verifyBlocking(mailRepo, times(1)) {
@@ -80,8 +84,10 @@ private class MailRegistrationIntegrationTest : BaseIntegrationTest() {
         val captor = argumentCaptor<Mail>()
 
         runBlocking {
-            createMail(
-                createCreateMailRequest(email = email)
+            grpcClient.createMail(
+                createCreateMailRequest(email = email),
+                props.contour.auth.user,
+                props.contour.auth.password
             )
         }
         verifyBlocking(mailRepo, times(1)) {
@@ -92,13 +98,5 @@ private class MailRegistrationIntegrationTest : BaseIntegrationTest() {
         assert(entityToSave.mailStatusId == MailStatus.Companion.MailStatusCode.NEW.id)
         assert(entityToSave.new)
         assert(entityToSave.clientEmail == email)
-    }
-
-    private suspend fun createMail(request: CreateMailRequest): MailResponse {
-        val auth = props.contour.auth.user + ":" + props.contour.auth.password
-        val encodedAuth = Base64.getEncoder().encode(auth.encodeToByteArray())
-        val authHeader = "Basic " + String(encodedAuth)
-        val metadata = Metadata().also { it.put(SecurityConstants.AUTHORIZATION_HEADER, authHeader) }
-        return grpcClient.currentServiceClient.createMail(request, metadata)
     }
 }

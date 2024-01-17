@@ -52,7 +52,6 @@ import java.util.Properties
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Suppress("kotlin:S1135") // Should fix it soon
 class BaseIntegrationTest {
 
     init {
