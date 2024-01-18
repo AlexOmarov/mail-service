@@ -29,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.mail.javamail.JavaMailSenderImpl
+import org.springframework.messaging.rsocket.RSocketRequester
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
@@ -81,6 +82,9 @@ abstract class BaseIntegrationTest {
 
     @SpyBean
     lateinit var createMailConsumer: CreateMailCommandConsumerWithRetrySupport
+
+    @SpyBean
+    lateinit var requester: RSocketRequester
 
     @BeforeAll
     fun setUp() {

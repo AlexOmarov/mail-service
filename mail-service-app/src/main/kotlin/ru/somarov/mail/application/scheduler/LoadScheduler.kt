@@ -43,8 +43,8 @@ import ru.somarov.mail.presentation.http.request.CreateMailRequest as CreateMail
 import ru.somarov.mail.presentation.http.response.MailResponse as MailResponseHttp
 import ru.somarov.mail.presentation.http.response.standard.StandardResponse as StandardResponseHttp
 import ru.somarov.mail.presentation.rsocket.request.CreateMailRequest as CreateMailRequestRsocket
-import ru.somarov.mail.presentation.rsocket.response.MailResponse as MailResponseRsocket
-import ru.somarov.mail.presentation.rsocket.response.standard.StandardResponse as StandardResponseRsocket
+import ru.somarov.mail.presentation.rsocket.response.MailRsocketResponse as MailResponseRsocket
+import ru.somarov.mail.presentation.rsocket.response.standard.StandardRsocketResponse as StandardResponseRsocket
 
 @Component
 @ConditionalOnExpression("\${contour.scheduling.load.enabled} and \${contour.scheduling.enabled}")

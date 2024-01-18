@@ -1,5 +1,5 @@
 package ru.somarov.mail.presentation.rsocket.response.standard
 
-enum class ResultCode {
+enum class RsocketResultCode {
     OK, FAILED
 }
