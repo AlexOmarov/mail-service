@@ -1,5 +1,6 @@
 package ru.somarov.mail.base
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.redis.testcontainers.RedisContainer
 import io.mockk.every
 import io.mockk.mockkStatic
@@ -32,6 +33,7 @@ import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.util.ReflectionUtils
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.PostgreSQLContainer
@@ -61,6 +63,12 @@ abstract class BaseIntegrationTest {
 
     @Autowired
     lateinit var dbClient: DatabaseClient
+
+    @Autowired
+    lateinit var mapper: ObjectMapper
+
+    @Autowired
+    lateinit var webClient: WebTestClient
 
     @Autowired
     lateinit var props: ServiceProps
@@ -160,8 +168,8 @@ abstract class BaseIntegrationTest {
         init {
             System.setProperty("kafka.brokers", kafka.bootstrapServers)
 
-            System.setProperty("spring.redis.host", redis.host)
-            System.setProperty("spring.redis.port", redis.firstMappedPort.toString())
+            System.setProperty("contour.cache.host", redis.host)
+            System.setProperty("contour.cache.port", redis.firstMappedPort.toString())
 
             System.setProperty("spring.flyway.url", postgresql.jdbcUrl)
             System.setProperty("spring.flyway.user", postgresql.username)

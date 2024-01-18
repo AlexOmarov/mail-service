@@ -29,7 +29,7 @@ class Dao(
         log.info("Got $cachedMail from redis")
         val result = if (cachedMail == null) {
             val mail = mailRepo.findById(id) ?: throw IllegalArgumentException("Got id $id which doesn't exist")
-            template.opsForSet().add("mails:$id", mail).awaitSingle()
+            ops.add("mails:$id", mail).awaitSingle()
             mail
         } else {
             cachedMail
@@ -37,6 +37,7 @@ class Dao(
         return result
     }
 
+    // Should put mail in cache here
     suspend fun createMail(email: String, text: String): Mail {
         return mailRepo.save(createMailEntity(email, text))
     }
@@ -49,6 +50,7 @@ class Dao(
         return mailRepo.findAllByMailStatusIdAndCreationDateAfter(mailStatusId, creationDate, page)
     }
 
+    // Should refresh mail in cache here
     fun updateMails(mails: List<Mail>): Flow<Mail> {
         return mailRepo.saveAll(mails.map { it.also { it.lastUpdateDate = OffsetDateTime.now(); it.new = false } })
     }

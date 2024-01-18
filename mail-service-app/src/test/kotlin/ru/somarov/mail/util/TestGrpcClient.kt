@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 import ru.somarov.mail.presentation.grpc.CreateMailRequest
 import ru.somarov.mail.presentation.grpc.MailResponse
 import ru.somarov.mail.presentation.grpc.MailServiceGrpcKt
-import java.util.Base64
+import ru.somarov.mail.util.BasicAuthCreator.createBasicAuthString
 
 @Service
 class TestGrpcClient {
@@ -15,9 +15,7 @@ class TestGrpcClient {
     lateinit var currentServiceClient: MailServiceGrpcKt.MailServiceCoroutineStub
 
     suspend fun createMail(request: CreateMailRequest, user: String, password: String): MailResponse {
-        val auth = "$user:$password"
-        val encodedAuth = Base64.getEncoder().encode(auth.encodeToByteArray())
-        val authHeader = "Basic " + String(encodedAuth)
+        val authHeader = createBasicAuthString(user, password)
         val metadata = Metadata().also { it.put(SecurityConstants.AUTHORIZATION_HEADER, authHeader) }
         return currentServiceClient.createMail(request, metadata)
     }
