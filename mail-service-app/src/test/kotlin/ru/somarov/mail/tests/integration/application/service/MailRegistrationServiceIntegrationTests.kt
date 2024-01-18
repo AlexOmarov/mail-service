@@ -1,4 +1,4 @@
-package ru.somarov.mail.tests.integration
+package ru.somarov.mail.tests.integration.application.service
 
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test

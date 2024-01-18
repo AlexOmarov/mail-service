@@ -1,11 +1,15 @@
-package ru.somarov.mail.tests.integration
+package ru.somarov.mail.tests.integration.application.service
 
+import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verifyBlocking
 import org.springframework.beans.factory.annotation.Autowired
-import ru.somarov.mail.application.service.EmailService
+import ru.somarov.mail.application.service.EmailSenderService
 import ru.somarov.mail.base.BaseIntegrationTest
 import ru.somarov.mail.infrastructure.db.entity.Mail
 import ru.somarov.mail.infrastructure.db.entity.MailChannel
@@ -17,7 +21,7 @@ import java.util.UUID
 private class EmailSendingServiceIntegrationTest : BaseIntegrationTest() {
 
     @Autowired
-    lateinit var service: EmailService
+    lateinit var service: EmailSenderService
 
     @Autowired
     lateinit var repository: MailRepo
@@ -36,6 +40,12 @@ private class EmailSendingServiceIntegrationTest : BaseIntegrationTest() {
         }
 
         assert(kk.size == MAILS_AMOUNT)
+
+        verifyBlocking(emailSenderImpl, times(1)) {
+            // anyVararg doesn't work with kotlin for some reason, had to do it with captor
+            // Probably relates to https://github.com/mockito/mockito-kotlin/issues/474
+            send(*argumentCaptor<Array<MimeMessage>>().capture())
+        }
     }
 
     private fun generateMails() = runBlocking {

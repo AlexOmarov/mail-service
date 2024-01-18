@@ -19,13 +19,13 @@ import ru.somarov.mail.presentation.kafka.event.broadcast.dto.MailStatus
 import java.time.OffsetDateTime
 
 @Service
-class EmailService(
+class EmailSenderService(
     private val props: ServiceProps,
     private val dao: Dao,
     private val kafkaProducerFacade: KafkaProducerFacade,
     private val emailSenderFacade: EmailSenderFacade
 ) {
-    private val log = LoggerFactory.getLogger(EmailService::class.java)
+    private val log = LoggerFactory.getLogger(EmailSenderService::class.java)
     suspend fun sendNewEmails(startDate: OffsetDateTime): Int {
         log.info("Started to get mails with unsent emails starting from $startDate")
 

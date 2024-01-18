@@ -6,13 +6,13 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import ru.somarov.mail.application.service.EmailService
+import ru.somarov.mail.application.service.EmailSenderService
 import ru.somarov.mail.infrastructure.config.ServiceProps
 import java.time.OffsetDateTime
 
 @Component
 @ConditionalOnExpression("\${contour.scheduling.email-sending.enabled} and \${contour.scheduling.enabled}")
-private class EmailSendingScheduler(private val service: EmailService, private val props: ServiceProps) {
+private class EmailSendingScheduler(private val service: EmailSenderService, private val props: ServiceProps) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     @SchedulerLock(

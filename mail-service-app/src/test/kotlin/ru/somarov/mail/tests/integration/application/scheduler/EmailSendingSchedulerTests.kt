@@ -1,4 +1,4 @@
-package ru.somarov.mail.tests.integration
+package ru.somarov.mail.tests.integration.application.scheduler
 
 import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.flow.toList
@@ -10,7 +10,7 @@ import org.mockito.kotlin.verifyBlocking
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.TestPropertySource
-import ru.somarov.mail.application.service.EmailService
+import ru.somarov.mail.application.service.EmailSenderService
 import ru.somarov.mail.base.BaseIntegrationTest
 import ru.somarov.mail.infrastructure.db.entity.Mail
 import ru.somarov.mail.infrastructure.db.entity.MailChannel
@@ -27,7 +27,7 @@ import java.util.UUID
 )
 private class EmailSendingSchedulerTests : BaseIntegrationTest() {
     @SpyBean
-    lateinit var service: EmailService
+    lateinit var service: EmailSenderService
 
     @Autowired
     lateinit var mailRepo: MailRepo
