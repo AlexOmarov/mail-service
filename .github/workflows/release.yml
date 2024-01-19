@@ -62,9 +62,9 @@ jobs:
           # Use the version extracted from the release tag
           new_version=$VERSION
           # Update the version in the Gradle build file
-          sed -i "s/version '$current_version'/version '$new_version'/" gradle.properties
+          sed -i "s/version=$current_version/version=$new_version/" gradle.properties
           # Set the new version as an environment variable for subsequent steps
-          echo "NEW_VERSION=$new_version" >> $GITHUB_ENV
+          echo "PREVIOUS_VERSION=current_version" >> $GITHUB_ENV
         shell: bash
 
       - name: Review Changes
