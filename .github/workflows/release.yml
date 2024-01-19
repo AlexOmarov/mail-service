@@ -78,7 +78,7 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add gradle.properties
-          git commit -m "Increase version to $NEW_VERSION"
+          git commit -m "Increase version to $VERSION"
           git push origin master
 
       - name: Log in to Docker Hub
