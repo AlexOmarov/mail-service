@@ -81,10 +81,10 @@ class KafkaTests : BaseIntegrationTest() {
     }
 
     @Test
-    fun `When consumer`() {
-        val kk = createReceiver(MailBroadcastDeserializer(mapper), props.kafka.mailBroadcastTopic)
+    fun `When create mail command comes then mail broadcast event is sent after saving mail`() {
+        val receiver = createReceiver(MailBroadcastDeserializer(mapper), props.kafka.mailBroadcastTopic)
         val recordList = mutableListOf<ConsumerRecord<String, MailBroadcast?>>()
-        kk.receiveAutoAck().concatMap { records ->
+        receiver.receiveAutoAck().concatMap { records ->
             records.map { record ->
                 log.info("Got $record with value ${record.value()}")
                 recordList.add(record)
@@ -120,7 +120,9 @@ class KafkaTests : BaseIntegrationTest() {
                 .asFlow()
                 .first()
         }
-        assert(true)
+        Awaitility.await().atMost(Duration.ofSeconds(WAIT_TIMEOUT_FOR_KAFKA_MESSAGE_PROCESSING_SECONDS))
+            .until { recordList.size == 1 }
+        assert(recordList.size == 1)
     }
 
     private fun <T> createReceiver(
