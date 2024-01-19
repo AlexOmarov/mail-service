@@ -56,7 +56,7 @@ jobs:
           current_version=$(grep -oP "version '\K[0-9.]+" gradle.properties)
           
           # Use the version extracted from the release tag
-          new_version=${{ steps.version.outputs.VERSION }}
+          new_version=$VERSION
           
           # Update the version in the Gradle build file
           sed -i "s/version '$current_version'/version '$new_version'/" gradle.properties
