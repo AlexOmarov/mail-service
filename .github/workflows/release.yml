@@ -52,6 +52,7 @@ jobs:
 
       - name: Increase version
         run: |
+          echo "zero"
           # Read the current version from the Gradle properties file using grep -o (print only matched part) and -P (regex enabled)
           current_version=$(grep -oP "version '\K[0-9.]+" gradle.properties)
           echo "first"
