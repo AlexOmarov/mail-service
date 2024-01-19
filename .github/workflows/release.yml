@@ -50,7 +50,6 @@ jobs:
           echo "VERSION=${version}" >> $GITHUB_ENV
         shell: bash
 
-
       - name: Increase version
         run: |
           # Read the current version from the Gradle properties file using grep -o (print only matched part) and -P (regex enabled)
