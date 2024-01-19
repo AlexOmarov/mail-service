@@ -67,7 +67,7 @@ class KafkaTestConfig(private val props: ServiceProps) {
         val producerProps: MutableMap<String, Any> = HashMap()
         producerProps[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = props.kafka.brokers
         producerProps[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
-        producerProps[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
+        producerProps[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = serializer::class.java
 
         return KafkaSender.create(
             SenderOptions.create<String, T>(producerProps)

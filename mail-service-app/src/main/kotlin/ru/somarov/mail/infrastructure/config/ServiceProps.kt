@@ -85,7 +85,8 @@ data class ServiceProps(
     data class AuthProps(
         val user: String,
         val roles: List<String>,
-        val password: String
+        val password: String,
+        val exclusions: List<String>,
     )
 
     data class CacheProps(

@@ -8,6 +8,12 @@ services:
     #   context: .
     image: decentboat/mail-service:latest
     container_name: service
+    healthcheck:
+      test: "curl --fail --silent localhost:8080/actuator/health | grep UP || exit 1"
+      interval: 5s
+      timeout: 2s
+      retries: 2
+      start_period: 40s
     depends_on:
       - db
       - kafka

@@ -22,7 +22,7 @@ private class SecurityConfig(private val props: ServiceProps) {
         return http
             .authorizeExchange {
                 it
-                    .pathMatchers("/webjars/**", "v3/api-docs/**").permitAll()
+                    .pathMatchers(*props.contour.auth.exclusions.toTypedArray()).permitAll()
                     .anyExchange().authenticated()
             }
             .csrf { it.disable() }

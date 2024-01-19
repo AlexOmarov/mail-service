@@ -20,6 +20,10 @@ contour:
   auth:
     user: user
     password: password
+    exclusions:
+      - /webjars/**
+      - /actuator/**
+      - /v3/api-docs/**
     roles:
       - USER
   rsocket:
