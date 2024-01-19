@@ -37,8 +37,45 @@ jobs:
         with:
           gradle-version: 8.5
 
+      - name: Extract version from release tag
+        id: version
+        run: |
+          # Get the tag name from the event payload
+          tag_name=$(echo $GITHUB_REF | sed 's/refs\/tags\///')
+
+          # Remove the 'v' prefix if present
+          version=${tag_name#v}
+
+          # Set the version as an output variable
+          echo "VERSION=${version}" >> $GITHUB_ENV
+        shell: bash
+
+
+      - name: Increase version
+        run: |
+          # Read the current version from the Gradle properties file using grep -o (print only matched part) and -P (regex enabled)
+          current_version=$(grep -oP "version '\K[0-9.]+" gradle.properties)
+          
+          # Use the version extracted from the release tag
+          new_version=${{ steps.version.outputs.VERSION }}
+          
+          # Update the version in the Gradle build file
+          sed -i "s/version '$current_version'/version '$new_version'/" gradle.properties
+          
+          # Set the new version as an environment variable for subsequent steps
+          echo "NEW_VERSION=$new_version" >> $GITHUB_ENV
+        shell: bash
+
       - name: Build
         run: ./gradlew build -x test installBootDist
+
+      - name: Commit and push version change
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add gradle.properties
+          git commit -m "Increase version to $NEW_VERSION"
+          git push origin HEAD:main
 
       - name: Log in to Docker Hub
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9

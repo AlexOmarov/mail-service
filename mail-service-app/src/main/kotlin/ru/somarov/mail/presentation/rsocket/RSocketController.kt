@@ -1,10 +1,14 @@
 package ru.somarov.mail.presentation.rsocket
 
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.messaging.handler.annotation.DestinationVariable
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Controller
+import reactor.core.publisher.Mono
 import ru.somarov.mail.application.service.MailService
 import ru.somarov.mail.presentation.rsocket.request.CreateMailRequest
 import ru.somarov.mail.presentation.rsocket.response.MailRsocketDto
@@ -35,6 +39,14 @@ class RSocketController(val service: MailService) {
         return StandardRsocketResponse(
             MailRsocketResponse(MailRsocketDto(mail.uuid, mail.text)),
             RsocketResponseMetadata(RsocketResultCode.OK, "")
+        )
+    }
+
+    @MessageExceptionHandler
+    fun exception(exception: Exception): Mono<ResponseEntity<String>> {
+        return Mono.just(
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(exception.message)
         )
     }
 }

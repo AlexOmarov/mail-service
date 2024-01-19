@@ -3,8 +3,10 @@ version: '3.9'
 services:
   # Our mail service
   service:
-    build:
-      context: .
+    # Uncomment to use prebuilt srcs instead of image
+    # build:
+    #   context: .
+    image: decentboat/mail-service:latest
     container_name: service
     depends_on:
       - db

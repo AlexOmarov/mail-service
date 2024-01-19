@@ -56,6 +56,7 @@ private class LoadScheduler(
 ) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private lateinit var sender: KafkaSender<String, CreateMailCommand>
+    private lateinit var poisonPillSender: KafkaSender<String, String>
 
     @GrpcClient("mail-service")
     lateinit var grpcClient: MailServiceGrpcKt.MailServiceCoroutineStub
@@ -69,6 +70,12 @@ private class LoadScheduler(
         sender = KafkaSender.create(
             SenderOptions.create<String, CreateMailCommand>(producerProps)
                 .withValueSerializer(CreateMailCommandSerializer(objectMapper))
+                .maxInFlight(props.kafka.sender.maxInFlight)
+        )
+
+        poisonPillSender = KafkaSender.create(
+            SenderOptions.create<String, String>(producerProps)
+                .withValueSerializer { _, data -> objectMapper.writeValueAsBytes(data) }
                 .maxInFlight(props.kafka.sender.maxInFlight)
         )
     }
@@ -93,6 +100,9 @@ private class LoadScheduler(
                 val kafkaCreateMailResponse = createMailUsingKafka()
                 logger.info("Kafka create mail response: $kafkaCreateMailResponse")
 
+                val kafkaPoisonPillResponse = sendPoisonPillUsingKafka()
+                logger.info("Kafka poison pill response: $kafkaPoisonPillResponse")
+
                 val grpcCreateMailResponse = createMailUsingGrpc()
                 logger.info("Grpc create mail response: $grpcCreateMailResponse")
 
@@ -107,6 +117,15 @@ private class LoadScheduler(
         } catch (e: Exception) {
             logger.error("Got exception while processing Load scheduler: $e")
         }
+    }
+
+    private suspend fun sendPoisonPillUsingKafka(): SenderResult<String> {
+        return producerFacade.sendMessage(
+            "Poison pill",
+            MessageMetadata(OffsetDateTime.now(), "key", 0),
+            props.kafka.createMailCommandTopic,
+            poisonPillSender
+        )
     }
 
     private suspend fun getMailUsingGrpc(id: UUID): MailResponseGrpc {
@@ -125,7 +144,6 @@ private class LoadScheduler(
     private suspend fun createMailUsingKafka(): SenderResult<CreateMailCommand> {
         return producerFacade.sendMessage(
             CreateMailCommand("email", "text"),
-            CreateMailCommand::class,
             MessageMetadata(OffsetDateTime.now(), "key", 0),
             props.kafka.createMailCommandTopic,
             sender

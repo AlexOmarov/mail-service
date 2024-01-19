@@ -4,9 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.micrometer.tracing.Tracer
 import io.opentelemetry.api.trace.SpanId
 import io.opentelemetry.api.trace.TraceId
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.reactive.asFlow
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -33,9 +30,7 @@ import ru.somarov.mail.presentation.kafka.RetryMessage
 import ru.somarov.mail.presentation.kafka.event.CommonEvent
 import ru.somarov.mail.presentation.kafka.event.broadcast.MailBroadcast
 import java.time.OffsetDateTime
-import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.random.Random
-import kotlin.reflect.KClass
 
 @Component
 class KafkaProducerFacade(
@@ -54,14 +49,13 @@ class KafkaProducerFacade(
         metadata: MessageMetadata,
         topic: String
     ): SenderResult<MailBroadcast> {
-        return sendMessage(event, event::class, metadata, props.kafka.mailBroadcastTopic, mailSender)
+        return sendMessage(event, metadata, props.kafka.mailBroadcastTopic, mailSender)
     }
 
-    @Suppress("UNCHECKED_CAST")
     suspend fun <T : CommonEvent> sendRetry(
         event: T,
         metadata: MessageMetadata
-    ): SenderResult<RetryMessage<T>> {
+    ): SenderResult<RetryMessage<out CommonEvent>> {
         val message = RetryMessage(
             payload = event,
             key = metadata.key,
@@ -69,18 +63,16 @@ class KafkaProducerFacade(
         )
         return sendMessage(
             message,
-            message::class,
             MessageMetadata(OffsetDateTime.now(), "retry_${metadata.key}", 0),
             props.kafka.retryTopic,
             retrySender
-        ) as SenderResult<RetryMessage<T>>
+        )
     }
 
-    @Suppress("UNCHECKED_CAST")
     suspend fun <T : CommonEvent> sendDlq(
         event: T,
         metadata: MessageMetadata
-    ): SenderResult<DlqMessage<T>> {
+    ): SenderResult<DlqMessage<out CommonEvent>> {
         val message = DlqMessage(
             payload = event,
             key = metadata.key,
@@ -88,16 +80,14 @@ class KafkaProducerFacade(
         )
         return sendMessage(
             message,
-            message::class,
             MessageMetadata(OffsetDateTime.now(), "dlq_${metadata.key}", 0),
             props.kafka.dlqTopic,
             dlqSender
-        ) as SenderResult<DlqMessage<T>>
+        )
     }
 
     suspend fun <T : Any> sendMessage(
         message: T,
-        clazz: KClass<out T>,
         metadata: MessageMetadata,
         topic: String,
         sender: KafkaSender<String, T>
@@ -107,7 +97,7 @@ class KafkaProducerFacade(
         val traceParent = getTraceParentHeader()
         val headers = mutableListOf<Header>(
             RecordHeader(TRACE_HEADER_KEY, traceParent.toByteArray()),
-            RecordHeader(PAYLOAD_TYPE_HEADER_NAME, (clazz.qualifiedName ?: "").toByteArray())
+            RecordHeader(PAYLOAD_TYPE_HEADER_NAME, (message::class.qualifiedName ?: "").toByteArray())
         )
 
         val record = ProducerRecord(
@@ -119,13 +109,10 @@ class KafkaProducerFacade(
             /* headers = */ headers
         )
 
-        val result =
-            CoroutineScope(SupervisorJob()).async(EmptyCoroutineContext) {
-                sender.send(Flux.just(SenderRecord.create(record, message)))
-                    .doOnError { e -> log.error("Send failed", e) }
-                    .asFlow()
-                    .first()
-            }.await()
+        val result = sender.send(Flux.just(SenderRecord.create(record, message)))
+            .doOnError { e -> log.error("Send failed", e) }
+            .asFlow()
+            .first()
 
         log.info(
             "Message has been sent: ${result.correlationMetadata()} " +
