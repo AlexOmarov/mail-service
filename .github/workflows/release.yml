@@ -54,15 +54,16 @@ jobs:
         run: |
           # Read the current version from the Gradle properties file using grep -o (print only matched part) and -P (regex enabled)
           current_version=$(grep -oP "version '\K[0-9.]+" gradle.properties)
-          
+          echo "first"
           # Use the version extracted from the release tag
           new_version=$VERSION
-          
+          echo "second"
           # Update the version in the Gradle build file
           sed -i "s/version '$current_version'/version '$new_version'/" gradle.properties
-          
+          echo "third"
           # Set the new version as an environment variable for subsequent steps
           echo "NEW_VERSION=$new_version" >> $GITHUB_ENV
+          echo "forth"
         shell: bash
 
       - name: Build
