@@ -2,6 +2,11 @@ FROM openjdk:21-jdk-slim
 
 RUN groupadd --system --gid 800 appuser && \
     useradd --system --uid 800 --gid 800 appuser
+
+RUN  apt-get update \
+  && apt-get install -y curl \
+  && apt-get clean
+
 USER appuser
 COPY .build/app/libs/app.jar /app.jar
 EXPOSE 8080 9010 9090 7000

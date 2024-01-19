@@ -120,6 +120,7 @@ class KafkaConsumerLauncherDecorator(
         observation.observe {
             result = if (record.value() == null) {
                 log.warn("Got empty value for record $record")
+                // Would be great to send messages which cannot be serialized to dlq here
                 Mono.just(MessageConsumptionResult(MessageConsumptionResult.MessageConsumptionResultCode.FAILED))
             } else {
                 mono(observationRegistry.asContextElement()) {

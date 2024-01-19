@@ -82,10 +82,17 @@ management:
       enabled: true
     livenessState:
       enabled: true
+    r2dbc:
+      enabled: true
   endpoints:
     web:
       exposure:
         include: health,prometheus,info
+  endpoint:
+    health:
+      group:
+        readiness:
+          include: r2dbc, kafkaReceiversHealth, kafkaClusterHealth, grpcChannel
       show-details: always
       show-components: always
       probes:
