@@ -27,7 +27,6 @@ import ru.somarov.mail.infrastructure.kafka.serde.mailbroadcast.MailBroadcastSer
 import ru.somarov.mail.infrastructure.kafka.serde.retry.RetryMessageSerializer
 import ru.somarov.mail.presentation.kafka.DlqMessage
 import ru.somarov.mail.presentation.kafka.RetryMessage
-import ru.somarov.mail.presentation.kafka.event.CommonEvent
 import ru.somarov.mail.presentation.kafka.event.broadcast.MailBroadcast
 import java.time.OffsetDateTime
 import kotlin.random.Random
@@ -49,13 +48,19 @@ class KafkaProducerFacade(
         metadata: MessageMetadata,
         topic: String
     ): SenderResult<MailBroadcast> {
-        return sendMessage(event, metadata, props.kafka.mailBroadcastTopic, mailSender)
+        return sendMessage(
+            event,
+            event::class.qualifiedName ?: "",
+            metadata,
+            props.kafka.mailBroadcastTopic,
+            mailSender
+        )
     }
 
-    suspend fun <T : CommonEvent> sendRetry(
+    suspend fun <T : Any> sendRetry(
         event: T,
         metadata: MessageMetadata
-    ): SenderResult<RetryMessage<out CommonEvent>> {
+    ): SenderResult<RetryMessage<out Any>> {
         val message = RetryMessage(
             payload = event,
             key = metadata.key,
@@ -63,16 +68,17 @@ class KafkaProducerFacade(
         )
         return sendMessage(
             message,
+            event::class.qualifiedName ?: "",
             MessageMetadata(OffsetDateTime.now(), "retry_${metadata.key}", 0),
             props.kafka.retryTopic,
             retrySender
         )
     }
 
-    suspend fun <T : CommonEvent> sendDlq(
+    suspend fun <T : Any> sendDlq(
         event: T,
         metadata: MessageMetadata
-    ): SenderResult<DlqMessage<out CommonEvent>> {
+    ): SenderResult<DlqMessage<out Any>> {
         val message = DlqMessage(
             payload = event,
             key = metadata.key,
@@ -80,6 +86,7 @@ class KafkaProducerFacade(
         )
         return sendMessage(
             message,
+            event::class.qualifiedName ?: "",
             MessageMetadata(OffsetDateTime.now(), "dlq_${metadata.key}", 0),
             props.kafka.dlqTopic,
             dlqSender
@@ -88,6 +95,7 @@ class KafkaProducerFacade(
 
     suspend fun <T : Any> sendMessage(
         message: T,
+        payloadQualifiedName: String,
         metadata: MessageMetadata,
         topic: String,
         sender: KafkaSender<String, T>
@@ -97,7 +105,7 @@ class KafkaProducerFacade(
         val traceParent = getTraceParentHeader()
         val headers = mutableListOf<Header>(
             RecordHeader(TRACE_HEADER_KEY, traceParent.toByteArray()),
-            RecordHeader(PAYLOAD_TYPE_HEADER_NAME, (message::class.qualifiedName ?: "").toByteArray())
+            RecordHeader(PAYLOAD_TYPE_HEADER_NAME, (payloadQualifiedName).toByteArray())
         )
 
         val record = ProducerRecord(

@@ -6,18 +6,17 @@ import org.apache.kafka.common.serialization.Deserializer
 import org.slf4j.LoggerFactory
 import ru.somarov.mail.infrastructure.kafka.Constants.PAYLOAD_TYPE_HEADER_NAME
 import ru.somarov.mail.presentation.kafka.RetryMessage
-import ru.somarov.mail.presentation.kafka.event.CommonEvent
 import java.nio.charset.Charset
 
-class RetryMessageDeserializer(private val mapper: ObjectMapper) : Deserializer<RetryMessage<CommonEvent>?> {
+class RetryMessageDeserializer(private val mapper: ObjectMapper) : Deserializer<RetryMessage<Any>?> {
     private val log = LoggerFactory.getLogger(RetryMessageDeserializer::class.java)
 
-    override fun deserialize(p0: String, p1: ByteArray): RetryMessage<CommonEvent>? {
+    override fun deserialize(p0: String, p1: ByteArray): RetryMessage<Any>? {
         throw IllegalStateException("Must not call deserialize method on RetryMessageDeserializer")
     }
 
     @Suppress("TooGenericExceptionCaught")
-    override fun deserialize(topic: String, headers: Headers, data: ByteArray): RetryMessage<CommonEvent>? {
+    override fun deserialize(topic: String, headers: Headers, data: ByteArray): RetryMessage<Any>? {
         val payloadType = String(headers.headers(PAYLOAD_TYPE_HEADER_NAME).first().value())
         val clazz = Class.forName(payloadType)
 

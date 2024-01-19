@@ -18,6 +18,7 @@ import java.security.SecureRandom
 private class SecurityConfig(private val props: ServiceProps) {
 
     @Bean
+    @Suppress("SpreadOperator") // Had to do it because this is spring security API
     fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
         return http
             .authorizeExchange {

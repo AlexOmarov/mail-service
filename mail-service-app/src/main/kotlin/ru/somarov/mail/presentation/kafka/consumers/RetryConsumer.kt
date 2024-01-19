@@ -22,10 +22,10 @@ class RetryConsumer(
     private val sender: KafkaProducerFacade,
     private val props: ServiceProps,
     private val consumers: List<AbstractMessageConsumerWithRetrySupport<CommonEvent>>,
-) : AbstractMessageConsumer<RetryMessage<CommonEvent>>(props.kafka) {
+) : AbstractMessageConsumer<RetryMessage<Any>>(props.kafka) {
     private val receiver = buildReceiver(RetryMessageDeserializer(mapper), props.kafka.retryTopic)
     private val log = LoggerFactory.getLogger(this.javaClass)
-    override fun getReceiver(): KafkaReceiver<String, RetryMessage<CommonEvent>?> = receiver
+    override fun getReceiver(): KafkaReceiver<String, RetryMessage<Any>?> = receiver
 
     override fun enabled(): Boolean = props.kafka.retryConsumingEnabled
 
@@ -34,7 +34,7 @@ class RetryConsumer(
     override fun getDelaySeconds() = props.kafka.retryHandlingInterval
 
     override fun getExecutionStrategy() = IMessageConsumer.ExecutionStrategy.SEQUENTIAL
-    override suspend fun onFailedMessage(e: Exception?, message: RetryMessage<CommonEvent>, metadata: MessageMetadata) {
+    override suspend fun onFailedMessage(e: Exception?, message: RetryMessage<Any>, metadata: MessageMetadata) {
         if (message.processingAttemptNumber < props.kafka.retryResendNumber) {
             sender.sendRetry(
                 message.payload,
@@ -49,7 +49,7 @@ class RetryConsumer(
     }
 
     override suspend fun handleMessage(
-        message: RetryMessage<CommonEvent>,
+        message: RetryMessage<Any>,
         metadata: MessageMetadata
     ): MessageConsumptionResult {
         return if (canBeRetried(message)) {
@@ -59,21 +59,26 @@ class RetryConsumer(
         }
     }
 
-    private suspend fun retryMessage(message: RetryMessage<CommonEvent>): MessageConsumptionResult {
-        val consumer = consumers.firstOrNull { it.supports() == message.payload::class }
-        if (consumer == null) {
-            log.warn("Cannot find consumer for message $message. Skip message processing")
-            return MessageConsumptionResult(MessageConsumptionResult.MessageConsumptionResultCode.OK)
+    private suspend fun retryMessage(message: RetryMessage<Any>): MessageConsumptionResult {
+        return if (message.payload::class == CommonEvent::class) {
+            val consumer = consumers.firstOrNull { it.supports() == message.payload::class }
+            if (consumer == null) {
+                log.warn("Cannot find consumer for message $message. Skip message processing")
+                MessageConsumptionResult(MessageConsumptionResult.MessageConsumptionResultCode.OK)
+            } else {
+                consumer.handleMessage(
+                    message.payload as CommonEvent,
+                    MessageMetadata(OffsetDateTime.now(), message.key, message.processingAttemptNumber)
+                )
+            }
+        } else {
+            throw IllegalArgumentException("Got retry message $message with payload not of type CommonEvent")
         }
-        return consumer.handleMessage(
-            message.payload,
-            MessageMetadata(OffsetDateTime.now(), message.key, message.processingAttemptNumber)
-        )
     }
 
     // Need to not get all already produced retried messages with higher resend attempt number
     // when decreasing it in props
-    private fun canBeRetried(message: RetryMessage<CommonEvent>): Boolean {
+    private fun canBeRetried(message: RetryMessage<Any>): Boolean {
         return props.kafka.retryResendNumber > message.processingAttemptNumber
     }
 }

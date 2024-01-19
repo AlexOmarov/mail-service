@@ -46,6 +46,9 @@ import ru.somarov.mail.presentation.rsocket.request.CreateMailRequest as CreateM
 import ru.somarov.mail.presentation.rsocket.response.MailRsocketResponse as MailResponseRsocket
 import ru.somarov.mail.presentation.rsocket.response.standard.StandardRsocketResponse as StandardResponseRsocket
 
+/**
+* Scheduler, which isn't a part of application base, but exists for imitating a load on service's APIs
+* */
 @Component
 @ConditionalOnExpression("\${contour.scheduling.load.enabled} and \${contour.scheduling.enabled}")
 private class LoadScheduler(
@@ -122,6 +125,7 @@ private class LoadScheduler(
     private suspend fun sendPoisonPillUsingKafka(): SenderResult<String> {
         return producerFacade.sendMessage(
             "Poison pill",
+            String::class.qualifiedName ?: "",
             MessageMetadata(OffsetDateTime.now(), "key", 0),
             props.kafka.createMailCommandTopic,
             poisonPillSender
@@ -144,6 +148,7 @@ private class LoadScheduler(
     private suspend fun createMailUsingKafka(): SenderResult<CreateMailCommand> {
         return producerFacade.sendMessage(
             CreateMailCommand("email", "text"),
+            CreateMailCommand::class.qualifiedName ?: "",
             MessageMetadata(OffsetDateTime.now(), "key", 0),
             props.kafka.createMailCommandTopic,
             sender

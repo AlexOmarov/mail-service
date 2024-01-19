@@ -2,9 +2,8 @@ package ru.somarov.mail.presentation.kafka
 
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
-import ru.somarov.mail.presentation.kafka.event.CommonEvent
 
-data class RetryMessage<T : CommonEvent>(
+data class RetryMessage<T>(
     @field:Valid
     val payload: T,
     @field:NotBlank
