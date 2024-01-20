@@ -74,7 +74,7 @@ private class MailRegistrationServiceIntegrationTest : BaseIntegrationTest() {
     }
 
     @Test
-    fun `When get mail method is called twice then call cache`() {
+    fun `When get mail method then call cache`() {
         val mail = runBlocking { dao.createMail("email", "text") }
 
         // First call
@@ -84,11 +84,11 @@ private class MailRegistrationServiceIntegrationTest : BaseIntegrationTest() {
             getMail(eq(mail.id))
         }
 
-        verifyBlocking(redisTemplate, times(1)) {
+        verifyBlocking(redisTemplate, times(2)) {
             opsForSet()
         }
 
-        verifyBlocking(mailRepo, times(1)) {
+        verifyBlocking(mailRepo, times(0)) {
             findById(mail.id)
         }
 
@@ -99,11 +99,11 @@ private class MailRegistrationServiceIntegrationTest : BaseIntegrationTest() {
             getMail(eq(mail.id))
         }
 
-        verifyBlocking(redisTemplate, times(2)) {
+        verifyBlocking(redisTemplate, times(3)) {
             opsForSet()
         }
 
-        verifyBlocking(mailRepo, times(1)) {
+        verifyBlocking(mailRepo, times(0)) {
             findById(mail.id)
         }
     }

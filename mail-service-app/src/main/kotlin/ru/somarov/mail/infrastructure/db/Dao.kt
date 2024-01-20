@@ -1,6 +1,7 @@
 package ru.somarov.mail.infrastructure.db
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import org.slf4j.LoggerFactory
@@ -39,7 +40,10 @@ class Dao(
 
     // Should put mail in cache here
     suspend fun createMail(email: String, text: String): Mail {
-        return mailRepo.save(createMailEntity(email, text))
+        val ops = template.opsForSet()
+        val mail = mailRepo.save(createMailEntity(email, text))
+        ops.add("mails:${mail.id}", mail).awaitSingle()
+        return mail
     }
 
     fun findAllByMailStatusIdAndCreationDateAfter(
@@ -51,8 +55,23 @@ class Dao(
     }
 
     // Should refresh mail in cache here
-    fun updateMails(mails: List<Mail>): Flow<Mail> {
-        return mailRepo.saveAll(mails.map { it.also { it.lastUpdateDate = OffsetDateTime.now(); it.new = false } })
+    suspend fun updateMails(mails: List<Mail>): List<Mail> {
+        val ops = template.opsForSet()
+        val updatedMails = mailRepo.saveAll(
+            mails.map { it.also { it.lastUpdateDate = OffsetDateTime.now(); it.new = false } }
+        ).toList()
+        updatedMails.forEach {
+            val key = "mails:${it.id}"
+            val existingMail = ops.scan(key).awaitFirstOrNull()
+
+            if (existingMail != null) {
+                ops.remove(key, existingMail).awaitSingle()
+                ops.add(key, it).awaitSingle()
+            } else {
+                ops.add(key, it).awaitSingle()
+            }
+        }
+        return updatedMails
     }
 
     private fun createMailEntity(email: String, text: String): Mail {
