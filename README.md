@@ -113,9 +113,9 @@ Compose файл включает в себя следующие инструм�
 7. [Smtp сервер](http://localhost:8083/)
    ![smtp.jpg](doc/img/smtp.jpg)
 8. [Actuator API сервиса](http://localhost:8080/actuator)
-   ![img.png](doc/img/actuator.png)
+   ![actuator.png](doc/img/actuator.png)
 9. [JMX подключение](https://visualvm.github.io/) - Используется программа VisualVM. Необходимо добавить локальное jmx соединение, адрес localhost:9010
-   ![img.png](doc/img/visualvm.png)
+   ![visualvm.png](doc/img/visualvm.png)
 
 `Liveness` и `readiness` API доступны по `actuator/health/liveness` и `actuator/health/readiness` путям.  
 Метрики для Prometheus доступны по адресу `actuator/prometheus`.  
