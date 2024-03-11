@@ -128,6 +128,17 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
       KAFKA_CLUSTERS_0_JMXPORT: 9997
+      # KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: rc1a-m9sg794q6emckrlf.mdb.yandexcloud.net:9091
+      # KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: SASL_SSL
+      # KAFKA_CLUSTERS_0_SSL_TRUSTSTORELOCATION: /tmp/ssl.jks
+      # KAFKA_CLUSTERS_0_SSL_TRUSTSTOREPASSWORD: "kafkacert"
+      # KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"denumhub-test2\" password=\"/cH01c8K&oD67m$`GrPJ\";"
+      # KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: "SCRAM-SHA-512"
+      # KAFKA_CLUSTERS_0_PROPERTIES_PROTOCOL: SASL
+      # KAFKA_CLUSTERS_0_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ''
+    # volumes:
+    #   - "F:/work/projects/orbsoft/message-queue-service/message-queue-service-app/src/main/resources/keys:/tmp"
+
   schema-registry:
     image: confluentinc/cp-schema-registry
     depends_on:
