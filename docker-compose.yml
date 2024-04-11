@@ -173,6 +173,14 @@ services:
       - elasticsearch_data:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
+  fluentd:
+    build: ./config/elk/fluentd/
+    container_name: fluentd
+    volumes:
+      - ./config/elk/fluentd/conf/:/fluentd/etc
+    ports:
+      - "9880:9880"
+      - "24224:24224"
   logstash:
     image: logstash:8.10.2
     depends_on:
@@ -185,14 +193,21 @@ services:
       - ./config/elk/logstash/pipelines:/usr/share/logstash/pipeline:ro
   #######################################################
   #  Call curl once Kibana was started
-  #  to create Kibana Data Views for ESDB logs
+  #  to create Kibana Data Views for logstash and fluentd
   #######################################################
-  initializer:
+  initializer-logstash:
     image: curlimages/curl
     restart: on-failure
     depends_on:
       - kibana
     command: [ "sh","-c","sleep 1 && curl  --fail -X POST 'kibana:5601/api/data_views/data_view' -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d'{ \"data_view\": { \"title\": \"logstash-*\", \"name\": \"My Logstash Data View\", \"timeFieldName\": \"@timestamp\" } }' || exit 1" ]
+  initializer-fluentd:
+    image: curlimages/curl
+    restart: on-failure
+    depends_on:
+      - kibana
+    command: [ "sh","-c","sleep 1 && curl  --fail -X POST 'kibana:5601/api/data_views/data_view' -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d'{ \"data_view\": { \"title\": \"fluentd-*\", \"name\": \"My Fluentd Data View\", \"timeFieldName\": \"@timestamp\" } }' || exit 1" ]
+
   # Containers related to metrics/traces
   prometheus:
     image: prom/prometheus

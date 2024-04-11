@@ -1,0 +1,24 @@
+version: '3.9'
+
+services:
+  # Change <YOUR_PATH_TO_KEYS_FOLDER> to path of your keys folder (where ssl key file for kafka is named ssl.jks)
+  # Change <USERNAME> to name of the user (denumhub-test2, denumhub-test, etc.)
+  # Change <PASSWORD> to password of dedicated user
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui
+    ports:
+      - "9001:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: denumhub
+      KAFKA_CLUSTERS_0_JMXPORT: 9997
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: rc1a-m9sg794q6emckrlf.mdb.yandexcloud.net:9091
+      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: SASL_SSL
+      KAFKA_CLUSTERS_0_SSL_TRUSTSTORELOCATION: /tmp/ssl.jks
+      KAFKA_CLUSTERS_0_SSL_TRUSTSTOREPASSWORD: "kafkacert"
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"<USERNAME>\" password=\"<PASSWORD>\";"
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: "SCRAM-SHA-512"
+      KAFKA_CLUSTERS_0_PROPERTIES_PROTOCOL: SASL
+      KAFKA_CLUSTERS_0_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ''
+    volumes:
+      - "<YOUR_PATH_TO_KEYS_FOLDER>:/tmp"
