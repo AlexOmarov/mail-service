@@ -67,7 +67,7 @@ private class EmailSendingSchedulerTests : BaseIntegrationTest() {
             sendNewEmails(any())
         }
         verifyBlocking(emailSenderImpl, timeout((delay).toMillis()).atLeastOnce()) {
-            send(any<MimeMessage>(), any<MimeMessage>())
+            send(*listOf(any<MimeMessage>()).toTypedArray())
         }
     }
 }

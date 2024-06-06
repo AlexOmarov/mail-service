@@ -1,6 +1,7 @@
 package ru.somarov.mail.util
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import jakarta.annotation.PostConstruct
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG
 import org.apache.kafka.clients.admin.NewTopic
@@ -15,7 +16,6 @@ import reactor.kafka.sender.SenderOptions
 import ru.somarov.mail.infrastructure.config.ServiceProps
 import ru.somarov.mail.infrastructure.kafka.serde.createmailcommand.CreateMailCommandSerializer
 import ru.somarov.mail.presentation.kafka.event.command.CreateMailCommand
-import javax.annotation.PostConstruct
 
 @TestConfiguration
 @AutoConfigureObservability

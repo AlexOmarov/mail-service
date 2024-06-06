@@ -1,17 +1,6 @@
 logging:
   config: classpath:logback.xml
 
-grpc:
-  server:
-    port: 9095
-  client:
-    mail-service:
-      address: localhost:9095
-      enableKeepAlive: true
-      keepAliveWithoutCalls: true
-      setKeepAliveTime: 6m
-      negotiationType: plaintext
-
 contour:
   mail:
     destination-email: 'test@yandex.ru'

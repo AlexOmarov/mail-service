@@ -1,7 +1,6 @@
 # Contour section stores values, that almost always vary from environment to environment
 contour:
   instance: unknown
-  grpc-port: 9091
   logstash:
     host: localhost:5046
   zipkin:
@@ -92,7 +91,7 @@ management:
     health:
       group:
         readiness:
-          include: r2dbc, kafkaReceiversHealth, kafkaClusterHealth, grpcChannel
+          include: r2dbc, kafkaReceiversHealth, kafkaClusterHealth
       show-details: always
       show-components: always
       probes:
@@ -117,16 +116,6 @@ management:
       export:
         enabled: true
 
-grpc:
-  server:
-    port: '${contour.grpc-port}'
-  client:
-    mail-service:
-      address: 'localhost:${contour.grpc-port}'
-      enableKeepAlive: true
-      keepAliveWithoutCalls: true
-      setKeepAliveTime: 6m
-      negotiationType: plaintext
 server:
   port: '${contour.http.port}'
 

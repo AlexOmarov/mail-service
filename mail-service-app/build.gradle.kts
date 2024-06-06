@@ -19,28 +19,29 @@ detekt {
 
 kover {
     useJacoco()
-}
-
-koverReport {
-    filters {
-        excludes {
-            classes(exclusions.split(","))
-        }
-    }
-    defaults {
-        xml {
-            onCheck = true
-        }
-        log {
-            onCheck = true
-        }
-        html {
-            onCheck = true
-        }
-
+    reports {
         verify {
             rule {
                 minBound(50)
+            }
+        }
+        total {
+            verify {
+                rule {
+                    minBound(50)
+                }
+            }
+            filters {
+                excludes {
+                    classes(exclusions.split(","))
+                }
+            }
+
+            xml {
+                onCheck = true
+            }
+            html {
+                onCheck = true
             }
         }
     }
@@ -51,14 +52,32 @@ dependencies {
 
     detektPlugins(libs.detekt.ktlint)
 
-    implementation(libs.spring.boot.starter.mail)
-    implementation(libs.bundles.shedlock)
-    implementation(libs.bundles.springdoc)
-    implementation(libs.bundles.reactive.service.base)
-    implementation(libs.bundles.database.postgresql)
-    implementation(libs.bundles.grpc.server)
+    implementation(libs.bundles.kotlin)
+    implementation(libs.bundles.web)
+    implementation(libs.bundles.kafka)
+    implementation(libs.bundles.database)
 
-    testImplementation(libs.bundles.reactive.service.test)
+    implementation(libs.spring.boot.starter.mail)
+    implementation(libs.spring.boot.starter.rsocket)
+    implementation(libs.spring.boot.starter.cache)
+    implementation(libs.spring.boot.starter.aop)
+    implementation(libs.spring.boot.starter.security)
+    implementation(libs.spring.security.rsocket)
+
+    implementation(libs.bundles.postgres)
+    implementation(libs.bundles.redis)
+    implementation(libs.bundles.micrometer)
+    implementation(libs.bundles.shedlock)
+
+    implementation(libs.rsocket.micrometer)
+    implementation(libs.otel.zipkin)
+    implementation(libs.logstash.logback.encoder)
+
+    implementation(libs.hessian)
+
+    testImplementation(libs.bundles.test)
+    testRuntimeOnly(libs.junit.launcher)
+
 }
 springBoot {
     buildInfo()

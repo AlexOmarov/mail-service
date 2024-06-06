@@ -7,8 +7,8 @@ import io.rsocket.micrometer.observation.ByteBufGetter
 import io.rsocket.micrometer.observation.ByteBufSetter
 import io.rsocket.micrometer.observation.RSocketRequesterTracingObservationHandler
 import io.rsocket.micrometer.observation.RSocketResponderTracingObservationHandler
+import jakarta.annotation.PostConstruct
 import org.springframework.context.annotation.Configuration
-import javax.annotation.PostConstruct
 
 @Configuration
 private class ObservationConfig(

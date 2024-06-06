@@ -1,12 +1,9 @@
 package ru.somarov.mail.application.scheduler
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.grpc.Metadata
 import io.rsocket.metadata.WellKnownMimeType
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.runBlocking
-import net.devh.boot.grpc.client.inject.GrpcClient
-import net.devh.boot.grpc.common.security.SecurityConstants
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringSerializer
@@ -30,15 +27,11 @@ import ru.somarov.mail.infrastructure.config.ServiceProps
 import ru.somarov.mail.infrastructure.kafka.KafkaProducerFacade
 import ru.somarov.mail.infrastructure.kafka.consumer.MessageMetadata
 import ru.somarov.mail.infrastructure.kafka.serde.createmailcommand.CreateMailCommandSerializer
-import ru.somarov.mail.presentation.grpc.GetMailRequest
-import ru.somarov.mail.presentation.grpc.MailServiceGrpcKt
 import ru.somarov.mail.presentation.kafka.event.command.CreateMailCommand
 import java.nio.charset.StandardCharsets
 import java.time.OffsetDateTime
 import java.util.Base64
 import java.util.UUID
-import ru.somarov.mail.presentation.grpc.CreateMailRequest as CreateMailRequestGrpc
-import ru.somarov.mail.presentation.grpc.MailResponse as MailResponseGrpc
 import ru.somarov.mail.presentation.http.request.CreateMailRequest as CreateMailRequestHttp
 import ru.somarov.mail.presentation.http.response.MailResponse as MailResponseHttp
 import ru.somarov.mail.presentation.http.response.standard.StandardResponse as StandardResponseHttp
@@ -47,8 +40,8 @@ import ru.somarov.mail.presentation.rsocket.response.MailRsocketResponse as Mail
 import ru.somarov.mail.presentation.rsocket.response.standard.StandardRsocketResponse as StandardResponseRsocket
 
 /**
-* Scheduler, which isn't a part of application base, but exists for imitating a load on service's APIs
-* */
+ * Scheduler, which isn't a part of application base, but exists for imitating a load on service's APIs
+ * */
 @Component
 @ConditionalOnExpression("\${contour.scheduling.load.enabled} and \${contour.scheduling.enabled}")
 private class LoadScheduler(
@@ -60,9 +53,6 @@ private class LoadScheduler(
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private lateinit var sender: KafkaSender<String, CreateMailCommand>
     private lateinit var poisonPillSender: KafkaSender<String, String>
-
-    @GrpcClient("mail-service")
-    lateinit var grpcClient: MailServiceGrpcKt.MailServiceCoroutineStub
 
     init {
         val producerProps: MutableMap<String, Any> = HashMap()
@@ -106,14 +96,8 @@ private class LoadScheduler(
                 val kafkaPoisonPillResponse = sendPoisonPillUsingKafka()
                 logger.info("Kafka poison pill response: $kafkaPoisonPillResponse")
 
-                val grpcCreateMailResponse = createMailUsingGrpc()
-                logger.info("Grpc create mail response: $grpcCreateMailResponse")
-
                 val rsocketGetMailResponse = getMailUsingRsocket(rsocketCreateMailResponse.response.mail.id)
                 logger.info("Rsocket get mail response: $rsocketGetMailResponse")
-
-                val grpcGetMailResponse = getMailUsingGrpc(UUID.fromString(grpcCreateMailResponse.mail.id))
-                logger.info("Grpc get mail response: $grpcGetMailResponse")
 
                 logger.info("LoadScheduler has been completed")
             }
@@ -129,19 +113,6 @@ private class LoadScheduler(
             MessageMetadata(OffsetDateTime.now(), "key", 0),
             props.kafka.createMailCommandTopic,
             poisonPillSender
-        )
-    }
-
-    private suspend fun getMailUsingGrpc(id: UUID): MailResponseGrpc {
-        val metadata = Metadata().also { it.put(SecurityConstants.AUTHORIZATION_HEADER, getAuthHeaderValue()) }
-        return grpcClient.getMail(GetMailRequest.newBuilder().setId(id.toString()).build(), metadata)
-    }
-
-    private suspend fun createMailUsingGrpc(): MailResponseGrpc {
-        val metadata = Metadata().also { it.put(SecurityConstants.AUTHORIZATION_HEADER, getAuthHeaderValue()) }
-        return grpcClient.createMail(
-            CreateMailRequestGrpc.newBuilder().setEmail("email").setText("text").build(),
-            metadata
         )
     }
 

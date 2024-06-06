@@ -1,6 +1,5 @@
 package ru.somarov.mail.infrastructure.http
 
-import ru.somarov.mail.infrastructure.grpc.error.exception.technical.TechnicalException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
@@ -30,18 +29,8 @@ class GlobalControllerExceptionHandler {
     private fun getResponseBody(exception: Throwable): Pair<ErrorResponse, HttpStatusCode> {
         return when (exception) {
             is ServerWebInputException -> processServerWebInputException(exception)
-            is TechnicalException -> processTechnicalException(exception)
             else -> processDefaultException()
         }
-    }
-
-    private fun processTechnicalException(
-        exception: TechnicalException
-    ): Pair<ErrorResponse, HttpStatusCode> {
-        val root = TechnicalException.getRootCause(exception)
-        return ErrorResponse(mapOf("message" to root.message, "trace" to root.uniqueTrace)) to HttpStatusCode.valueOf(
-            HTTP_ERROR_STATUS_CODE
-        )
     }
 
     private fun processServerWebInputException(

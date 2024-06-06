@@ -1,13 +1,14 @@
 package ru.somarov.mail.infrastructure.kafka
 
 import io.micrometer.core.instrument.kotlin.asContextElement
+import io.micrometer.observation.Observation
 import io.micrometer.observation.ObservationRegistry
+import jakarta.annotation.PreDestroy
 import kotlinx.coroutines.reactor.mono
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.boot.actuate.health.CompositeReactiveHealthContributor
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator
-import org.springframework.kafka.support.micrometer.KafkaListenerObservation
 import org.springframework.kafka.support.micrometer.KafkaRecordReceiverContext
 import org.springframework.stereotype.Component
 import reactor.core.Disposables
@@ -22,13 +23,13 @@ import ru.somarov.mail.infrastructure.kafka.observability.KafkaReceiverHealthInd
 import java.time.Duration
 import java.time.OffsetDateTime
 import java.util.UUID
-import javax.annotation.PreDestroy
+import java.util.function.Supplier
 
 @Component
 class KafkaConsumerLauncherDecorator(
     private val props: ServiceProps,
     private val consumers: List<IMessageConsumer<out Any>>,
-    private val observationRegistry: ObservationRegistry
+    private val registry: ObservationRegistry
 ) {
     private val log = LoggerFactory.getLogger(KafkaConsumerLauncherDecorator::class.java)
     private val disposables = Disposables.composite()
@@ -46,7 +47,8 @@ class KafkaConsumerLauncherDecorator(
 
     @Suppress("UNCHECKED_CAST")
     private fun startConsumers(registry: MutableMap<String, ReactiveHealthIndicator>) {
-        consumers.filter { it.enabled() }
+        consumers
+            .filter { it.enabled() }
             .forEach {
                 val disposable = consume(it as IMessageConsumer<Any>).subscribe()
                 disposables.add(disposable)
@@ -64,14 +66,12 @@ class KafkaConsumerLauncherDecorator(
     }
 
     private fun getRecordsBatches(consumer: IMessageConsumer<Any>): Flux<Flux<ConsumerRecord<String, Any?>>> {
-        return Flux.defer {
-            log.info("Starting ${consumer.getName()} receiver")
-            var flux = consumer.getReceiver().receiveAutoAck()
-            if (consumer.getDelaySeconds() != null) {
-                flux = flux.delayElements(Duration.ofSeconds(consumer.getDelaySeconds()!!))
-            }
-            flux
+        log.info("Starting ${consumer.getName()} receiver")
+        var flux = consumer.getReceiver().receiveAutoAck()
+        if (consumer.getDelaySeconds() != null) {
+            flux = flux.delayElements(Duration.ofSeconds(consumer.getDelaySeconds()!!))
         }
+        return flux
     }
 
     private fun handleBatch(records: Flux<ConsumerRecord<String, Any?>>, consumer: IMessageConsumer<Any>): Mono<Long> {
@@ -105,29 +105,25 @@ class KafkaConsumerLauncherDecorator(
     private fun handleRecord(
         record: ConsumerRecord<String, Any?>,
         receiver: IMessageConsumer<Any>
-    ): Mono<MessageConsumptionResult> {
-        val observation = KafkaListenerObservation.LISTENER_OBSERVATION.observation(
-            /* customConvention = */ null,
-            /* defaultConvention = */ KafkaListenerObservation.DefaultKafkaListenerObservationConvention.INSTANCE,
-            /* contextSupplier = */ {
-                KafkaRecordReceiverContext(record, receiver.getName()) {
-                    UUID.randomUUID().toString()
-                }
-            },
-            /* registry = */ observationRegistry
+    ): Mono<MessageConsumptionResult>? {
+        val observation = Observation.createNotStarted(
+            "kafka_observation_${UUID.randomUUID()}",
+            { KafkaRecordReceiverContext(record, receiver.getName()) { UUID.randomUUID().toString() } },
+            registry
         )
-        var result: Mono<MessageConsumptionResult>? = null
-        observation.observe {
-            result = if (record.value() == null) {
-                log.warn("Got empty value for record $record")
-                // Would be great to send messages which cannot be serialized to dlq here
-                Mono.just(MessageConsumptionResult(MessageConsumptionResult.MessageConsumptionResultCode.FAILED))
-            } else {
-                mono(observationRegistry.asContextElement()) {
-                    receiver.handle(record.value()!!, MessageMetadata(OffsetDateTime.now(), record.key(), 0))
+
+        return observation.observe(
+            Supplier<Mono<MessageConsumptionResult>> {
+                if (record.value() == null) {
+                    log.warn("Got empty value for record $record")
+                    // Would be great to send messages which cannot be serialized to dlq here
+                    Mono.just(MessageConsumptionResult(MessageConsumptionResult.MessageConsumptionResultCode.FAILED))
+                } else {
+                    mono(registry.asContextElement()) {
+                        receiver.handle(record.value()!!, MessageMetadata(OffsetDateTime.now(), record.key(), 0))
+                    }
                 }
             }
-        }
-        return result!!
+        )
     }
 }
