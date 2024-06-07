@@ -4,7 +4,7 @@ import org.slf4j.LoggerFactory
 import ru.somarov.mail.infrastructure.config.ServiceProps
 import ru.somarov.mail.infrastructure.kafka.KafkaProducerFacade
 import ru.somarov.mail.infrastructure.kafka.consumer.MessageMetadata
-import ru.somarov.mail.presentation.kafka.event.CommonEvent
+import ru.somarov.mail.presentation.dto.events.event.CommonEvent
 import kotlin.reflect.KClass
 
 abstract class AbstractMessageConsumerWithRetrySupport<T : CommonEvent>(

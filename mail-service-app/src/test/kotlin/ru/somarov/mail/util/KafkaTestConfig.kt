@@ -15,7 +15,7 @@ import reactor.kafka.sender.KafkaSender
 import reactor.kafka.sender.SenderOptions
 import ru.somarov.mail.infrastructure.config.ServiceProps
 import ru.somarov.mail.infrastructure.kafka.serde.createmailcommand.CreateMailCommandSerializer
-import ru.somarov.mail.presentation.kafka.event.command.CreateMailCommand
+import ru.somarov.mail.presentation.dto.events.event.command.CreateMailCommand
 
 @TestConfiguration
 @AutoConfigureObservability

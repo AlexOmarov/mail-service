@@ -9,42 +9,8 @@ plugins {
     alias(libs.plugins.kover)
 }
 
-project.layout.buildDirectory = File("../.build/app")
-val exclusions = project.properties["test_exclusions"].toString().replace("/", ".")
-
 detekt {
     config.setFrom(files("$rootDir/detekt-config.yml"))
-    reportsDir = file("${project.layout.buildDirectory.get().asFile.path}/reports/detekt")
-}
-
-kover {
-    useJacoco()
-    reports {
-        verify {
-            rule {
-                minBound(50)
-            }
-        }
-        total {
-            verify {
-                rule {
-                    minBound(50)
-                }
-            }
-            filters {
-                excludes {
-                    classes(exclusions.split(","))
-                }
-            }
-
-            xml {
-                onCheck = true
-            }
-            html {
-                onCheck = true
-            }
-        }
-    }
 }
 
 dependencies {
@@ -79,9 +45,6 @@ dependencies {
     testRuntimeOnly(libs.junit.launcher)
 
 }
-springBoot {
-    buildInfo()
-}
 
 tasks.bootJar {
     archiveFileName.set("app.jar")
@@ -102,6 +65,37 @@ tasks.withType<Test> {
     }
 }
 
-tasks.withType(org.springframework.boot.gradle.tasks.bundling.BootJar::class.java) {
-    loaderImplementation = org.springframework.boot.loader.tools.LoaderImplementation.CLASSIC
+springBoot {
+    buildInfo()
 }
+
+kover {
+    useJacoco()
+    reports {
+        total {
+            verify {
+                rule {
+                    minBound(50)
+                }
+            }
+            filters {
+                excludes {
+                    classes(
+                        project.properties["test_exclusions"]
+                            .toString()
+                            .replace("/", ".")
+                            .split(",")
+                    )
+                }
+            }
+
+            xml {
+                onCheck = true
+            }
+            html {
+                onCheck = true
+            }
+        }
+    }
+}
+

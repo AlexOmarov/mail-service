@@ -4,11 +4,9 @@ plugins {
     alias(libs.plugins.detekt)
     `maven-publish`
 }
-project.layout.buildDirectory = File("../.build/api")
 
 detekt {
     config.setFrom(files("$rootDir/detekt-config.yml"))
-    reportsDir = file("${project.layout.buildDirectory.get().asFile.path}/reports/detekt")
 }
 
 dependencies {

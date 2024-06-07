@@ -10,7 +10,7 @@ import ru.somarov.mail.infrastructure.kafka.consumer.MessageConsumptionResult
 import ru.somarov.mail.infrastructure.kafka.consumer.MessageMetadata
 import ru.somarov.mail.infrastructure.kafka.consumer.types.AbstractMessageConsumerWithRetrySupport
 import ru.somarov.mail.infrastructure.kafka.serde.createmailcommand.CreateMailCommandDeserializer
-import ru.somarov.mail.presentation.kafka.event.command.CreateMailCommand
+import ru.somarov.mail.presentation.dto.events.event.command.CreateMailCommand
 
 @Component
 class CreateMailCommandConsumerWithRetrySupport(

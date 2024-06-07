@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.kafka.common.serialization.Deserializer
 import org.slf4j.LoggerFactory
 import ru.somarov.mail.infrastructure.kafka.serde.retry.RetryMessageDeserializer
-import ru.somarov.mail.presentation.kafka.event.broadcast.MailBroadcast
+import ru.somarov.mail.presentation.dto.events.event.broadcast.MailBroadcast
 import java.nio.charset.Charset
 
 class MailBroadcastDeserializer(private val mapper: ObjectMapper) : Deserializer<MailBroadcast?> {

@@ -7,8 +7,8 @@ import ru.somarov.mail.infrastructure.db.Dao
 import ru.somarov.mail.infrastructure.db.entity.Mail
 import ru.somarov.mail.infrastructure.kafka.KafkaProducerFacade
 import ru.somarov.mail.infrastructure.kafka.consumer.MessageMetadata
-import ru.somarov.mail.presentation.kafka.event.broadcast.MailBroadcast
-import ru.somarov.mail.presentation.kafka.event.broadcast.dto.MailStatus
+import ru.somarov.mail.presentation.dto.events.event.broadcast.MailBroadcast
+import ru.somarov.mail.presentation.dto.events.event.broadcast.dto.MailStatus
 import java.time.OffsetDateTime
 import java.util.UUID
 

@@ -12,8 +12,8 @@ import ru.somarov.mail.infrastructure.kafka.consumer.MessageMetadata
 import ru.somarov.mail.infrastructure.kafka.consumer.types.AbstractMessageConsumer
 import ru.somarov.mail.infrastructure.kafka.consumer.types.AbstractMessageConsumerWithRetrySupport
 import ru.somarov.mail.infrastructure.kafka.serde.retry.RetryMessageDeserializer
-import ru.somarov.mail.presentation.kafka.RetryMessage
-import ru.somarov.mail.presentation.kafka.event.CommonEvent
+import ru.somarov.mail.presentation.dto.events.RetryMessage
+import ru.somarov.mail.presentation.dto.events.event.CommonEvent
 import java.time.OffsetDateTime
 
 @Component

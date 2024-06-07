@@ -1,7 +1,7 @@
 version: '3.9'
 
 services:
-  # Our mail service
+  # Our service
   service:
     # Uncomment to use prebuilt srcs instead of image
     # build:
@@ -96,6 +96,18 @@ services:
       - zk-data:/var/lib/zookeeper/data
       - zk-txn-logs:/var/lib/zookeeper/log
       - zk-secrets:/etc/zookeeper/secrets
+  schema-registry:
+    image: confluentinc/cp-schema-registry
+    depends_on:
+      - kafka
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: localhost
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:6005
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:9092'
+    ports:
+      - "6005:6005"
+    volumes:
+      - schema-registry-secrets:/etc/schema-registry/secrets
   kafka:
     image: confluentinc/cp-enterprise-kafka
     depends_on:
@@ -138,41 +150,7 @@ services:
       # KAFKA_CLUSTERS_0_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ''
     # volumes:
     #   - "F:/work/projects/orbsoft/message-queue-service/message-queue-service-app/src/main/resources/keys:/tmp"
-
-  schema-registry:
-    image: confluentinc/cp-schema-registry
-    depends_on:
-      - kafka
-    environment:
-      SCHEMA_REGISTRY_HOST_NAME: localhost
-      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:6005
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:9092'
-    ports:
-      - "6005:6005"
-    volumes:
-      - schema-registry-secrets:/etc/schema-registry/secrets
-  # Containers related to ELK stack for logs -
-  kibana:
-    image: kibana:8.10.2
-    depends_on:
-      - elasticsearch
-    ports:
-      - "5601:5601"
-    expose:
-      - "5601"
-    environment:
-      ELASTICSEARCH_URL: http://elasticsearch:9200
-  elasticsearch:
-    image: elasticsearch:8.10.2
-    environment:
-      - discovery.type=single-node
-      - node.name=elastic
-      - bootstrap.memory_lock=true
-      - xpack.security.enabled=false
-    volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
+  # Containers related to Opensearch stack for logs -
   fluentd:
     build: ./config/elk/fluentd/
     container_name: fluentd
@@ -184,30 +162,34 @@ services:
   logstash:
     image: logstash:8.10.2
     depends_on:
-      - elasticsearch
+      - opensearch
     ports:
       - '25826:25826'
       - '5046:5046'
     volumes:
       - ./config/elk/logstash/pipelines.yaml:/usr/share/logstash/config/pipelines.yml:ro
       - ./config/elk/logstash/pipelines:/usr/share/logstash/pipeline:ro
-  #######################################################
-  #  Call curl once Kibana was started
-  #  to create Kibana Data Views for logstash and fluentd
-  #######################################################
-  initializer-logstash:
-    image: curlimages/curl
-    restart: on-failure
+  opensearch:
+    image: opensearchproject/opensearch:2.14.0
+    environment:
+      OPENSEARCH_INITIAL_ADMIN_PASSWORD: "Aa1@~sfhkjswfyj!"
+      discovery.type: "single-node"
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.14.0
     depends_on:
-      - kibana
-    command: [ "sh","-c","sleep 1 && curl  --fail -X POST 'kibana:5601/api/data_views/data_view' -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d'{ \"data_view\": { \"title\": \"logstash-*\", \"name\": \"My Logstash Data View\", \"timeFieldName\": \"@timestamp\" } }' || exit 1" ]
-  initializer-fluentd:
-    image: curlimages/curl
-    restart: on-failure
-    depends_on:
-      - kibana
-    command: [ "sh","-c","sleep 1 && curl  --fail -X POST 'kibana:5601/api/data_views/data_view' -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d'{ \"data_view\": { \"title\": \"fluentd-*\", \"name\": \"My Fluentd Data View\", \"timeFieldName\": \"@timestamp\" } }' || exit 1" ]
-
+      - opensearch
+    ports:
+      - "5601:5601"
+    environment:
+      # must be a string with no spaces when specified as an environment variable
+      OPENSEARCH_HOSTS: '["https://opensearch:9200"]'
+    volumes:
+      - ./config/elk/opensearch/opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml:ro
   # Containers related to metrics/traces
   prometheus:
     image: prom/prometheus
@@ -274,6 +256,6 @@ volumes:
 
   grafana_data: { }
   prometheus_data: { }
-  elasticsearch_data: { }
+  opensearch_data: { }
 
   redis_data: { }

@@ -5,7 +5,7 @@ import org.apache.kafka.common.header.Headers
 import org.apache.kafka.common.serialization.Deserializer
 import org.slf4j.LoggerFactory
 import ru.somarov.mail.infrastructure.kafka.Constants.PAYLOAD_TYPE_HEADER_NAME
-import ru.somarov.mail.presentation.kafka.RetryMessage
+import ru.somarov.mail.presentation.dto.events.RetryMessage
 import java.nio.charset.Charset
 
 class RetryMessageDeserializer(private val mapper: ObjectMapper) : Deserializer<RetryMessage<Any>?> {

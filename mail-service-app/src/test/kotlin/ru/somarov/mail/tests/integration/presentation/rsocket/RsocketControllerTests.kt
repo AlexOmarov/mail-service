@@ -18,8 +18,8 @@ import org.springframework.util.MimeType
 import org.springframework.util.MimeTypeUtils
 import ru.somarov.mail.base.BaseIntegrationTest
 import ru.somarov.mail.infrastructure.db.Dao
-import ru.somarov.mail.presentation.rsocket.response.MailRsocketResponse
-import ru.somarov.mail.presentation.rsocket.response.standard.StandardRsocketResponse
+import ru.somarov.mail.presentation.dto.request.CreateMailRequest
+import ru.somarov.mail.presentation.dto.response.MailResponse
 
 class RsocketControllerTests : BaseIntegrationTest() {
 
@@ -36,8 +36,8 @@ class RsocketControllerTests : BaseIntegrationTest() {
             runBlocking {
                 requester
                     .route("mail")
-                    .data(ru.somarov.mail.presentation.rsocket.request.CreateMailRequest("text", "email"))
-                    .retrieveMono<StandardRsocketResponse<MailRsocketResponse>>()
+                    .data(CreateMailRequest("text", "email"))
+                    .retrieveMono<MailResponse>()
                     .contextCapture().awaitSingle()
             }
         }
@@ -51,9 +51,9 @@ class RsocketControllerTests : BaseIntegrationTest() {
             requester
                 .route("mail")
                 .metadata(credentials, RSOCKET_AUTHENTICATION_MIME_TYPE)
-                .data(ru.somarov.mail.presentation.rsocket.request.CreateMailRequest("text", "email"))
-                .retrieveMono<StandardRsocketResponse<MailRsocketResponse>>()
-                .contextCapture().awaitSingle().response
+                .data(CreateMailRequest("text", "email"))
+                .retrieveMono<MailResponse>()
+                .contextCapture().awaitSingle()
         }
 
         assert(result.mail.text == text)
@@ -67,9 +67,9 @@ class RsocketControllerTests : BaseIntegrationTest() {
             requester
                 .route("mail")
                 .metadata(credentials, RSOCKET_AUTHENTICATION_MIME_TYPE)
-                .data(ru.somarov.mail.presentation.rsocket.request.CreateMailRequest("text", "email"))
-                .retrieveMono<StandardRsocketResponse<MailRsocketResponse>>()
-                .contextCapture().awaitSingle().response
+                .data(CreateMailRequest("text", "email"))
+                .retrieveMono<MailResponse>()
+                .contextCapture().awaitSingle()
         }
         verifyBlocking(dao, times(1)) {
             createMail(any(), eq(text))
@@ -86,8 +86,8 @@ class RsocketControllerTests : BaseIntegrationTest() {
             requester
                 .route("mail.${mail.id}")
                 .metadata(credentials, RSOCKET_AUTHENTICATION_MIME_TYPE)
-                .retrieveMono<StandardRsocketResponse<MailRsocketResponse>>()
-                .contextCapture().awaitSingle().response
+                .retrieveMono<MailResponse>()
+                .contextCapture().awaitSingle()
         }
 
         assert(response.mail.id == mail.id)

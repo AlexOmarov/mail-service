@@ -34,7 +34,7 @@ import reactor.kafka.sender.SenderRecord
 import ru.somarov.mail.base.BaseIntegrationTest
 import ru.somarov.mail.infrastructure.db.Dao
 import ru.somarov.mail.infrastructure.kafka.KafkaProducerFacade
-import ru.somarov.mail.presentation.kafka.event.command.CreateMailCommand
+import ru.somarov.mail.presentation.dto.events.event.command.CreateMailCommand
 import ru.somarov.mail.util.KafkaTestConfig
 import java.time.Duration
 import java.util.UUID

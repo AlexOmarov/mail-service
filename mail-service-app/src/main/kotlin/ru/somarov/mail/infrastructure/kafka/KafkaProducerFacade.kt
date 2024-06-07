@@ -25,9 +25,9 @@ import ru.somarov.mail.infrastructure.kafka.consumer.MessageMetadata
 import ru.somarov.mail.infrastructure.kafka.serde.dlq.DlqMessageSerializer
 import ru.somarov.mail.infrastructure.kafka.serde.mailbroadcast.MailBroadcastSerializer
 import ru.somarov.mail.infrastructure.kafka.serde.retry.RetryMessageSerializer
-import ru.somarov.mail.presentation.kafka.DlqMessage
-import ru.somarov.mail.presentation.kafka.RetryMessage
-import ru.somarov.mail.presentation.kafka.event.broadcast.MailBroadcast
+import ru.somarov.mail.presentation.dto.events.DlqMessage
+import ru.somarov.mail.presentation.dto.events.RetryMessage
+import ru.somarov.mail.presentation.dto.events.event.broadcast.MailBroadcast
 import java.time.OffsetDateTime
 import kotlin.random.Random
 

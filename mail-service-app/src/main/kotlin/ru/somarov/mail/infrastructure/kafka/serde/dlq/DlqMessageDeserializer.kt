@@ -6,8 +6,8 @@ import org.apache.kafka.common.serialization.Deserializer
 import org.slf4j.LoggerFactory
 import ru.somarov.mail.infrastructure.kafka.Constants.PAYLOAD_TYPE_HEADER_NAME
 import ru.somarov.mail.infrastructure.kafka.serde.retry.RetryMessageDeserializer
-import ru.somarov.mail.presentation.kafka.DlqMessage
-import ru.somarov.mail.presentation.kafka.event.CommonEvent
+import ru.somarov.mail.presentation.dto.events.DlqMessage
+import ru.somarov.mail.presentation.dto.events.event.CommonEvent
 import java.nio.charset.Charset
 
 class DlqMessageDeserializer(private val mapper: ObjectMapper) : Deserializer<DlqMessage<CommonEvent>?> {

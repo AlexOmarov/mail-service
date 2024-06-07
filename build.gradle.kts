@@ -4,14 +4,6 @@ plugins {
     alias(libs.plugins.sonarqube)
 }
 
-allprojects {
-    group = "ru.somarov"
-
-    repositories {
-        mavenCentral()
-    }
-}
-
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
         jvmTarget = "21"
@@ -19,21 +11,19 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     }
 }
 
-var exclusions = project.properties["test_exclusions"].toString()
-
 sonar {
+    val exclusions = project.properties["test_exclusions"].toString()
+    val appBuildDirectory = project(":mail-service-app").layout.buildDirectory.get().asFile
+    val apiBuildDirectory = project(":mail-service-api").layout.buildDirectory.get().asFile
+
     properties {
-        property("sonar.qualitygate.wait", "true")
-        property("sonar.core.codeCoveragePlugin", "jacoco")
         property(
             "sonar.kotlin.detekt.reportPaths",
-            "${project(":mail-service-app").layout.buildDirectory.get().asFile}/reports/detekt/detekt.xml, " +
-                "${project(":mail-service-api").layout.buildDirectory.get().asFile}/reports/detekt/detekt.xml"
+            "$appBuildDirectory/reports/detekt/detekt.xml, $apiBuildDirectory/reports/detekt/detekt.xml"
         )
-        property(
-            "sonar.coverage.jacoco.xmlReportPaths",
-            "${project(":mail-service-app").layout.buildDirectory.get().asFile}/reports/kover/report.xml"
-        )
+        property("sonar.qualitygate.wait", "true")
+        property("sonar.core.codeCoveragePlugin", "jacoco")
+        property("sonar.coverage.jacoco.xmlReportPaths", "$appBuildDirectory/reports/kover/report.xml")
         property("sonar.cpd.exclusions", exclusions)
         property("sonar.jacoco.excludes", exclusions)
         property("sonar.coverage.exclusions", exclusions)

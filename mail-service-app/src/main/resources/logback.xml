@@ -3,6 +3,7 @@
 
 <configuration debug="false">
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
     <springProperty name="componentName" source="spring.application.name"/>
     <springProperty name="LOGSTASH_HOST" source="contour.logstash.host"/>
 

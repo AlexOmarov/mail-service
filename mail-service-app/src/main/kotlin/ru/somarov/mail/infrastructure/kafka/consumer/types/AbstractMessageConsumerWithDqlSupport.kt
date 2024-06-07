@@ -3,7 +3,7 @@ package ru.somarov.mail.infrastructure.kafka.consumer.types
 import ru.somarov.mail.infrastructure.config.ServiceProps
 import ru.somarov.mail.infrastructure.kafka.KafkaProducerFacade
 import ru.somarov.mail.infrastructure.kafka.consumer.MessageMetadata
-import ru.somarov.mail.presentation.kafka.event.CommonEvent
+import ru.somarov.mail.presentation.dto.events.event.CommonEvent
 
 abstract class AbstractMessageConsumerWithDqlSupport<T : CommonEvent>(
     private val sender: KafkaProducerFacade,

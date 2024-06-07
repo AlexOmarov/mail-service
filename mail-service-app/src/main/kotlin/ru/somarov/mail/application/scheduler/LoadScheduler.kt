@@ -27,17 +27,13 @@ import ru.somarov.mail.infrastructure.config.ServiceProps
 import ru.somarov.mail.infrastructure.kafka.KafkaProducerFacade
 import ru.somarov.mail.infrastructure.kafka.consumer.MessageMetadata
 import ru.somarov.mail.infrastructure.kafka.serde.createmailcommand.CreateMailCommandSerializer
-import ru.somarov.mail.presentation.kafka.event.command.CreateMailCommand
+import ru.somarov.mail.presentation.dto.events.event.command.CreateMailCommand
+import ru.somarov.mail.presentation.dto.request.CreateMailRequest
+import ru.somarov.mail.presentation.dto.response.MailResponse
 import java.nio.charset.StandardCharsets
 import java.time.OffsetDateTime
 import java.util.Base64
 import java.util.UUID
-import ru.somarov.mail.presentation.http.request.CreateMailRequest as CreateMailRequestHttp
-import ru.somarov.mail.presentation.http.response.MailResponse as MailResponseHttp
-import ru.somarov.mail.presentation.http.response.standard.StandardResponse as StandardResponseHttp
-import ru.somarov.mail.presentation.rsocket.request.CreateMailRequest as CreateMailRequestRsocket
-import ru.somarov.mail.presentation.rsocket.response.MailRsocketResponse as MailResponseRsocket
-import ru.somarov.mail.presentation.rsocket.response.standard.StandardRsocketResponse as StandardResponseRsocket
 
 /**
  * Scheduler, which isn't a part of application base, but exists for imitating a load on service's APIs
@@ -96,7 +92,7 @@ private class LoadScheduler(
                 val kafkaPoisonPillResponse = sendPoisonPillUsingKafka()
                 logger.info("Kafka poison pill response: $kafkaPoisonPillResponse")
 
-                val rsocketGetMailResponse = getMailUsingRsocket(rsocketCreateMailResponse.response.mail.id)
+                val rsocketGetMailResponse = getMailUsingRsocket(rsocketCreateMailResponse.mail.id)
                 logger.info("Rsocket get mail response: $rsocketGetMailResponse")
 
                 logger.info("LoadScheduler has been completed")
@@ -126,38 +122,38 @@ private class LoadScheduler(
         )
     }
 
-    private suspend fun getMailUsingRsocket(id: UUID): StandardResponseRsocket<MailResponseRsocket> {
+    private suspend fun getMailUsingRsocket(id: UUID): MailResponse {
         val credentials = UsernamePasswordMetadata(props.contour.auth.user, props.contour.auth.password)
         // Had to use retrieveMono contextCapture to capture observation,
         // because observation requester proxy creates mono for request using mono defer contextual
         return requester
             .route("mail.$id")
             .metadata(credentials, RSOCKET_AUTHENTICATION_MIME_TYPE)
-            .retrieveMono<StandardResponseRsocket<MailResponseRsocket>>()
+            .retrieveMono<MailResponse>()
             .contextCapture().awaitSingle()
     }
 
-    private suspend fun createMailUsingHttp(): StandardResponseHttp<MailResponseHttp> {
+    private suspend fun createMailUsingHttp(): MailResponse {
         val webClient = WebClient.builder().baseUrl("http://localhost:${props.contour.http.port}").build()
-        val request = CreateMailRequestHttp("text", "test@gmail.com")
+        val request = CreateMailRequest("text", "test@gmail.com")
         return webClient.post()
             .uri("/mails")
             .body(BodyInserters.fromValue(request))
             .header(HttpHeaders.AUTHORIZATION, getAuthHeaderValue())
             .retrieve()
-            .bodyToMono(object : ParameterizedTypeReference<StandardResponseHttp<MailResponseHttp>>() {})
+            .bodyToMono(object : ParameterizedTypeReference<MailResponse>() {})
             .awaitSingle()
     }
 
-    private suspend fun createMailUsingRsocket(): StandardResponseRsocket<MailResponseRsocket> {
+    private suspend fun createMailUsingRsocket(): MailResponse {
         val credentials = UsernamePasswordMetadata(props.contour.auth.user, props.contour.auth.password)
         // Had to use retrieveMono contextCapture to capture observation,
         // because observation requester proxy creates mono for request using mono defer contextual
         return requester
             .route("mail")
             .metadata(credentials, RSOCKET_AUTHENTICATION_MIME_TYPE)
-            .data(CreateMailRequestRsocket("text", "email"))
-            .retrieveMono<StandardResponseRsocket<MailResponseRsocket>>()
+            .data(CreateMailRequest("text", "email"))
+            .retrieveMono<MailResponse>()
             .contextCapture().awaitSingle()
     }
 
