@@ -15,23 +15,22 @@ internal class HttpLogger(private val filters: List<HttpLoggerFilter>) {
         var preparedBody = body
         val matchedFilters = filters.filter { it.pattern().matches(path) }
 
-        val shouldLog = shouldLog(
-            filters = matchedFilters,
-            request = request,
-            body = preparedBody
-        )
-        if (!shouldLog) {
+        if (!shouldLog(filters = matchedFilters, request = request, body = preparedBody)) {
             return
         }
 
         matchedFilters.forEach { preparedBody = it.prepareRequestBody(preparedBody) }
+
         val method = Optional.ofNullable(request.method).orElse(HttpMethod.GET).name()
         val headers = request.headers
         val params = request.queryParams
         val fullPath = getFullPath(request.uri.query ?: "", path)
 
         if (preparedBody != null) {
-            log.info("Incoming HTTP request -> $method $fullPath: headers=$headers, params=$params, body=$preparedBody")
+            log.info(
+                "Body of incoming HTTP request -> " +
+                    "$method $fullPath: headers=$headers, params=$params, body=$preparedBody"
+            )
         } else {
             log.info("Incoming HTTP request -> $method $fullPath: headers=$headers, params=$params")
         }
@@ -43,21 +42,23 @@ internal class HttpLogger(private val filters: List<HttpLoggerFilter>) {
         var preparedBody = body
         val matchedFilters = filters.filter { it.pattern().matches(path) }
 
-        val isRequestLoggable = shouldLog(
-            filters = matchedFilters,
-            request = request,
-            body = preparedBody
-        )
-        if (!isRequestLoggable) {
+        if (!shouldLog(filters = matchedFilters, request = request, body = preparedBody)) {
             return
         }
 
         matchedFilters.forEach { preparedBody = it.prepareResponseBody(preparedBody) }
+
         val method = Optional.ofNullable(request.method).orElse(HttpMethod.GET).name()
         val headers = response.headers
         val fullPath = getFullPath(request.uri.query ?: "", path)
 
-        log.info("Outgoing HTTP response <- $method $fullPath $status: headers=$headers, body=$preparedBody")
+        if (preparedBody != null) {
+            log.info(
+                "Body of outgoing HTTP response <- $method $fullPath $status: headers=$headers, body=$preparedBody"
+            )
+        } else {
+            log.info("Outgoing HTTP response <- $method $fullPath $status: headers=$headers")
+        }
     }
 
     private fun getFullPath(query: String, path: String): String {

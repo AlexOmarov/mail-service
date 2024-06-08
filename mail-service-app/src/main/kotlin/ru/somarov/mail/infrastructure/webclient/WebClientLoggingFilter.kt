@@ -29,13 +29,21 @@ class WebClientLoggingFilter : ExchangeFilterFunction {
             .build()
 
         return next.exchange(loggingRequest)
-            .map { response -> response.mutate().body { flux -> addLog(flux, response, loggingRequest) }.build() }
+            .map { response ->
+                log.info(
+                    "Incoming HTTP response -> " +
+                        "${request.method()} ${request.url()} ${response.statusCode().value()}: " +
+                        "headers=${response.headers().asHttpHeaders().entries.map { it.toString() }}"
+                )
+                response.mutate().body { flux -> addLog(flux, response, loggingRequest) }.build()
+            }
     }
 
     private fun addLog(flux: Flux<DataBuffer>, response: ClientResponse, request: ClientRequest): Flux<DataBuffer> {
         return flux.map { dataBuffer ->
             log.info(
-                "Incoming HTTP response -> ${request.method()} ${request.url()} ${response.statusCode().value()}: " +
+                "Body of incoming HTTP response -> " +
+                    "${request.method()} ${request.url()} ${response.statusCode().value()}: " +
                     "headers=${response.headers().asHttpHeaders().entries.map { it.toString() }}, " +
                     "body=${dataBuffer.toString(StandardCharsets.UTF_8)}"
             )
@@ -63,6 +71,7 @@ class WebClientLoggingFilter : ExchangeFilterFunction {
         }
 
         override fun setComplete(): Mono<Void> { // This is for requests without body (e.g. GET).
+            // Should try to parse trace id and span id where base message is constructed and put in context here
             val needToLog = alreadyLogged.compareAndSet(false, true)
             if (needToLog) {
                 log.info(baseLogMessage)

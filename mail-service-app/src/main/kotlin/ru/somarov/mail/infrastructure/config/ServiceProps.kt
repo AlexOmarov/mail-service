@@ -21,11 +21,16 @@ data class ServiceProps(
 
     data class HttpProps(
         val logging: HttpLoggingProps,
+        val client: WebClientProps,
         val port: Int,
     )
 
     data class HttpLoggingProps(
         val exclusions: List<String>,
+    )
+
+    data class WebClientProps(
+        val connectionTimeoutMillis: Int,
     )
 
     data class MailProps(

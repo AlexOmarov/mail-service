@@ -21,11 +21,14 @@ internal class LoggingResponseDecorator internal constructor(
         return super.writeWith(
             Flux.from(body)
                 .publishOn(Schedulers.boundedElastic())
-                .doOnNext { buffer: DataBuffer ->
+                .doOnNext { buffer ->
+                    // Here can be several log messages if body is huge
                     val bodyStream = ByteArrayOutputStream()
                     val channel = Channels.newChannel(bodyStream)
                     buffer.readableByteBuffers().forEach { channel.write(it) }
+                    channel.close()
                     httpLogger.logResponse(request, delegate, String(bodyStream.toByteArray()))
+                    bodyStream.close()
                 }
         )
     }

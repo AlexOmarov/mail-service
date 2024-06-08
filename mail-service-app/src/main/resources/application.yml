@@ -36,6 +36,8 @@ contour:
     uri: 'http://localhost:7001/rsocket' # only for self-requesting, remove if use service as template
   http:
     port: 8080
+    client:
+      connection-timeout-millis: 5000
     logging:
       exclusions:
         - /webjars.*

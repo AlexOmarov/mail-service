@@ -13,14 +13,16 @@ internal class LoggingRequestDecorator(
     private val logger: HttpLogger
 ) : ServerHttpRequestDecorator(delegate) {
 
-    private val body: Flux<DataBuffer>? = super.getBody()
+    override fun getBody(): Flux<DataBuffer> = super
+        .getBody()
         .publishOn(Schedulers.boundedElastic())
         .doOnNext { buffer ->
+            // Here can be several log messages if body is huge
             val bodyStream = ByteArrayOutputStream()
             val channel = Channels.newChannel(bodyStream)
             buffer.readableByteBuffers().forEach { channel.write(it) }
+            channel.close()
             logger.logRequest(delegate, String(bodyStream.toByteArray()))
+            bodyStream.close()
         }
-
-    override fun getBody(): Flux<DataBuffer> = body!!
 }
