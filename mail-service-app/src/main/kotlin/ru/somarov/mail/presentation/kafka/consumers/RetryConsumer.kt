@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component
 import reactor.kafka.receiver.KafkaReceiver
 import ru.somarov.mail.infrastructure.config.ServiceProps
 import ru.somarov.mail.infrastructure.kafka.KafkaProducerFacade
+import ru.somarov.mail.infrastructure.kafka.Utils.buildReceiver
 import ru.somarov.mail.infrastructure.kafka.consumer.IMessageConsumer
 import ru.somarov.mail.infrastructure.kafka.consumer.MessageConsumptionResult
 import ru.somarov.mail.infrastructure.kafka.consumer.MessageMetadata
@@ -23,7 +24,11 @@ class RetryConsumer(
     private val props: ServiceProps,
     private val consumers: List<AbstractMessageConsumerWithRetrySupport<CommonEvent>>,
 ) : AbstractMessageConsumer<RetryMessage<Any>>(props.kafka) {
-    private val receiver = buildReceiver(RetryMessageDeserializer(mapper), props.kafka.retryTopic)
+    private val receiver = buildReceiver(
+        RetryMessageDeserializer(mapper),
+        props.kafka.retryTopic,
+        props.kafka
+    )
     private val log = LoggerFactory.getLogger(this.javaClass)
     override fun getReceiver(): KafkaReceiver<String, RetryMessage<Any>?> = receiver
 

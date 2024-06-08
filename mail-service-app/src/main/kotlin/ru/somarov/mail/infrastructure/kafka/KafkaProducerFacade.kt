@@ -2,25 +2,21 @@ package ru.somarov.mail.infrastructure.kafka
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.micrometer.tracing.Tracer
-import io.opentelemetry.api.trace.SpanId
-import io.opentelemetry.api.trace.TraceId
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.reactive.asFlow
-import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.header.Header
 import org.apache.kafka.common.header.internals.RecordHeader
-import org.apache.kafka.common.serialization.Serializer
-import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.kafka.sender.KafkaSender
-import reactor.kafka.sender.SenderOptions
 import reactor.kafka.sender.SenderRecord
 import reactor.kafka.sender.SenderResult
 import ru.somarov.mail.infrastructure.config.ServiceProps
 import ru.somarov.mail.infrastructure.kafka.Constants.PAYLOAD_TYPE_HEADER_NAME
+import ru.somarov.mail.infrastructure.kafka.Utils.createSenderOptions
+import ru.somarov.mail.infrastructure.kafka.Utils.createTraceParentHeader
 import ru.somarov.mail.infrastructure.kafka.consumer.MessageMetadata
 import ru.somarov.mail.infrastructure.kafka.serde.dlq.DlqMessageSerializer
 import ru.somarov.mail.infrastructure.kafka.serde.mailbroadcast.MailBroadcastSerializer
@@ -29,19 +25,15 @@ import ru.somarov.mail.presentation.dto.events.DlqMessage
 import ru.somarov.mail.presentation.dto.events.RetryMessage
 import ru.somarov.mail.presentation.dto.events.event.broadcast.MailBroadcast
 import java.time.OffsetDateTime
-import kotlin.random.Random
 
 @Component
-class KafkaProducerFacade(
-    mapper: ObjectMapper,
-    private val tracer: Tracer,
-    private val props: ServiceProps,
-) {
+class KafkaProducerFacade(mapper: ObjectMapper, private val tracer: Tracer, private val props: ServiceProps) {
+
     private val log = LoggerFactory.getLogger(KafkaSender::class.java)
 
-    private val retrySender = KafkaSender.create(senderProps(RetryMessageSerializer(mapper)))
-    private val dlqSender = KafkaSender.create(senderProps(DlqMessageSerializer(mapper)))
-    private val mailSender = KafkaSender.create(senderProps(MailBroadcastSerializer(mapper)))
+    private val retrySender = KafkaSender.create(createSenderOptions(RetryMessageSerializer(mapper), props.kafka))
+    private val dlqSender = KafkaSender.create(createSenderOptions(DlqMessageSerializer(mapper), props.kafka))
+    private val mailSender = KafkaSender.create(createSenderOptions(MailBroadcastSerializer(mapper), props.kafka))
 
     suspend fun sendMailBroadcast(
         event: MailBroadcast,
@@ -102,7 +94,7 @@ class KafkaProducerFacade(
     ): SenderResult<T> {
         val partition = null
         val timestamp = null
-        val traceParent = getTraceParentHeader()
+        val traceParent = createTraceParentHeader(tracer)
         val headers = mutableListOf<Header>(
             RecordHeader(TRACE_HEADER_KEY, traceParent.toByteArray()),
             RecordHeader(PAYLOAD_TYPE_HEADER_NAME, (payloadQualifiedName).toByteArray())
@@ -131,32 +123,6 @@ class KafkaProducerFacade(
         )
 
         return result
-    }
-
-    private fun getTraceParentHeader(): String {
-        val min = Random.nextLong(2L, Long.MAX_VALUE - 2)
-        val max = Random.nextLong(min, Long.MAX_VALUE)
-        var traceId = TraceId.fromLongs(max, min)
-        var spanId = SpanId.fromLong(Random.nextLong())
-
-        val traceContext = tracer.currentTraceContext().context()
-        if (traceContext != null) {
-            traceId = traceContext.traceId()
-            spanId = traceContext.spanId()
-        }
-
-        return "00-$traceId-$spanId-01"
-    }
-
-    private fun <T> senderProps(serializer: Serializer<T>): SenderOptions<String, T> {
-        val producerProps: MutableMap<String, Any> = HashMap()
-        producerProps[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = props.kafka.brokers
-        producerProps[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
-        producerProps[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
-
-        return SenderOptions.create<String, T>(producerProps)
-            .withValueSerializer(serializer)
-            .maxInFlight(props.kafka.sender.maxInFlight)
     }
 
     companion object {

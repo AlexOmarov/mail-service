@@ -6,6 +6,7 @@ import reactor.kafka.receiver.KafkaReceiver
 import ru.somarov.mail.application.service.MailService
 import ru.somarov.mail.infrastructure.config.ServiceProps
 import ru.somarov.mail.infrastructure.kafka.KafkaProducerFacade
+import ru.somarov.mail.infrastructure.kafka.Utils.buildReceiver
 import ru.somarov.mail.infrastructure.kafka.consumer.MessageConsumptionResult
 import ru.somarov.mail.infrastructure.kafka.consumer.MessageMetadata
 import ru.somarov.mail.infrastructure.kafka.consumer.types.AbstractMessageConsumerWithRetrySupport
@@ -24,7 +25,8 @@ class CreateMailCommandConsumerWithRetrySupport(
 ) {
     private val postbackReceiver = buildReceiver(
         CreateMailCommandDeserializer(mapper),
-        props.kafka.createMailCommandTopic
+        props.kafka.createMailCommandTopic,
+        props.kafka
     )
 
     override suspend fun handleMessage(
