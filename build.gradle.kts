@@ -27,5 +27,6 @@ sonar {
         property("sonar.cpd.exclusions", exclusions)
         property("sonar.jacoco.excludes", exclusions)
         property("sonar.coverage.exclusions", exclusions)
+        property("sonar.junit.reportPaths", "$appBuildDirectory")
     }
 }
