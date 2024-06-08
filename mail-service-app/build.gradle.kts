@@ -38,6 +38,9 @@ dependencies {
     implementation(libs.rsocket.micrometer)
     implementation(libs.otel.zipkin)
     implementation(libs.logstash.logback.encoder)
+    implementation(libs.fluency.core)
+    implementation(libs.janino)
+    implementation(libs.fluency.fluentd)
 
     implementation(libs.hessian)
 

@@ -6,6 +6,9 @@
 
     <springProperty name="componentName" source="spring.application.name"/>
     <springProperty name="LOGSTASH_HOST" source="contour.logstash.host"/>
+    <springProperty name="FLUENTD_HOST" source="contour.fluentd.host"/>
+    <springProperty name="FLUENTD_PORT" source="contour.fluentd.port"/>
+    <springProperty name="FLUENTD_ENABLED" source="contour.fluentd.enabled"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
@@ -58,10 +61,49 @@
             </providers>
         </encoder>
     </appender>
+    <appender name="FLUENTD" class="ru.somarov.mail.infrastructure.logging.FluentdAppender">
+        <host>${FLUENTD_HOST}</host>
+        <port>${FLUENTD_PORT}</port>
+        <tag>${componentName}</tag>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <pattern>yyyy-MM-dd' 'HH:mm:ss.SSS</pattern>
+                    <fieldName>timestamp</fieldName>
+                    <timeZone>UTC</timeZone>
+                </timestamp>
+                <pattern>
+                    <omitEmptyFields>false</omitEmptyFields>
+                    <pattern>
+                        {
+                        "level": "%level",
+                        "message": "%message",
+                        "traceId": "%X{traceId}",
+                        "spanId": "%X{spanId}",
+                        "loggerName": "%logger",
+                        "threadName": "%thread",
+                        "componentName": "${componentName}"
+                        }
+                    </pattern>
+                </pattern>
+                <stackTrace>
+                    <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                        <lineSeparator>|</lineSeparator>
+                        <maxLength>1024</maxLength>
+                    </throwableConverter>
+                </stackTrace>
+            </providers>
+        </encoder>
+    </appender>
 
     <root>
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="STASH"/>
+        <if condition='Boolean.valueOf(p("FLUENTD_ENABLED"))'>
+            <then>
+                <appender-ref ref="FLUENTD"/>
+            </then>
+        </if>
     </root>
     <!-- Stop output INFO at start -->
     <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>

@@ -3,6 +3,10 @@ contour:
   instance: unknown
   logstash:
     host: localhost:5046
+  fluentd:
+    host: localhost
+    port: 5046
+    enabled: true
   zipkin:
     endpoint: http://localhost:9411/api/v2/spans
   kafka:

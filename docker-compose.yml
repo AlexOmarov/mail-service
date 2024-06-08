@@ -4,9 +4,9 @@ services:
   # Our service
   service:
     # Uncomment to use prebuilt srcs instead of image
-    # build:
-    #   context: .
-    image: decentboat/mail-service:latest
+    build:
+      context: .
+    # image: decentboat/mail-service:latest
     container_name: service
     healthcheck:
       test: "curl --fail --silent localhost:8080/actuator/health | grep UP || exit 1"
@@ -35,6 +35,8 @@ services:
       contour.kafka.brokers: kafka:9092
       contour.zipkin.endpoint: http://zipkin:9411/api/v2/spans
       contour.logstash.host: logstash:5046
+      contour.fluentd.host: fluentd
+      contour.fluentd.port: 24224
       contour.database.host: db
       contour.database.port: 5432
       contour.database.name: mail_service
@@ -178,6 +180,8 @@ services:
     ports:
       - "9200:9200"
       - "9600:9600"
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:2.14.0
     depends_on:

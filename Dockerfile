@@ -8,7 +8,7 @@ RUN  apt-get update \
   && apt-get clean
 
 USER appuser
-COPY .build/app/libs/app.jar /app.jar
+COPY ./mail-service-app/build/libs/app.jar /app.jar
 EXPOSE 8080 9010 9090 7000
 ENTRYPOINT ["java", \
     "-XX:+HeapDumpOnOutOfMemoryError", "-XX:HeapDumpPath=/var/dumps", \
