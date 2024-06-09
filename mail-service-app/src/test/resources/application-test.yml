@@ -29,3 +29,6 @@ contour:
       batch-size: 20
       lock-max-duration: PT1H
 
+kafka:
+  consuming-enabled: false
+  offset-reset-config: 'earliest'

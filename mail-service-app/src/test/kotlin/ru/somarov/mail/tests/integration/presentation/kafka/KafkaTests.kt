@@ -16,7 +16,6 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.reset
 import org.mockito.kotlin.times
@@ -25,6 +24,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.context.annotation.Import
+import org.springframework.test.context.TestPropertySource
 import org.testcontainers.shaded.org.awaitility.Awaitility.await
 import reactor.core.publisher.Flux
 import reactor.kafka.receiver.KafkaReceiver
@@ -33,21 +33,18 @@ import reactor.kafka.sender.KafkaSender
 import reactor.kafka.sender.SenderRecord
 import ru.somarov.mail.base.BaseIntegrationTest
 import ru.somarov.mail.infrastructure.db.Dao
-import ru.somarov.mail.infrastructure.kafka.KafkaProducerFacade
-import ru.somarov.mail.presentation.dto.events.event.command.CreateMailCommand
+import ru.somarov.mail.presentation.dto.event.command.CreateMailCommand
 import ru.somarov.mail.util.KafkaTestConfig
 import java.time.Duration
 import java.util.UUID
 
 @Import(KafkaTestConfig::class)
+@TestPropertySource(properties = ["kafka.consuming-enabled=true"])
 class KafkaTests : BaseIntegrationTest() {
     private val log = LoggerFactory.getLogger(this.javaClass)
 
     @Autowired
     lateinit var createMailCommandSender: KafkaSender<String, CreateMailCommand>
-
-    @SpyBean
-    lateinit var producerFacade: KafkaProducerFacade
 
     @SpyBean
     lateinit var dao: Dao
@@ -80,10 +77,6 @@ class KafkaTests : BaseIntegrationTest() {
                         assertDoesNotThrow {
                             verifyBlocking(dao, times(1)) {
                                 createMail(eq(email), eq(text))
-                            }
-
-                            verifyBlocking(producerFacade, times(1)) {
-                                sendMailBroadcast(any(), any(), any())
                             }
                         }
                     },

@@ -80,7 +80,6 @@ contour:
     user: mail_service
     password: mail_service
 
-
 management:
   health:
     readinessState:
@@ -97,7 +96,7 @@ management:
     health:
       group:
         readiness:
-          include: r2dbc, kafkaReceiversHealth, kafkaClusterHealth
+          include: r2dbc, kafkaConsumersHealth, kafkaClusterHealth
       show-details: always
       show-components: always
       probes:

@@ -1,6 +1,7 @@
 package ru.somarov.mail.application.scheduler
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.micrometer.observation.ObservationRegistry
 import io.rsocket.metadata.WellKnownMimeType
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.runBlocking
@@ -20,14 +21,12 @@ import org.springframework.util.MimeType
 import org.springframework.util.MimeTypeUtils
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
-import reactor.kafka.sender.KafkaSender
-import reactor.kafka.sender.SenderOptions
 import reactor.kafka.sender.SenderResult
 import ru.somarov.mail.infrastructure.config.ServiceProps
-import ru.somarov.mail.infrastructure.kafka.KafkaProducerFacade
-import ru.somarov.mail.infrastructure.kafka.consumer.MessageMetadata
-import ru.somarov.mail.infrastructure.kafka.serde.createmailcommand.CreateMailCommandSerializer
-import ru.somarov.mail.presentation.dto.events.event.command.CreateMailCommand
+import ru.somarov.mail.infrastructure.kafka.Metadata
+import ru.somarov.mail.infrastructure.kafka.Producer
+import ru.somarov.mail.infrastructure.kafka.Producer.ProducerProps
+import ru.somarov.mail.presentation.dto.event.command.CreateMailCommand
 import ru.somarov.mail.presentation.dto.request.CreateMailRequest
 import ru.somarov.mail.presentation.dto.response.MailResponse
 import java.nio.charset.StandardCharsets
@@ -43,30 +42,24 @@ import java.util.UUID
 private class LoadScheduler(
     private val requester: RSocketRequester,
     private val props: ServiceProps,
-    private val producerFacade: KafkaProducerFacade,
-    objectMapper: ObjectMapper
+    mapper: ObjectMapper,
+    registry: ObservationRegistry,
 ) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
-    private lateinit var sender: KafkaSender<String, CreateMailCommand>
-    private lateinit var poisonPillSender: KafkaSender<String, String>
+    private val mailProducer = Producer<CreateMailCommand>(
+        mapper,
+        ProducerProps(props.kafka.brokers, props.kafka.sender.maxInFlight, props.kafka.mailBroadcastTopic), registry
+    )
+    private val poisonPillProducer = Producer<String>(
+        mapper,
+        ProducerProps(props.kafka.brokers, props.kafka.sender.maxInFlight, props.kafka.mailBroadcastTopic), registry
+    )
 
     init {
         val producerProps: MutableMap<String, Any> = HashMap()
         producerProps[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = props.kafka.brokers
         producerProps[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
         producerProps[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
-
-        sender = KafkaSender.create(
-            SenderOptions.create<String, CreateMailCommand>(producerProps)
-                .withValueSerializer(CreateMailCommandSerializer(objectMapper))
-                .maxInFlight(props.kafka.sender.maxInFlight)
-        )
-
-        poisonPillSender = KafkaSender.create(
-            SenderOptions.create<String, String>(producerProps)
-                .withValueSerializer { _, data -> objectMapper.writeValueAsBytes(data) }
-                .maxInFlight(props.kafka.sender.maxInFlight)
-        )
     }
 
     @SchedulerLock(
@@ -102,24 +95,12 @@ private class LoadScheduler(
         }
     }
 
-    private suspend fun sendPoisonPillUsingKafka(): SenderResult<String> {
-        return producerFacade.sendMessage(
-            "Poison pill",
-            String::class.qualifiedName ?: "",
-            MessageMetadata(OffsetDateTime.now(), "key", 0),
-            props.kafka.createMailCommandTopic,
-            poisonPillSender
-        )
+    private suspend fun sendPoisonPillUsingKafka(): SenderResult<UUID> {
+        return poisonPillProducer.send("Poison pill", Metadata(OffsetDateTime.now(), "key", 0))
     }
 
-    private suspend fun createMailUsingKafka(): SenderResult<CreateMailCommand> {
-        return producerFacade.sendMessage(
-            CreateMailCommand("email", "text"),
-            CreateMailCommand::class.qualifiedName ?: "",
-            MessageMetadata(OffsetDateTime.now(), "key", 0),
-            props.kafka.createMailCommandTopic,
-            sender
-        )
+    private suspend fun createMailUsingKafka(): SenderResult<UUID> {
+        return mailProducer.send(CreateMailCommand("email", "text"), Metadata(OffsetDateTime.now(), "key", 0))
     }
 
     private suspend fun getMailUsingRsocket(id: UUID): MailResponse {

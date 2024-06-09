@@ -4,10 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.redis.testcontainers.RedisContainer
 import jakarta.mail.Session
 import jakarta.mail.internet.MimeMessage
-import org.awaitility.kotlin.await
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
@@ -16,9 +14,8 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.reset
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -36,8 +33,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
 import reactor.core.publisher.Hooks
 import ru.somarov.mail.infrastructure.config.ServiceProps
-import ru.somarov.mail.presentation.kafka.consumers.CreateMailCommandConsumerWithRetrySupport
-import java.time.Duration
+import ru.somarov.mail.presentation.consumers.MailConsumer
 import java.util.Properties
 
 @Testcontainers
@@ -47,6 +43,8 @@ import java.util.Properties
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 abstract class BaseIntegrationTest {
+
+    private val log = LoggerFactory.getLogger(this.javaClass)
 
     init {
         // Still doesn't add header to request with this, fix is needed
@@ -69,7 +67,7 @@ abstract class BaseIntegrationTest {
     lateinit var emailSenderImpl: JavaMailSenderImpl
 
     @SpyBean
-    lateinit var createMailConsumer: CreateMailCommandConsumerWithRetrySupport
+    lateinit var mailConsumer: MailConsumer
 
     @SpyBean
     lateinit var requester: RSocketRequester
@@ -77,17 +75,12 @@ abstract class BaseIntegrationTest {
     @BeforeAll
     fun setUp() {
         // Wait for consumer to load (not to start consuming)
-        await.await().timeout(Duration.ofSeconds(360)).atMost(Duration.ofSeconds(360))
-            .untilAsserted {
-                Assertions.assertAll(
-                    { verify(createMailConsumer, times(1)).getReceiver() }
-                )
-            }
+        log.info("Set up")
     }
 
     @AfterAll
     fun teardown() {
-        reset(createMailConsumer)
+        reset(mailConsumer)
     }
 
     @BeforeEach

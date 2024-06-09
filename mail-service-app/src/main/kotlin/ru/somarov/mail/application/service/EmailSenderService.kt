@@ -1,5 +1,7 @@
 package ru.somarov.mail.application.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.micrometer.observation.ObservationRegistry
 import kotlinx.coroutines.flow.toList
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
@@ -11,21 +13,27 @@ import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusC
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.FAILED
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.NEW
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.SENT
-import ru.somarov.mail.infrastructure.kafka.KafkaProducerFacade
-import ru.somarov.mail.infrastructure.kafka.consumer.MessageMetadata
+import ru.somarov.mail.infrastructure.kafka.Metadata
+import ru.somarov.mail.infrastructure.kafka.Producer
+import ru.somarov.mail.infrastructure.kafka.Producer.ProducerProps
 import ru.somarov.mail.infrastructure.mail.EmailSenderFacade
-import ru.somarov.mail.presentation.dto.events.event.broadcast.MailBroadcast
-import ru.somarov.mail.presentation.dto.events.event.broadcast.dto.MailStatus
+import ru.somarov.mail.presentation.dto.event.broadcast.MailBroadcast
 import java.time.OffsetDateTime
 
 @Service
 class EmailSenderService(
     private val props: ServiceProps,
     private val dao: Dao,
-    private val kafkaProducerFacade: KafkaProducerFacade,
-    private val emailSenderFacade: EmailSenderFacade
+    private val emailSenderFacade: EmailSenderFacade,
+    mapper: ObjectMapper,
+    registry: ObservationRegistry
 ) {
     private val log = LoggerFactory.getLogger(EmailSenderService::class.java)
+    private val producer = Producer<MailBroadcast>(
+        mapper,
+        ProducerProps(props.kafka.brokers, props.kafka.sender.maxInFlight, props.kafka.mailBroadcastTopic), registry
+    )
+
     suspend fun sendNewEmails(startDate: OffsetDateTime): Int {
         log.info("Started to get mails with unsent emails starting from $startDate")
 
@@ -73,10 +81,13 @@ class EmailSenderService(
         ).toList()
         savedMails.forEach { mail ->
             val statusDto = MailStatusCode.entries.first { it.id == mail.mailStatusId }
-            kafkaProducerFacade.sendMailBroadcast(
-                event = MailBroadcast(id = mail.uuid, status = MailStatus.valueOf(statusDto.name)),
-                metadata = MessageMetadata(attempt = 0, datetime = OffsetDateTime.now(), key = mail.uuid.toString()),
-                topic = props.kafka.mailBroadcastTopic
+            producer.send(
+                event = MailBroadcast(id = mail.uuid, status = MailBroadcast.MailStatus.valueOf(statusDto.name)),
+                metadata = Metadata(
+                    attempt = 0,
+                    createdAt = OffsetDateTime.now(),
+                    key = mail.uuid.toString()
+                )
             )
         }
     }

@@ -6,6 +6,7 @@ import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG
 import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.clients.producer.ProducerConfig
+import org.apache.kafka.common.errors.SerializationException
 import org.apache.kafka.common.serialization.Serializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
@@ -14,8 +15,7 @@ import org.springframework.context.annotation.Bean
 import reactor.kafka.sender.KafkaSender
 import reactor.kafka.sender.SenderOptions
 import ru.somarov.mail.infrastructure.config.ServiceProps
-import ru.somarov.mail.infrastructure.kafka.serde.createmailcommand.CreateMailCommandSerializer
-import ru.somarov.mail.presentation.dto.events.event.command.CreateMailCommand
+import ru.somarov.mail.presentation.dto.event.command.CreateMailCommand
 
 @TestConfiguration
 @AutoConfigureObservability
@@ -60,7 +60,13 @@ class KafkaTestConfig(private val props: ServiceProps) {
 
     @Bean
     fun createMailCommandSender(mapper: ObjectMapper): KafkaSender<String, CreateMailCommand> {
-        return createSender(CreateMailCommandSerializer(mapper))
+        return createSender { _, data ->
+            try {
+                mapper.writeValueAsBytes(data)
+            } catch (e: Exception) {
+                throw SerializationException("Error when serializing CommonEvent to byte[]", e)
+            }
+        }
     }
 
     private fun <T> createSender(serializer: Serializer<T>): KafkaSender<String, T> {
