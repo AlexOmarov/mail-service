@@ -19,7 +19,7 @@ import ru.somarov.mail.infrastructure.mail.EmailSenderFacade
 import java.time.OffsetDateTime
 import java.util.UUID
 
-private class EmailSendingServiceIntegrationTest : BaseIntegrationTest() {
+class EmailSendingServiceIntegrationTests : BaseIntegrationTest() {
 
     @Autowired
     lateinit var service: EmailSenderService

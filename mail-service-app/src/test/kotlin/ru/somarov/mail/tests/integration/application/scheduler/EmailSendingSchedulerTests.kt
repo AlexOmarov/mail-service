@@ -25,7 +25,7 @@ import java.util.UUID
         "contour.scheduling.email-sending.enabled = true",
     ]
 )
-private class EmailSendingSchedulerTests : BaseIntegrationTest() {
+class EmailSendingSchedulerTests : BaseIntegrationTest() {
     @SpyBean
     lateinit var service: EmailSenderService
 

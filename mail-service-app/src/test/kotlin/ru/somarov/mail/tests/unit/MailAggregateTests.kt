@@ -15,7 +15,7 @@ import ru.somarov.mail.infrastructure.db.entity.MailStatus
 import java.time.OffsetDateTime
 import java.util.UUID
 
-private class MailAggregateTests {
+class MailAggregateTests {
     private val mailSender = mock<JavaMailSender>()
 
     @Test

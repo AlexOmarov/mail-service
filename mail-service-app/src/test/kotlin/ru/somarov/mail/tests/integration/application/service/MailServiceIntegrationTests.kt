@@ -24,7 +24,7 @@ import ru.somarov.mail.infrastructure.db.repo.MailRepo
 import java.time.OffsetDateTime
 import java.util.UUID
 
-private class MailRegistrationServiceIntegrationTest : BaseIntegrationTest() {
+class MailServiceIntegrationTests : BaseIntegrationTest() {
 
     @Autowired
     lateinit var service: MailService
