@@ -4,8 +4,7 @@
 <configuration debug="false">
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
-    <springProperty name="componentName" source="spring.application.name"/>
-    <springProperty name="LOGSTASH_HOST" source="contour.logstash.host"/>
+    <springProperty name="component" source="spring.application.name"/>
     <springProperty name="FLUENTD_HOST" source="contour.fluentd.host"/>
     <springProperty name="FLUENTD_PORT" source="contour.fluentd.port"/>
     <springProperty name="FLUENTD_ENABLED" source="contour.fluentd.enabled"/>
@@ -28,33 +27,7 @@
                             "spanId": "%X{spanId}",
                             "loggerName": "%logger",
                             "threadName": "%thread",
-                            "componentName": "${componentName}"
-                        }
-                    </pattern>
-                </pattern>
-            </providers>
-        </encoder>
-    </appender>
-    <appender name="STASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>${LOGSTASH_HOST:- }</destination>
-        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
-            <providers>
-                <timestamp>
-                    <pattern>yyyy-MM-dd' 'HH:mm:ss.SSS</pattern>
-                    <fieldName>timestamp</fieldName>
-                    <timeZone>UTC</timeZone>
-                </timestamp>
-                <pattern>
-                    <omitEmptyFields>false</omitEmptyFields>
-                    <pattern>
-                        {
-                        "level": "%level",
-                        "message": "%message",
-                        "traceId": "%X{traceId}",
-                        "spanId": "%X{spanId}",
-                        "loggerName": "%logger",
-                        "threadName": "%thread",
-                        "componentName": "${componentName}"
+                            "component": "${component}"
                         }
                     </pattern>
                 </pattern>
@@ -82,7 +55,7 @@
                         "spanId": "%X{spanId}",
                         "loggerName": "%logger",
                         "threadName": "%thread",
-                        "componentName": "${componentName}"
+                        "component": "${component}"
                         }
                     </pattern>
                 </pattern>
@@ -98,7 +71,6 @@
 
     <root>
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="STASH"/>
         <if condition='Boolean.valueOf(p("FLUENTD_ENABLED"))'>
             <then>
                 <appender-ref ref="FLUENTD"/>

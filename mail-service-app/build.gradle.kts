@@ -37,13 +37,9 @@ dependencies {
     implementation(libs.bundles.shedlock)
 
     implementation(libs.rsocket.micrometer)
-    implementation(libs.otel.zipkin)
-    implementation(libs.logstash.logback.encoder)
-    implementation(libs.fluency.core)
     implementation(libs.janino)
+    implementation(libs.fluency.core)
     implementation(libs.fluency.fluentd)
-
-    implementation(libs.hessian)
 
     testImplementation(libs.bundles.test)
     testRuntimeOnly(libs.junit.launcher)

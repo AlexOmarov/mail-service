@@ -36,7 +36,6 @@ class FluentdAppender<E : ILoggingEvent> : AppenderBase<E>() {
         eventObject.mdcPropertyMap["spanId"]?.let { data["X-Call-Id"] = it }
 
         data["message"] = eventObject.formattedMessage
-        data["applicationName"] = tag
         data["level"] = eventObject.level.toString()
         data["logLevel.levelStr"] = eventObject.level.toString()
         data["loggerName"] = eventObject.loggerName

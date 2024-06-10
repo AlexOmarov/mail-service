@@ -1,8 +1,6 @@
 # Contour section stores values, that almost always vary from environment to environment
 contour:
   instance: unknown
-  logstash:
-    host: localhost:5046
   fluentd:
     host: localhost
     port: 5046
