@@ -29,7 +29,8 @@ internal class HttpLogger(private val filters: List<HttpLoggerFilter>) {
         if (preparedBody != null) {
             log.info(
                 "Body of incoming HTTP request -> " +
-                    "$method $fullPath: headers=$headers, params=$params, body=$preparedBody"
+                    "$method $fullPath: headers=$headers, params=$params, " +
+                    "body=${preparedBody!!.trimIndent().replace("\n", "")}"
             )
         } else {
             log.info("Incoming HTTP request -> $method $fullPath: headers=$headers, params=$params")
@@ -54,7 +55,9 @@ internal class HttpLogger(private val filters: List<HttpLoggerFilter>) {
 
         if (preparedBody != null) {
             log.info(
-                "Body of outgoing HTTP response <- $method $fullPath $status: headers=$headers, body=$preparedBody"
+                "Body of outgoing HTTP response <- " +
+                    "$method $fullPath $status: headers=$headers, " +
+                    "body=${preparedBody!!.trimIndent().replace("\n", "")}"
             )
         } else {
             log.info("Outgoing HTTP response <- $method $fullPath $status: headers=$headers")

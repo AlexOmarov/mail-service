@@ -20,14 +20,14 @@ import java.util.UUID
 private class MailController(private val service: MailService) : ISwaggerMailController {
     private val logger = LoggerFactory.getLogger(MailController::class.java)
 
-    @GetMapping("{id}")
+    @GetMapping("{id}", produces = ["application/json"])
     override suspend fun getMail(@PathVariable id: UUID): MailResponse {
         logger.info("Got getMail request for id $id")
         val mail = service.getMail(id)
         return MailResponse(Mail(mail.uuid, mail.text))
     }
 
-    @PostMapping
+    @PostMapping(produces = ["application/json"])
     override suspend fun createMail(@RequestBody request: CreateMailRequest): MailResponse {
         logger.info("Got create mail http request with body $request")
         val mail = service.createMail(request.email, request.text)

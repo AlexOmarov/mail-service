@@ -10,15 +10,15 @@ import io.rsocket.plugins.RSocketInterceptor
 import org.springframework.boot.rsocket.server.RSocketServerCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.MediaType
+import org.springframework.http.codec.cbor.KotlinSerializationCborDecoder
+import org.springframework.http.codec.cbor.KotlinSerializationCborEncoder
 import org.springframework.messaging.rsocket.RSocketRequester
 import org.springframework.messaging.rsocket.RSocketStrategies
 import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler
 import org.springframework.security.rsocket.metadata.SimpleAuthenticationEncoder
 import reactor.util.retry.Retry
 import ru.somarov.mail.infrastructure.config.ServiceProps
-import ru.somarov.mail.infrastructure.hessian.HessianCodecSupport.Companion.HESSIAN_MIME_TYPE
-import ru.somarov.mail.infrastructure.hessian.impl.HessianDecoder
-import ru.somarov.mail.infrastructure.hessian.impl.HessianEncoder
 import ru.somarov.mail.infrastructure.rsocket.RsocketClientLoggingInterceptor
 import ru.somarov.mail.infrastructure.rsocket.RsocketServerLoggingInterceptor
 import java.net.URI
@@ -50,8 +50,8 @@ private class RSocketConfig(private val props: ServiceProps) {
     fun messageHandler(): RSocketMessageHandler {
         val handler = RSocketMessageHandler()
         handler.rSocketStrategies = RSocketStrategies.builder()
-            .encoders { it.add(HessianEncoder()) }
-            .decoders { it.add(HessianDecoder()) }
+            .encoders { it.add(KotlinSerializationCborEncoder()) }
+            .decoders { it.add(KotlinSerializationCborDecoder()) }
             .build()
         return handler
     }
@@ -74,11 +74,11 @@ private class RSocketConfig(private val props: ServiceProps) {
                     }
                     .reconnect(Retry.fixedDelay(2, Duration.ofSeconds(2)))
             }
-            .dataMimeType(HESSIAN_MIME_TYPE)
+            .dataMimeType(MediaType.APPLICATION_CBOR)
             .rsocketStrategies(
                 RSocketStrategies.builder()
-                    .encoders { it.add(HessianEncoder()); it.add(SimpleAuthenticationEncoder()) }
-                    .decoders { it.add(HessianDecoder()) }
+                    .encoders { it.addAll(listOf(KotlinSerializationCborEncoder(), SimpleAuthenticationEncoder())) }
+                    .decoders { it.add(KotlinSerializationCborDecoder()) }
                     .build()
             )
             .websocket(URI.create(props.contour.rsocket.uri))

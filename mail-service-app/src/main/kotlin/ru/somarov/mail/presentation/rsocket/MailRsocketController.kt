@@ -4,6 +4,7 @@ import jakarta.validation.Valid
 import org.springframework.messaging.handler.annotation.DestinationVariable
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.Payload
+import org.springframework.messaging.rsocket.RSocketRequester
 import org.springframework.stereotype.Controller
 import org.springframework.validation.annotation.Validated
 import ru.somarov.mail.application.service.MailService
@@ -17,7 +18,7 @@ import java.util.UUID
 private class MailRsocketController(val service: MailService) {
 
     @MessageMapping("mail")
-    suspend fun createMail(@Payload @Valid request: CreateMailRequest): MailResponse {
+    suspend fun createMail(@Payload @Valid request: CreateMailRequest, requester: RSocketRequester): MailResponse {
         val mail = service.createMail(request.email, request.text)
         return MailResponse(Mail(mail.uuid, mail.text))
     }

@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm")
     alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.detekt)
     `maven-publish`
 }
@@ -13,6 +14,7 @@ dependencies {
     detektPlugins(libs.detekt.ktlint)
 
     api(libs.springdoc.api)
+    api(libs.kotlin.serialization.cbor)
     api(libs.spring.boot.starter.validation)
 }
 

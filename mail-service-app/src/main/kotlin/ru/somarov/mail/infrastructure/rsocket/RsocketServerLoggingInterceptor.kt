@@ -5,32 +5,29 @@ import io.rsocket.RSocket
 import io.rsocket.plugins.RSocketInterceptor
 import org.slf4j.LoggerFactory
 import reactor.core.publisher.Mono
+import ru.somarov.mail.infrastructure.rsocket.RsocketUtil.getDeserializedPayload
 
-class RsocketServerLoggingInterceptor : RSocketInterceptor, RsocketPayloadDeserializer {
+class RsocketServerLoggingInterceptor : RSocketInterceptor {
     private val log = LoggerFactory.getLogger(this.javaClass)
 
     override fun apply(rSocket: RSocket): RSocket {
         return object : RSocket {
             override fun requestResponse(payload: Payload): Mono<Payload> {
-                logRequest(payload)
+                val deserializedRequest = getDeserializedPayload(payload)
+                log.info(
+                    "Incoming rsocket request -> ${deserializedRequest.third}: " +
+                        "payload: ${deserializedRequest.first}, metadata: ${deserializedRequest.second}"
+                )
                 return rSocket.requestResponse(payload)
-                    .doOnSuccess { response -> logResponse(response) }
-            }
-
-            private fun logRequest(payload: Payload) {
-                val deserializedPayload = getDeserializedPayload(payload)
-                log.info(
-                    "Incoming rsocket request -> " +
-                        "payload: ${deserializedPayload.first}, metadata: ${deserializedPayload.second}"
-                )
-            }
-
-            private fun logResponse(payload: Payload) {
-                val deserializedPayload = getDeserializedPayload(payload)
-                log.info(
-                    "Outgoing rsocket response <- " +
-                        "payload: ${deserializedPayload.first}, metadata: ${deserializedPayload.second}"
-                )
+                    .doOnSuccess {
+                        val deserializedResponse = getDeserializedPayload(it)
+                        log.info(
+                            "Outgoing rsocket response <- ${deserializedRequest.third}: " +
+                                "payload: ${deserializedResponse.first}, " +
+                                "request metadata: ${deserializedRequest.second}, " +
+                                "response metadata: ${deserializedResponse.second}"
+                        )
+                    }
             }
         }
     }

@@ -76,6 +76,7 @@ class MailRsocketControllerTests : BaseIntegrationTest() {
         val mail = runBlocking { dao.createMail("email", "text") }
         val ex = webClient.get().uri("/mails/${mail.id}")
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .header(HttpHeaders.EXPECT, MediaType.APPLICATION_JSON_VALUE)
             .header(
                 HttpHeaders.AUTHORIZATION,
                 createBasicAuthString(props.contour.auth.user, props.contour.auth.password)
