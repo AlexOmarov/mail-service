@@ -21,11 +21,11 @@ private class ExceptionHandler {
         return ResponseEntity(result.first, result.second)
     }
 
-    @MessageExceptionHandler
-    fun exception(ex: Exception): ResponseEntity<ErrorResponse> {
+    @MessageExceptionHandler(Throwable::class)
+    fun exception(ex: Throwable): ErrorResponse {
         log.error("Got exception while processing message: $ex")
         val result = getResponseBody(ex)
-        return ResponseEntity(result.first, result.second)
+        return result.first
     }
 
     private fun getResponseBody(exception: Throwable): Pair<ErrorResponse, HttpStatusCode> {
