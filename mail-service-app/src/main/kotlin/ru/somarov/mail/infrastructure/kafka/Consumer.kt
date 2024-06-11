@@ -119,19 +119,19 @@ abstract class Consumer<T : Any>(
             registry
         )
 
-        return observation.observe(
-            Supplier {
-                if (record.value() == null) {
-                    log.warn("Got empty value for record $record")
-                    // Would be great to send messages which cannot be serialized to dlq here
-                    Mono.just(Result(Result.Code.FAILED))
-                } else {
-                    mono(registry.asContextElement()) {
-                        handle(record.value()!!, Metadata(OffsetDateTime.now(), record.key(), 0))
-                    }
+        val result: Mono<Result>? = observation.observe(Supplier {
+            if (record.value() == null) {
+                log.warn("Got empty value for record $record")
+                // Would be great to send messages which cannot be serialized to dlq here
+                Mono.just(Result(Result.Code.FAILED))
+            } else {
+                mono(registry.asContextElement()) {
+                    handle(record.value()!!, Metadata(OffsetDateTime.now(), record.key(), 0))
                 }
             }
-        )!!
+        })
+
+        return result!!
     }
 
     @Suppress("TooGenericExceptionCaught")
