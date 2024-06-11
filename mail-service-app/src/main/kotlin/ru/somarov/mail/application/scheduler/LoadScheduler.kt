@@ -48,11 +48,11 @@ private class LoadScheduler(
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val mailProducer = Producer<CreateMailCommand>(
         mapper,
-        ProducerProps(props.kafka.brokers, props.kafka.sender.maxInFlight, props.kafka.mailBroadcastTopic), registry
+        ProducerProps(props.kafka.brokers, props.kafka.sender.maxInFlight, props.kafka.createMailCommandTopic), registry
     )
     private val poisonPillProducer = Producer<String>(
         mapper,
-        ProducerProps(props.kafka.brokers, props.kafka.sender.maxInFlight, props.kafka.mailBroadcastTopic), registry
+        ProducerProps(props.kafka.brokers, props.kafka.sender.maxInFlight, props.kafka.createMailCommandTopic), registry
     )
 
     init {

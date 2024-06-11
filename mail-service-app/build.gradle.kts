@@ -37,13 +37,16 @@ dependencies {
     implementation(libs.bundles.shedlock)
 
     implementation(libs.rsocket.micrometer)
-    implementation(libs.janino)
-    implementation(libs.fluency.core)
-    implementation(libs.fluency.fluentd)
+    implementation(libs.logback.logstash)
+    implementation(libs.logback.otel)
+    implementation(libs.otel.otlp)
 
     testImplementation(libs.bundles.test)
     testRuntimeOnly(libs.junit.launcher)
 
+}
+repositories {
+    mavenCentral()
 }
 
 tasks.bootJar {

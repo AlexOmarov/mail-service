@@ -1,7 +1,11 @@
-FROM bellsoft/liberica-runtime-container:jre-21-crac-slim-glibc
+FROM openjdk:21-jdk-slim
 
 RUN addgroup --system --gid 800 appuser && \
-    adduser --system --uid 800 appuser
+    adduser --system --uid 800 --gid 800 appuser
+
+RUN  apt-get update \
+  && apt-get install -y curl \
+  && apt-get clean
 
 USER appuser
 COPY ./mail-service-app/build/libs/app.jar /app.jar

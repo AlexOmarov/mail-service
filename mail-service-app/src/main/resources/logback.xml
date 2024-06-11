@@ -4,10 +4,8 @@
 <configuration debug="false">
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
-    <springProperty name="component" source="spring.application.name"/>
-    <springProperty name="FLUENTD_HOST" source="contour.fluentd.host"/>
-    <springProperty name="FLUENTD_PORT" source="contour.fluentd.port"/>
-    <springProperty name="FLUENTD_ENABLED" source="contour.fluentd.enabled"/>
+    <springProperty name="serviceName" source="spring.application.name"/>
+    <springProperty name="OTEL_HOST" source="contour.otlp.host"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
@@ -27,55 +25,23 @@
                             "spanId": "%X{spanId}",
                             "loggerName": "%logger",
                             "threadName": "%thread",
-                            "component": "${component}"
-                        }
-                    </pattern>
-                </pattern>
-            </providers>
-        </encoder>
-    </appender>
-    <appender name="FLUENTD" class="ru.somarov.mail.infrastructure.logging.FluentdAppender">
-        <host>${FLUENTD_HOST}</host>
-        <port>${FLUENTD_PORT}</port>
-        <tag>${componentName}</tag>
-        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
-            <providers>
-                <timestamp>
-                    <pattern>yyyy-MM-dd' 'HH:mm:ss.SSS</pattern>
-                    <fieldName>timestamp</fieldName>
-                    <timeZone>UTC</timeZone>
-                </timestamp>
-                <pattern>
-                    <omitEmptyFields>false</omitEmptyFields>
-                    <pattern>
-                        {
-                        "level": "%level",
-                        "message": "%message",
-                        "traceId": "%X{traceId}",
-                        "spanId": "%X{spanId}",
-                        "loggerName": "%logger",
-                        "threadName": "%thread",
-                        "component": "${component}"
+                            "serviceName": "${serviceName}"
                         }
                     </pattern>
                 </pattern>
                 <stackTrace>
                     <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
                         <lineSeparator>|</lineSeparator>
-                        <maxLength>1024</maxLength>
                     </throwableConverter>
                 </stackTrace>
             </providers>
         </encoder>
     </appender>
+    <appender name="OTEL" class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender"/>
 
     <root>
         <appender-ref ref="CONSOLE"/>
-        <if condition='Boolean.valueOf(p("FLUENTD_ENABLED"))'>
-            <then>
-                <appender-ref ref="FLUENTD"/>
-            </then>
-        </if>
+        <appender-ref ref="OTEL"/>
     </root>
     <!-- Stop output INFO at start -->
     <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>

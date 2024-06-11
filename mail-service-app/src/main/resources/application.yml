@@ -1,12 +1,15 @@
 # Contour section stores values, that almost always vary from environment to environment
 contour:
   instance: unknown
-  fluentd:
+  fluentbit:
     host: localhost
     port: 5046
     enabled: true
-  zipkin:
-    endpoint: http://localhost:9411/api/v2/spans
+  otlp:
+    host: localhost
+    logs-port: 4317
+    metrics-port: 4318
+    traces-port: 4319
   kafka:
     brokers: localhost:29092
     mail-broadcast-topic: mail_service_mail_broadcast
@@ -79,6 +82,12 @@ contour:
     password: mail_service
 
 management:
+  otlp:
+    metrics:
+      export:
+        url: 'http://${contour.otlp.host}:${contour.otlp.metrics-port}/opentelemetry.proto.collector.metrics.v1.MetricsService/Export'
+    tracing:
+      endpoint: 'http://${contour.otlp.host}:${contour.otlp.traces-port}/opentelemetry.proto.collector.trace.v1.TraceService/Export'
   health:
     readinessState:
       enabled: true
@@ -89,7 +98,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,prometheus,info
+        include: health,info
   endpoint:
     health:
       group:
@@ -108,16 +117,9 @@ management:
             requests: true
     health:
       show-details: always
-  zipkin:
-    tracing:
-      endpoint: '${contour.zipkin.endpoint}'
   tracing:
     sampling:
       probability: 1.0
-  prometheus:
-    metrics:
-      export:
-        enabled: true
 
 server:
   port: '${contour.http.port}'

@@ -4,26 +4,27 @@ services:
   # Our service
   service:
     # Uncomment to use prebuilt srcs instead of image
-    # build:
-    #  context: .
-    image: decentboat/mail-service:latest
+    build:
+     context: .
+    # image: decentboat/mail-service:latest
     container_name: service
     healthcheck:
-      test: "curl --fail --silent localhost:8080/actuator/health | grep UP || exit 1"
+      test: "curl --fail --silent localhost:8080/actuator/health/liveness | grep UP || exit 1"
       interval: 5s
       timeout: 2s
-      retries: 2
+      retries: 5
       start_period: 20s
     depends_on:
       - db
+      - dataprepper
       - kafka
       - redis
-      - zipkin
       - mailslurper
       - mock-server
     environment:
       contour.cache.host: redis
       contour.cache.port: 6379
+
       contour.mail.host: mailslurper
       contour.mail.username: user@mail.ru
       contour.mail.password: password
@@ -32,17 +33,18 @@ services:
       contour.mail.tls-required: false
       contour.mail.auth-enabled: false
       contour.mail.port: 2500
+
       contour.kafka.brokers: kafka:9092
-      contour.zipkin.endpoint: http://zipkin:9411/api/v2/spans
-      contour.fluentd.host: fluentd
-      contour.fluentd.port: 24224
+
+      contour.otlp.host: dataprepper
+
       contour.database.host: db
       contour.database.port: 5432
       contour.database.name: mail_service
       contour.database.schema: mail_service
       contour.database.password: mail_service
       contour.database.user: mail_service
-      spring.profiles.active: dev
+
     ports:
       - "8080:8080"
       - "9091:9091"
@@ -152,14 +154,15 @@ services:
     # volumes:
     #   - "F:/work/projects/orbsoft/message-queue-service/message-queue-service-app/src/main/resources/keys:/tmp"
   # Containers related to Opensearch stack for logs -
-  fluentd:
-    build: ./config/elk/fluentd/
-    container_name: fluentd
+  dataprepper:
+    image: opensearchproject/data-prepper:2.8.0
+    container_name: dataprepper
     volumes:
-      - ./config/elk/fluentd/conf/:/fluentd/etc
+      - ./config/fluentbit/pipelines.yml:/usr/share/data-prepper/pipelines/pipelines.yaml
     ports:
-      - "9880:9880"
-      - "24224:24224"
+      - "4317:4317" # otel_logs_source
+      - "4318:4318" # otel_metrics_source
+      - "4319:4319" # otel_trace_source
   opensearch:
     image: opensearchproject/opensearch:2.14.0
     environment:
@@ -181,35 +184,6 @@ services:
       # must be a string with no spaces when specified as an environment variable
       OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
       DISABLE_SECURITY_DASHBOARDS_PLUGIN: true
-  # Containers related to metrics/traces
-  prometheus:
-    image: prom/prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./config/observability/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/var/lib/prometheus
-  grafana:
-    image: grafana/grafana-enterprise
-    container_name: grafana
-    restart: unless-stopped
-    depends_on:
-      - prometheus
-    ports:
-      - '3000:3000'
-    environment:
-      GF_INSTALL_PLUGINS: grafana-clock-panel
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
-    volumes:
-      - ./config/observability/grafana/datasources/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yaml
-      - ./config/observability/grafana/dashboards/config.yml:/etc/grafana/provisioning/dashboards/config.yaml
-      - ./config/observability/grafana/dashboards/micrometer.json:/var/lib/grafana/dashboards/micrometer.json
-      - grafana_data:/var/lib/grafana
-  zipkin:
-    image: openzipkin/zipkin
-    ports:
-      - "9411:9411"
   # Containers with emulated side systems
   mock-server:
     image: mockserver/mockserver
@@ -245,8 +219,6 @@ volumes:
 
   schema-registry-secrets: { }
 
-  grafana_data: { }
-  prometheus_data: { }
   opensearch_data: { }
 
   redis_data: { }

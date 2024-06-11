@@ -8,8 +8,8 @@ kotlin-serialization-cbor = "1.6.3"
 kotlinx-coroutines = "1.8.1"
 kover = "0.8.0"
 
-fluency = "2.7.0"
-janino = "3.1.12"
+logstash-logback-encoder = "7.4"
+otel-logback-encoder = "2.4.0-alpha"
 
 micrometer = "1.13.0"
 micrometer-context-propagation = "1.1.1"
@@ -17,7 +17,7 @@ micrometer-reactor = "1.1.6"
 micrometer-tracing = "1.3.0"
 
 mockito = "5.3.1"
-otel = "1.38.0"
+otel = "1.37.0"
 r2dbc-postgresql = "1.0.5.RELEASE"
 reactor-kotlin-extensions = "1.2.2"
 rsocket-micrometer = "1.1.4"
@@ -44,14 +44,13 @@ junit-api = { group = "org.junit.jupiter", name = "junit-jupiter-api" }
 junit-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine" }
 junit-launcher = { group = "org.junit.platform", name = "junit-platform-launcher" }
 
-janino = { group = "org.codehaus.janino", name = "janino", version.ref = "janino" }
-fluency-core = { group = "org.komamitsu", name = "fluency-core", version.ref = "fluency" }
-fluency-fluentd = { group = "org.komamitsu", name = "fluency-fluentd", version.ref = "fluency" }
+logback-logstash = { group = "net.logstash.logback", name = "logstash-logback-encoder", version.ref = "logstash-logback-encoder" }
+logback-otel = { group = "io.opentelemetry.instrumentation", name = "opentelemetry-logback-appender-1.0", version.ref = "otel-logback-encoder" }
 
 micrometer = { group = "io.micrometer", name = "micrometer-core", version.ref = "micrometer" }
-micrometer-context-propagation = { group = "io.micrometer", name = "context-propagation", version.ref = "micrometer-context-propagation" }
 micrometer-reactor = { group = "io.projectreactor", name = "reactor-core-micrometer", version.ref = "micrometer-reactor" }
-micrometer-registry-prometheus = { group = "io.micrometer", name = "micrometer-registry-prometheus", version.ref = "micrometer" }
+micrometer-context-propagation = { group = "io.micrometer", name = "context-propagation", version.ref = "micrometer-context-propagation" }
+micrometer-registry-otlp = { group = "io.micrometer", name = "micrometer-registry-otlp", version.ref = "micrometer" }
 micrometer-tracing = { group = "io.micrometer", name = "micrometer-tracing", version.ref = "micrometer-tracing" }
 micrometer-tracing-otel = { group = "io.micrometer", name = "micrometer-tracing-bridge-otel", version.ref = "micrometer-tracing" }
 
@@ -107,10 +106,8 @@ test = ["junit-api", "junit-engine", "testcontainers-junit", "mockito", "awaitil
 
 postgres = ["flyway-postgres", "postgresql", "testcontainers-postgres", "r2dbc-postgresql"]
 redis = ["spring-boot-starter-data-redis-reactive", "testcontainers-redis"]
-micrometer = ["micrometer", "micrometer-registry-prometheus", "micrometer-reactor", "micrometer-tracing", "micrometer-tracing-otel", "micrometer-context-propagation"]
+micrometer = ["micrometer", "micrometer-registry-otlp", "micrometer-reactor", "micrometer-tracing", "micrometer-tracing-otel", "micrometer-context-propagation"]
 shedlock = ["shedlock-spring", "shedlock-provider-r2dbc"]
-
-base = ["rsocket-micrometer", "otel-otlp"]
 
 [plugins]
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }

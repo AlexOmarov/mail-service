@@ -4,14 +4,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import java.time.Duration
 
 @ConfigurationProperties
-data class ServiceProps(
-    val contour: ContourProps,
-    val kafka: KafkaProps
-) {
+data class ServiceProps(val contour: ContourProps, val kafka: KafkaProps) {
     data class ContourProps(
         val instance: String,
         val scheduling: SchedulingProps,
         val mail: MailProps,
+        val otlp: OtlpProps,
         val cache: CacheProps,
         val rsocket: RSocketProps,
         val http: HttpProps,
@@ -27,6 +25,11 @@ data class ServiceProps(
 
     data class HttpLoggingProps(
         val exclusions: List<String>,
+    )
+
+    data class OtlpProps(
+        val host: String,
+        val logsPort: Int,
     )
 
     data class WebClientProps(

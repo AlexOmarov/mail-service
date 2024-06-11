@@ -152,7 +152,7 @@ abstract class Consumer<T : Any>(
                 try {
                     mapper.readValue(stringData, clazz)
                 } catch (e: Exception) {
-                    log.error("Got exception $e while trying to parse ConversionUpdateEvent from data $data")
+                    log.error("Got exception $e while trying to parse event from data $data")
                     null
                 }
             }
