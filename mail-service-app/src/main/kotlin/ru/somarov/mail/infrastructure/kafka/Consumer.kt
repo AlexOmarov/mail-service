@@ -114,7 +114,7 @@ abstract class Consumer<T : Any>(
 
     private fun handleRecord(record: ConsumerRecord<String, T?>): Mono<Result> {
         val observation = Observation.createNotStarted(
-            "kafka_observation_${UUID.randomUUID()}",
+            "kafka_observation",
             { KafkaRecordReceiverContext(record, props.name) { UUID.randomUUID().toString() } },
             registry
         )
