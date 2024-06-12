@@ -5,6 +5,8 @@ metrics_pipeline:
       unframed_requests: true
       proto_reflection_service: true
       ssl: false
+  processor:
+    - otel_metrics_raw_processor:
   sink:
     - opensearch:
         hosts: [ "http://opensearch:9200" ]
@@ -46,15 +48,17 @@ raw_traces_pipeline:
         hosts: ["http://opensearch:9200"]
         insecure: true
         index_type: trace-analytics-raw
+        trace_analytics_raw: true
 
 service_traces_pipeline:
   source:
     pipeline:
       name: "traces_pipeline"
   processor:
-    - service_map:
+    - service_map_stateful:
   sink:
     - opensearch:
         hosts: ["http://opensearch:9200"]
         insecure: true
         index_type: trace-analytics-service-map
+        trace_analytics_service_map: true

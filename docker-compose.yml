@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   # Our service
   service:
@@ -9,7 +7,7 @@ services:
     # image: decentboat/mail-service:latest
     container_name: service
     healthcheck:
-      test: "curl --fail --silent localhost:8080/actuator/health/liveness | grep UP || exit 1"
+      test: "wget --no-verbose --tries=1 --spider localhost:8080/actuator/health/liveness || exit 1"
       interval: 5s
       timeout: 2s
       retries: 5
