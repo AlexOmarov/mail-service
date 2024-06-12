@@ -1,0 +1,99 @@
+receivers:
+  # TODO: add jmx for all systems
+  otlp/logs:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+  otlp/metrics:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+
+  otlp/traces:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4319
+
+  zookeeper:
+    endpoint: "zookeeper:2181"
+    collection_interval: 5s
+
+  kafkametrics:
+    brokers: kafka:9092
+    protocol_version: 3.7.0
+    scrapers:
+      - brokers
+      - topics
+      - consumers
+    collection_interval: 5s
+
+  redis:
+    endpoint: "keydb:6379"
+    password: "123"
+    collection_interval: 5s
+
+  postgresql:
+    endpoint: db:5432
+    transport: tcp
+    username: mail_service
+    password: mail_service
+    databases:
+      - mail_service
+    collection_interval: 5s
+    tls:
+      insecure: true
+    connection_pool:
+      max_idle_time: 10m
+      max_lifetime: 0
+      max_idle: 2
+      max_open: 5
+
+  sqlquery/pgstatstatements:
+    driver: postgres
+    datasource: "host=db port=5432 user=mail_service password=mail_service sslmode=disable dbname=mail_service"
+    collection_interval: 5s
+    queries:
+      - sql: "SELECT queryid, total_exec_time, mean_exec_time, userid, dbid FROM pg_stat_statements"
+        metrics:
+          - metric_name: pg_stat_statements_total_exec_time
+            value_column: total_exec_time
+            attribute_columns: [queryid, userid, dbid]
+            value_type: double
+            data_type: sum
+          - metric_name: pg_stat_statements_mean_exec_time
+            value_column: mean_exec_time
+            attribute_columns: [queryid, userid, dbid]
+            value_type: double
+            data_type: gauge
+
+exporters:
+  prometheusremotewrite:
+    endpoint: "http://dataprepper:4318/v1/metrics"
+    resource_to_telemetry_conversion:
+      enabled: true # Convert resource attributes to metric labels
+
+  otlp/logs:
+    endpoint: dataprepper:4317
+    tls:
+      insecure: true
+  otlp/metrics:
+    endpoint: dataprepper:4318
+    tls:
+      insecure: true
+  otlp/traces:
+    endpoint: dataprepper:4319
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    metrics:
+      receivers: [sqlquery/pgstatstatements, otlp/metrics, zookeeper, kafkametrics, redis, postgresql]
+      exporters: [otlp/metrics]
+    logs:
+      receivers: [ otlp/logs ]
+      exporters: [ otlp/logs ]
+    traces:
+      receivers: [ otlp/traces ]
+      exporters: [ otlp/traces ]

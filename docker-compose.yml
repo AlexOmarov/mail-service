@@ -1,5 +1,5 @@
 services:
-  # Our service
+  # Service
   service:
     # Uncomment to use prebuilt srcs instead of image
     build:
@@ -15,12 +15,14 @@ services:
     depends_on:
       - db
       - dataprepper
+      - otel-collector
       - kafka
-      - redis
+      - keydb
       - mailslurper
       - mock-server
     environment:
-      contour.cache.host: redis
+      contour.cache.host: keydb
+      spring.application.name: mail-service-three
       contour.cache.port: 6379
 
       contour.mail.host: mailslurper
@@ -34,7 +36,7 @@ services:
 
       contour.kafka.brokers: kafka:9092
 
-      contour.otlp.host: dataprepper
+      contour.otlp.host: otel-collector
 
       contour.database.host: db
       contour.database.port: 5432
@@ -47,7 +49,7 @@ services:
       - "9091:9091"
       - "9010:9010"
       - "7001:7001"
-  # Containers related to databases
+  # Storage
   db:
     image: postgres:16.3
     container_name: db
@@ -58,8 +60,10 @@ services:
       POSTGRES_PASSWORD: mail_service
       POSTGRES_USER: mail_service
       POSTGRES_DB: mail_service
+    command: postgres -c shared_preload_libraries='pg_stat_statements'
     volumes:
       - pg_data:/var/lib/postgresql/data
+      - ./config/db/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
   pgadmin:
     image: dpage/pgadmin4
     depends_on:
@@ -74,24 +78,25 @@ services:
       - pgadmin:/var/lib/pgadmin
     ports:
       - "4002:80"
-  redis:
-    container_name: redis
+  keydb:
+    container_name: keydb
     image: eqalpha/keydb:latest
     restart: always
     entrypoint: keydb-server --appendonly yes --requirepass 123 --maxmemory 512mb --maxmemory-policy allkeys-lru
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
-  # Containers related to kafka
+      - keydb_data:/data
+  # Kafka
   zookeeper:
     image: confluentinc/cp-zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_SERVER_ID: 1
-    ports:
-      - "2181:2181"
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME : 0.0.0.0
+      KAFKA_OPTS: "-Dzookeeper.4lw.commands.whitelist=*"
     volumes:
       - zk-data:/var/lib/zookeeper/data
       - zk-txn-logs:/var/lib/zookeeper/log
@@ -104,8 +109,6 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: localhost
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:6005
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:9092'
-    ports:
-      - "6005:6005"
     volumes:
       - schema-registry-secrets:/etc/schema-registry/secrets
   kafka:
@@ -124,6 +127,9 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_DEFAULT_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME : 0.0.0.0
+      KAFKA_JMX_OPTS : "-Dcom.sun.management.jmxremote.rmi.port=9101 -Djava.rmi.server.hostname=0.0.0.0 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false"
     volumes:
       - kafka-data:/var/lib/kafka/data
       - kafka-secrets:/etc/kafka/secrets
@@ -140,27 +146,31 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
       KAFKA_CLUSTERS_0_JMXPORT: 9997
-  # Containers related to Opensearch stack for logs -
+  # Observability
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.102.1
+    volumes:
+      - ./config/observability/otelcollector/config.yaml:/etc/config.yaml
+    command: ["--config=/etc/config.yaml"]
+    ports:
+      - "1888:1888" # pprof extension
+      - "8888:8888" # Prometheus exposed by the Collector
+      - "8889:8889" # Prometheus exporter metrics
+      - "13133:13133" # health_check extension
+      - "4317:4317" # OTLP gRPC receiver
+      - "4318:4318" # OTLP http receiver
   dataprepper:
     image: opensearchproject/data-prepper:2.8.0
     container_name: dataprepper
     volumes:
-      - ./config/dataprepper:/usr/share/data-prepper/pipelines
-    ports:
-      - "4317:4317" # otel_logs_source
-      - "4318:4318" # otel_metrics_source
-      - "4319:4319" # otel_trace_source
+      - ./config/observability/dataprepper:/usr/share/data-prepper/pipelines
   opensearch:
     image: opensearchproject/opensearch:2.14.0
     environment:
       OPENSEARCH_INITIAL_ADMIN_PASSWORD: "Aa1@~sfhkjswfyj!"
       discovery.type: "single-node"
       DISABLE_SECURITY_PLUGIN: true
-
       OPENSEARCH_JAVA_OPTS="-Dopensearch:experimental:feature:telemetry:enabled=true":
-    ports:
-      - "9200:9200"
-      - "9600:9600"
     volumes:
       - opensearch_data:/usr/share/opensearch/data
   opensearch-dashboards:
@@ -173,7 +183,7 @@ services:
       # must be a string with no spaces when specified as an environment variable
       OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
       DISABLE_SECURITY_DASHBOARDS_PLUGIN: true
-  # Containers with emulated side systems
+  # Side
   mock-server:
     image: mockserver/mockserver
     ports:
@@ -183,7 +193,7 @@ services:
       MOCKSERVER_PROPERTY_FILE: /config/mockserver.properties
       MOCKSERVER_INITIALIZATION_JSON_PATH: /config/init.json
     volumes:
-      - ./config/sidesystems/mockserver:/config
+      - ./config/side/mockserver:/config
   mailslurper:
     container_name: mailslurper
     image: marcopas/docker-mailslurper:latest
@@ -210,4 +220,4 @@ volumes:
 
   opensearch_data: { }
 
-  redis_data: { }
+  keydb_data: { }

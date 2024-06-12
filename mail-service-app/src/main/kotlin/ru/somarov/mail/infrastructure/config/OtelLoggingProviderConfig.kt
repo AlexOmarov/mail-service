@@ -9,7 +9,6 @@ import io.opentelemetry.sdk.resources.Resource
 import io.opentelemetry.sdk.trace.samplers.Sampler
 import org.springframework.boot.actuate.autoconfigure.tracing.SpanProcessors
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
-import org.springframework.boot.info.BuildProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -20,7 +19,6 @@ private class OtelLoggingProviderConfig {
     @ConditionalOnMissingBean
     fun otelSdkLoggerProvider(
         props: ServiceProps,
-        buildProperties: BuildProperties,
         resource: Resource,
         spanProcessors: SpanProcessors,
         sampler: Sampler
@@ -40,7 +38,7 @@ private class OtelLoggingProviderConfig {
                         .put("telemetry.sdk.name", "opentelemetry")
                         .put("telemetry.sdk.language", "java")
                         .put("telemetry.sdk.version", OtelVersion.VERSION)
-                        .put("service.name", buildProperties.group)
+                        .put("service.name", props.spring.application.name)
                         .build()
                 )
             )

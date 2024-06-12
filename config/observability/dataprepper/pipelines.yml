@@ -1,9 +1,17 @@
+logs_pipeline:
+  source:
+    otel_logs_source:
+      port: 4317
+      ssl: false
+  sink:
+    - opensearch:
+        hosts: [ "http://opensearch:9200" ]
+        index: logs-otel-v1-%{yyyy.MM.dd}
+
 metrics_pipeline:
   source:
     otel_metrics_source:
       port: 4318
-      unframed_requests: true
-      proto_reflection_service: true
       ssl: false
   processor:
     - otel_metrics_raw_processor:
@@ -12,24 +20,10 @@ metrics_pipeline:
         hosts: [ "http://opensearch:9200" ]
         index: metrics-otel-v1-%{yyyy.MM.dd}
 
-logs_pipeline:
-  source:
-    otel_logs_source:
-      port: 4317
-      unframed_requests: true
-      proto_reflection_service: true
-      ssl: false
-  sink:
-    - opensearch:
-        hosts: [ "http://opensearch:9200" ]
-        index: logs-otel-v1-%{yyyy.MM.dd}
-
 traces_pipeline:
   source:
     otel_trace_source:
       port: 4319
-      unframed_requests: true
-      proto_reflection_service: true
       ssl: false
   sink:
     - pipeline:
@@ -55,7 +49,7 @@ service_traces_pipeline:
     pipeline:
       name: "traces_pipeline"
   processor:
-    - service_map_stateful:
+    - service_map:
   sink:
     - opensearch:
         hosts: ["http://opensearch:9200"]
