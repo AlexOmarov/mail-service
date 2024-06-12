@@ -5,7 +5,7 @@
       "path" : "/mock"
     },
     "httpResponse" : {
-      "body" : "{\"wheather\": 20.5}",
+      "body" : "{\"weather\": 20.5}",
       "statusCode": 200
     }
   }
