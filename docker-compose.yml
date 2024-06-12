@@ -44,7 +44,6 @@ services:
       contour.database.schema: mail_service
       contour.database.password: mail_service
       contour.database.user: mail_service
-
     ports:
       - "8080:8080"
       - "9091:9091"
@@ -158,7 +157,7 @@ services:
     image: opensearchproject/data-prepper:2.8.0
     container_name: dataprepper
     volumes:
-      - ./config/fluentbit/pipelines.yml:/usr/share/data-prepper/pipelines/pipelines.yaml
+      - ./config/dataprepper:/usr/share/data-prepper/pipelines
     ports:
       - "4317:4317" # otel_logs_source
       - "4318:4318" # otel_metrics_source
@@ -169,6 +168,8 @@ services:
       OPENSEARCH_INITIAL_ADMIN_PASSWORD: "Aa1@~sfhkjswfyj!"
       discovery.type: "single-node"
       DISABLE_SECURITY_PLUGIN: true
+
+      OPENSEARCH_JAVA_OPTS="-Dopensearch:experimental:feature:telemetry:enabled=true":
     ports:
       - "9200:9200"
       - "9600:9600"

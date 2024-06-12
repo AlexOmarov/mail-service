@@ -30,6 +30,31 @@ traces_pipeline:
       proto_reflection_service: true
       ssl: false
   sink:
+    - pipeline:
+        name: "raw_traces_pipeline"
+    - pipeline:
+        name: "service_traces_pipeline"
+
+raw_traces_pipeline:
+  source:
+    pipeline:
+      name: "traces_pipeline"
+  processor:
+    - otel_trace_raw:
+  sink:
     - opensearch:
-        hosts: [ "http://opensearch:9200" ]
-        index: traces-otel-v1-%{yyyy.MM.dd}
+        hosts: ["http://opensearch:9200"]
+        insecure: true
+        index_type: trace-analytics-raw
+
+service_traces_pipeline:
+  source:
+    pipeline:
+      name: "traces_pipeline"
+  processor:
+    - service_map:
+  sink:
+    - opensearch:
+        hosts: ["http://opensearch:9200"]
+        insecure: true
+        index_type: trace-analytics-service-map

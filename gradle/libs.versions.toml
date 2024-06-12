@@ -11,7 +11,7 @@ kover = "0.8.0"
 logstash-logback-encoder = "7.4"
 otel-logback-encoder = "2.4.0-alpha"
 
-micrometer = "1.13.0"
+micrometer = "1.13.1"
 micrometer-context-propagation = "1.1.1"
 micrometer-reactor = "1.1.6"
 micrometer-tracing = "1.3.0"
