@@ -1,7 +1,7 @@
 package ru.somarov.mail.infrastructure.db
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import org.slf4j.LoggerFactory
@@ -16,10 +16,8 @@ import java.time.OffsetDateTime
 import java.util.UUID
 
 @Component
-class Dao(
-    private val mailRepo: MailRepo,
-    private val template: ReactiveRedisTemplate<String, Mail>
-) {
+class Dao(private val mailRepo: MailRepo, private val template: ReactiveRedisTemplate<String, Mail>) {
+
     private val log = LoggerFactory.getLogger(this.javaClass)
 
     // Cached operation
@@ -55,12 +53,11 @@ class Dao(
     }
 
     // Should refresh mail in cache here
-    suspend fun updateMails(mails: List<Mail>): List<Mail> {
+    fun updateMails(mails: List<Mail>): Flow<Mail> {
         val ops = template.opsForSet()
         val updatedMails = mailRepo.saveAll(
             mails.map { it.also { it.lastUpdateDate = OffsetDateTime.now(); it.new = false } }
-        ).toList()
-        updatedMails.forEach {
+        ).map {
             val key = "mails:${it.id}"
             val existingMail = ops.scan(key).awaitFirstOrNull()
 
@@ -70,6 +67,7 @@ class Dao(
             } else {
                 ops.add(key, it).awaitSingle()
             }
+            it
         }
         return updatedMails
     }
