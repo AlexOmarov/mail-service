@@ -68,8 +68,8 @@ receivers:
             data_type: gauge
 
 exporters:
-  prometheusremotewrite:
-    endpoint: "http://dataprepper:4318/v1/metrics"
+  prometheus:
+    endpoint: "0.0.0.0:8008"
     resource_to_telemetry_conversion:
       enabled: true # Convert resource attributes to metric labels
 
@@ -90,7 +90,7 @@ service:
   pipelines:
     metrics:
       receivers: [sqlquery/pgstatstatements, otlp/metrics, zookeeper, kafkametrics, redis, postgresql]
-      exporters: [otlp/metrics]
+      exporters: [otlp/metrics,prometheus]
     logs:
       receivers: [ otlp/logs ]
       exporters: [ otlp/logs ]

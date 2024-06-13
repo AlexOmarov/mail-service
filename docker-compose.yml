@@ -15,7 +15,7 @@ services:
     depends_on:
       - db
       - dataprepper
-      - otel-collector
+      - collector
       - kafka
       - keydb
       - mailslurper
@@ -36,7 +36,7 @@ services:
 
       contour.kafka.brokers: kafka:9092
 
-      contour.otlp.host: otel-collector
+      contour.otlp.host: collector
 
       contour.database.host: db
       contour.database.port: 5432
@@ -147,7 +147,14 @@ services:
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
       KAFKA_CLUSTERS_0_JMXPORT: 9997
   # Observability
-  otel-collector:
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/observability/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/var/lib/prometheus
+  collector:
     image: otel/opentelemetry-collector-contrib:0.102.1
     volumes:
       - ./config/observability/otelcollector/config.yaml:/etc/config.yaml
@@ -155,7 +162,7 @@ services:
     ports:
       - "1888:1888" # pprof extension
       - "8888:8888" # Prometheus exposed by the Collector
-      - "8889:8889" # Prometheus exporter metrics
+      - "8008:8008" # Prometheus exporter metrics
       - "13133:13133" # health_check extension
       - "4317:4317" # OTLP gRPC receiver
       - "4318:4318" # OTLP http receiver
@@ -219,5 +226,6 @@ volumes:
   schema-registry-secrets: { }
 
   opensearch_data: { }
+  prometheus_data: { }
 
   keydb_data: { }
