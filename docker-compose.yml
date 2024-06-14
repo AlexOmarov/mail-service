@@ -190,6 +190,22 @@ services:
       # must be a string with no spaces when specified as an environment variable
       OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
       DISABLE_SECURITY_DASHBOARDS_PLUGIN: true
+  # Analytics
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.5.3.5-alpine
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    environment:
+        CLICKHOUSE_DB: mail_service
+        CLICKHOUSE_USER: mail_service
+        CLICKHOUSE_PASSWORD: mail_service
+        CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT : 1
+    volumes:
+      - ch-data:/var/lib/clickhouse/
+      # - ./config/analytics/clickhouse/users.xml:/etc/clickhouse-server/users.d/users.xml
+      # - ./config/analytics/clickhouse/config.xml:/etc/clickhouse-server/config.d/config.xml
+      - ./config/analytics/clickhouse/init:/docker-entrypoint-initdb.d/
   # Side
   mock-server:
     image: mockserver/mockserver
@@ -229,3 +245,4 @@ volumes:
   prometheus_data: { }
 
   keydb_data: { }
+  ch-data: { }
