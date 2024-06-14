@@ -19,6 +19,7 @@ import reactor.kafka.sender.KafkaSender
 import reactor.kafka.sender.SenderOptions
 import reactor.kafka.sender.SenderRecord
 import reactor.kafka.sender.SenderResult
+import ru.somarov.mail.presentation.dto.event.Metadata
 import java.util.UUID
 import kotlin.random.Random
 

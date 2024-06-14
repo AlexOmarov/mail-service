@@ -20,6 +20,7 @@ import reactor.kafka.receiver.KafkaReceiver
 import reactor.kafka.receiver.ReceiverOptions
 import reactor.util.retry.Retry
 import ru.somarov.mail.infrastructure.kafka.observability.KafkaReceiverHealthIndicator
+import ru.somarov.mail.presentation.dto.event.Metadata
 import java.nio.charset.Charset
 import java.time.Duration
 import java.time.OffsetDateTime

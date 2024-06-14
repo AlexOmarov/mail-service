@@ -23,7 +23,7 @@ import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.kafka.sender.SenderResult
 import ru.somarov.mail.infrastructure.config.ServiceProps
-import ru.somarov.mail.infrastructure.kafka.Metadata
+import ru.somarov.mail.presentation.dto.event.Metadata
 import ru.somarov.mail.infrastructure.kafka.Producer
 import ru.somarov.mail.infrastructure.kafka.Producer.ProducerProps
 import ru.somarov.mail.presentation.dto.event.command.CreateMailCommand

@@ -13,7 +13,7 @@ import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusC
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.FAILED
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.NEW
 import ru.somarov.mail.infrastructure.db.entity.MailStatus.Companion.MailStatusCode.SENT
-import ru.somarov.mail.infrastructure.kafka.Metadata
+import ru.somarov.mail.presentation.dto.event.Metadata
 import ru.somarov.mail.infrastructure.kafka.Producer
 import ru.somarov.mail.infrastructure.kafka.Producer.ProducerProps
 import ru.somarov.mail.infrastructure.mail.EmailSenderFacade

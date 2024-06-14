@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 import ru.somarov.mail.infrastructure.config.ServiceProps
 import ru.somarov.mail.infrastructure.db.Dao
 import ru.somarov.mail.infrastructure.db.entity.Mail
-import ru.somarov.mail.infrastructure.kafka.Metadata
+import ru.somarov.mail.presentation.dto.event.Metadata
 import ru.somarov.mail.infrastructure.kafka.Producer
 import ru.somarov.mail.infrastructure.kafka.Producer.ProducerProps
 import ru.somarov.mail.presentation.dto.event.broadcast.MailBroadcast

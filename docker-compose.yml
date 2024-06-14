@@ -225,7 +225,11 @@ services:
       - "2500:2500"
       - "8085:8085"
       - "8083:8080"
-
+  # LB
+  nginx:
+    image: nginx:1.27.0
+    ports:
+      - "10000:80"
 
 volumes:
   pg_data: { }

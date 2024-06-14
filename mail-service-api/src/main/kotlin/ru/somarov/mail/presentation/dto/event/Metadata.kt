@@ -1,4 +1,4 @@
-package ru.somarov.mail.infrastructure.kafka
+package ru.somarov.mail.presentation.dto.event
 
 import java.time.OffsetDateTime
 
