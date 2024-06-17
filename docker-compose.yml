@@ -146,6 +146,23 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
       KAFKA_CLUSTERS_0_JMXPORT: 9997
+  # Keycloack
+  keycloack:
+    build:
+      context: ./config/keycloack
+      args:
+        - DB_HOST=db
+        - DB_DRIVER=postgres
+        - DB_NAME=keycloack
+        - DB_USER=keycloack
+        - DB_PASSWORD=keycloack
+    environment:
+      KEYCLOAK_ADMIN: "admin"
+      KEYCLOAK_ADMIN_PASSWORD: "admin"
+    volumes:
+      - kc-data:/opt/keycloak
+    ports:
+      - "4000:8080"
   # Observability
   prometheus:
     image: prom/prometheus
@@ -220,7 +237,6 @@ services:
       POSTGRES_DB: us-db-ci_purgeable
       POSTGRES_USER: us
       POSTGRES_PASSWORD: us
-
   us:
     container_name: datalens-us
     image: ghcr.io/datalens-tech/datalens-us:0.209.0
@@ -272,7 +288,6 @@ services:
       - pg-compeng
     volumes:
       - ./config/analytics/datalens/backend-configs:/etc/backend-configs
-
   datalens:
     container_name: datalens-ui
     image: ghcr.io/datalens-tech/datalens-ui:0.1741.0
@@ -336,3 +351,4 @@ volumes:
 
   keydb_data: { }
   ch-data: { }
+  kc-data: { }
