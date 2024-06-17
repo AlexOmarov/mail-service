@@ -1,6 +1,9 @@
 CREATE EXTENSION "uuid-ossp";
 CREATE EXTENSION "pg_stat_statements";
 
-CREATE USER keycloack LOGIN WITH PASSWORD 'keycloack';
+CREATE DATABASE keycloak;
+CREATE USER keycloak WITH ENCRYPTED PASSWORD 'keycloak';
 
-CREATE DATABASE keycloack OWNER keycloack;
+GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak;
+
+GRANT ALL PRIVILEGES ON SCHEMA public TO keycloak;

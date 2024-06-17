@@ -146,19 +146,19 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
       KAFKA_CLUSTERS_0_JMXPORT: 9997
-  # Keycloack
-  keycloack:
+  # keycloak
+  keycloak:
     build:
-      context: ./config/keycloack
-      args:
-        - DB_HOST=db
-        - DB_DRIVER=postgres
-        - DB_NAME=keycloack
-        - DB_USER=keycloack
-        - DB_PASSWORD=keycloack
+      context: config/keycloak
     environment:
       KEYCLOAK_ADMIN: "admin"
       KEYCLOAK_ADMIN_PASSWORD: "admin"
+      DB_HOST: "db:5432"
+      DB_DRIVER: postgres
+      DB_NAME: keycloak
+      DB_USER: keycloak
+      DB_PASSWORD: keycloak
+      HOST: keycloak
     volumes:
       - kc-data:/opt/keycloak
     ports:
