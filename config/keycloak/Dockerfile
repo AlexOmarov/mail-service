@@ -17,4 +17,4 @@ CMD ["/opt/keycloak/bin/kc.sh start \
     --db-password ${DB_PASSWORD} \
     --https-certificate-file=/opt/keycloak/certificate.pem \
     --https-certificate-key-file=/opt/keycloak/private_key.pem \
-    --hostname ${HOST}"]
+    --hostname-strict=false"]

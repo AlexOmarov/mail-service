@@ -158,11 +158,11 @@ services:
       DB_NAME: keycloak
       DB_USER: keycloak
       DB_PASSWORD: keycloak
-      HOST: keycloak
     volumes:
       - kc-data:/opt/keycloak
     ports:
-      - "4000:8080"
+      - "4000:9000"
+      - "4001:8443"
   # Observability
   prometheus:
     image: prom/prometheus
