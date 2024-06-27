@@ -12,7 +12,7 @@ receivers:
 
   otlp/traces:
     protocols:
-      http:
+      grpc:
         endpoint: 0.0.0.0:4319
 
   zookeeper:

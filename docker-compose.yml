@@ -183,6 +183,7 @@ services:
       - "13133:13133" # health_check extension
       - "4317:4317" # OTLP gRPC receiver
       - "4318:4318" # OTLP http receiver
+      - "4319:4319" # OTLP http receiver
   dataprepper:
     image: opensearchproject/data-prepper:2.8.0
     container_name: dataprepper
