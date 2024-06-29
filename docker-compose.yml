@@ -186,7 +186,7 @@ services:
     volumes:
       - ./config/observability/dataprepper:/usr/share/data-prepper/pipelines
   opensearch:
-    image: opensearchproject/opensearch:2.14.0
+    image: opensearchproject/opensearch:2.15.0
     environment:
       OPENSEARCH_INITIAL_ADMIN_PASSWORD: "Aa1@~sfhkjswfyj!"
       discovery.type: "single-node"
@@ -195,7 +195,7 @@ services:
     volumes:
       - opensearch_data:/usr/share/opensearch/data
   opensearch-dashboards:
-    image: opensearchproject/opensearch-dashboards:2.14.0
+    image: opensearchproject/opensearch-dashboards:2.15.0
     depends_on:
       - opensearch
     ports:
