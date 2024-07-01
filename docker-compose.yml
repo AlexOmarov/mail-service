@@ -191,7 +191,7 @@ services:
       OPENSEARCH_INITIAL_ADMIN_PASSWORD: "Aa1@~sfhkjswfyj!"
       discovery.type: "single-node"
       DISABLE_SECURITY_PLUGIN: true
-      OPENSEARCH_JAVA_OPTS="-Dopensearch:experimental:feature:telemetry:enabled=true":
+      OPENSEARCH_JAVA_OPTS: "-Dopensearch.experimental.feature.telemetry.enabled=true"
     volumes:
       - opensearch_data:/usr/share/opensearch/data
   opensearch-dashboards:
