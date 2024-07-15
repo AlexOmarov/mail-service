@@ -1,16 +1,18 @@
+{{- define "templates.deployment" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "postgres.fullname" . }}
+  name: {{ include "persistence.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "postgres.labels" . | nindent 4 }}
+    {{- include "persistence.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "postgres.selectorLabels" . | nindent 6 }}
+      {{- include "persistence.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,7 +20,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "postgres.labels" . | nindent 8 }}
+        {{- include "persistence.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -27,7 +29,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "postgres.serviceAccountName" . }}
+      serviceAccountName: {{ include "persistence.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -36,11 +38,17 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
-            {{- range .Values.env }}
-            - name: {{ .name }}
-              value: {{ .value | quote }}
+          {{- if or .Values.env .Values.secretEnvName }}
+          envFrom:
+            {{- if .Values.env }}
+            - configMapRef:
+                name: {{ include "persistence.fullname" $ }}-env
             {{- end }}
+            {{- if .Values.secretEnvName }}
+            - secretRef:
+            name: {{ .Values.secretEnvName }}
+            {{- end }}
+          {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
@@ -71,3 +79,4 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+{{- end}}

@@ -1,0 +1,4 @@
+releases:
+  - name: persistence
+    namespace: persistence
+    chart: persistence/

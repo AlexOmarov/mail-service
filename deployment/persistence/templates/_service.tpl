@@ -1,9 +1,10 @@
+{{- define "templates.service" }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "postgres.fullname" . }}
+  name: {{ include "persistence.fullname" . }}
   labels:
-    {{- include "postgres.labels" . | nindent 4 }}
+    {{- include "persistence.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -12,4 +13,5 @@ spec:
       protocol: TCP
       name: http
   selector:
-    {{- include "postgres.selectorLabels" . | nindent 4 }}
+    {{- include "persistence.selectorLabels" . | nindent 4 }}
+{{- end}}

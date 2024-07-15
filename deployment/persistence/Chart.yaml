@@ -1,0 +1,11 @@
+apiVersion: v2
+name: persistence
+description: A overall chart for releases of all infrastructure of Berte project
+
+version: 0.1.0
+
+dependencies:
+  - name: postgres
+    version: 0.1.0
+    repository: file://charts/postgres
+    condition: postgres.enabled
