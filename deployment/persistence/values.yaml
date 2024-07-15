@@ -8,6 +8,10 @@ postgres:
   image:
     repository: "postgres"
     tag: "16.3"
+  ports:
+    - name: tcp
+      containerPort: 5432
+      protocol: TCP
   resources:
     requests:
       memory: 256Mi
@@ -19,3 +23,32 @@ postgres:
       POSTGRES_DB: test
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
+
+keydb:
+  enabled: true
+  image:
+    repository: "eqalpha/keydb"
+    tag: "latest"
+  ports:
+    - name: tcp
+      containerPort: 6379
+      protocol: TCP
+  command: [ "keydb-server" ]
+  args:
+    - "--appendonly"
+    - "yes"
+    - "--requirepass"
+    - "$(REDIS_PASSWORD)"
+    - "--maxmemory"
+    - "512mb"
+    - "--maxmemory-policy"
+    - "allkeys-lru"
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 20m
+    limits:
+      memory: 384Mi
+      cpu: 300m
+  env:
+    REDIS_PASSWORD: 123
