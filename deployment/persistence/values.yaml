@@ -108,7 +108,7 @@ kafka:
     KAFKA_BROKER_ID: 1
     KAFKA_ZOOKEEPER_CONNECT: persistence-zookeeper:2181
     KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092
-    KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:29092,EXTERNAL://kafka:9092
+    KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:29092,EXTERNAL://persistence-kafka:9092
     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -117,3 +117,31 @@ kafka:
     KAFKA_JMX_PORT: 9101
     KAFKA_JMX_HOSTNAME: 0.0.0.0
     KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote.rmi.port=9101 -Djava.rmi.server.hostname=0.0.0.0 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false"
+
+schema-registry:
+  image:
+    repository: "confluentinc/cp-schema-registry"
+    tag: "latest"
+  service:
+    selector:
+      app: schema-registry
+    port: 6005
+    targetPort: 6005
+  ports:
+    - name: jmx
+      containerPort: 9101
+      protocol: TCP
+    - name: kafka
+      containerPort: 6005
+      protocol: TCP
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 200m
+    limits:
+      memory: 1024Mi
+      cpu: 300m
+  env:
+    SCHEMA_REGISTRY_HOST_NAME: localhost
+    SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:6005
+    SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'persistence-kafka:9092'
