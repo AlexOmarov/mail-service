@@ -52,3 +52,68 @@ keydb:
       cpu: 300m
   env:
     REDIS_PASSWORD: 123
+
+zookeeper:
+  image:
+    repository: "confluentinc/cp-zookeeper"
+    tag: "latest"
+  service:
+    selector:
+      app: zookeeper
+    port: 2181
+    targetPort: 2181
+  ports:
+    - name: tcp
+      containerPort: 9101
+      protocol: TCP
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 20m
+    limits:
+      memory: 384Mi
+      cpu: 300m
+  env:
+    ZOOKEEPER_CLIENT_PORT: 2181
+    ZOOKEEPER_TICK_TIME: 2000
+    ZOOKEEPER_SERVER_ID: 1
+    KAFKA_JMX_PORT: 9101
+    KAFKA_JMX_HOSTNAME: 0.0.0.0
+    KAFKA_OPTS: "-Dzookeeper.4lw.commands.whitelist=*"
+
+kafka:
+  image:
+    repository: "confluentinc/cp-enterprise-kafka"
+    tag: "latest"
+  service:
+    selector:
+      app: kafka
+    port: 9092
+    targetPort: 9092
+  ports:
+    - name: jmx
+      containerPort: 9101
+      protocol: TCP
+    - name: kafka
+      containerPort: 29092
+      protocol: TCP
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 200m
+    limits:
+      memory: 1024Mi
+      cpu: 300m
+  env:
+    KAFKA_BROKER_ID: 1
+    KAFKA_ZOOKEEPER_CONNECT: persistence-zookeeper:2181
+    KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092
+    KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:29092,EXTERNAL://kafka:9092
+    KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+    KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+    KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+    KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    KAFKA_JMX_PORT: 9101
+    KAFKA_JMX_HOSTNAME: 0.0.0.0
+    KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote.rmi.port=9101 -Djava.rmi.server.hostname=0.0.0.0 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false"
