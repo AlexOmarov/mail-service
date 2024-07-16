@@ -5,6 +5,11 @@ global:
 
 postgres:
   enabled: true
+  service:
+    selector:
+      app: postgres
+    port: 5432
+    targetPort: 5432
   image:
     repository: "postgres"
     tag: "16.3"
@@ -24,8 +29,43 @@ postgres:
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
 
+clickhouse:
+  enabled: true
+  service:
+    selector:
+      app: clickhouse
+    port: 8123
+    targetPort: 8123
+  image:
+    repository: "clickhouse/clickhouse-server"
+    tag: "24.5.3.5-alpine"
+  ports:
+    - name: tcp
+      containerPort: 8123
+      protocol: TCP
+    - name: tcpnine
+      containerPort: 9000
+      protocol: TCP
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 20m
+    limits:
+      memory: 384Mi
+      cpu: 300m
+  env:
+    CLICKHOUSE_DB: test
+    CLICKHOUSE_USER: test
+    CLICKHOUSE_PASSWORD: test
+    CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT : 1
+
 keydb:
   enabled: true
+  service:
+    selector:
+      app: keydb
+    port: 6379
+    targetPort: 6379
   image:
     repository: "eqalpha/keydb"
     tag: "latest"

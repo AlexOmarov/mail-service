@@ -29,3 +29,8 @@ dependencies:
     version: 0.1.0
     repository: file://charts/schema-registry
     condition: schema-registry.enabled
+
+  - name: clickhouse
+    version: 0.1.0
+    repository: file://charts/clickhouse
+    condition: clickhouse.enabled
