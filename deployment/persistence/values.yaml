@@ -1,4 +1,59 @@
 global:
+  replicaCount: 1
+
+  image:
+    pullPolicy: IfNotPresent
+
+  imagePullSecrets: [ ]
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Automatically mount a ServiceAccount's API credentials?
+    automount: true
+    # Annotations to add to the service account
+    annotations: { }
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  podAnnotations: { }
+  podLabels: { }
+
+  podSecurityContext: { }
+  # fsGroup: 2000
+
+  securityContext: { }
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 20m
+    limits:
+      memory: 384Mi
+      cpu: 300m
+
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: { }
+
+  tolerations: [ ]
+
+  affinity: { }
+
   serviceDiscoveryRoleBinding: true
   env:
     TEST_ENV: "TEST"
@@ -97,6 +152,22 @@ zookeeper:
   image:
     repository: "confluentinc/cp-zookeeper"
     tag: "latest"
+  livenessProbe:
+    tcpSocket:
+      port: 2181
+      initialDelaySeconds: 3
+      periodSeconds: 3
+  readinessProbe:
+    tcpSocket:
+      port: 2181
+      initialDelaySeconds: 3
+      periodSeconds: 3
+  volumeMounts:
+    - name: foo
+      mountPath: "/etc/foo"
+      readOnly: false
+  volumes:
+    - name: foo
   service:
     selector:
       app: zookeeper

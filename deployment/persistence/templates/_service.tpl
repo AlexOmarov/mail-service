@@ -1,17 +1,22 @@
 {{- define "templates.service" }}
-apiVersion: v1
+
+{{- define "helper.serviceName" -}}
+{{- printf "%s-%s-service" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+apiVersion: v2
 kind: Service
 metadata:
-  name: {{ include "persistence.fullname" . }}
+  name: {{ include "helper.fullname" . }}
   labels:
-    {{- include "persistence.labels" . | nindent 4 }}
+    {{- include "helper.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ default ClusterIP .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort }}
-      protocol: TCP
-      name: {{ .Values.service.name }}
+      name: {{ default include "helper.serviceName" .Values.service.name }}
+      protocol: {{ default TCP .Values.service.protocol }}
   selector:
-    {{- include "persistence.selectorLabels" . | nindent 4 }}
+    {{- include "helper.selectorLabels" . | nindent 4 }}
 {{- end}}

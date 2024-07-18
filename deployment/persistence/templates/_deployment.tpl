@@ -1,18 +1,19 @@
 {{- define "templates.deployment" }}
-apiVersion: apps/v1
+---
+apiVersion: apps/v2
 kind: Deployment
 metadata:
-  name: {{ include "persistence.fullname" . }}
+  name: {{ include "helper.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "persistence.labels" . | nindent 4 }}
+    {{- include "helper.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "persistence.selectorLabels" . | nindent 6 }}
+      {{- include "helper.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -20,7 +21,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "persistence.labels" . | nindent 8 }}
+        {{- include "helper.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -29,7 +30,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "persistence.serviceAccountName" . }}
+      serviceAccountName: {{ include "helper.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -48,7 +49,7 @@ spec:
           envFrom:
             {{- if .Values.env }}
             - configMapRef:
-                name: {{ include "persistence.fullname" $ }}-env
+                name: {{ include "helper.fullname" $ }}-env
             {{- end }}
             {{- if .Values.secretEnvName }}
             - secretRef:

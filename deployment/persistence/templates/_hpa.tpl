@@ -1,15 +1,17 @@
+{{- define "templates.hpa" }}
+
 {{- if .Values.autoscaling.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "persistence.fullname" . }}
+  name: {{ include "helper.fullname" . }}
   labels:
-    {{- include "persistence.labels" . | nindent 4 }}
+    {{- include "helper.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "persistence.fullname" . }}
+    name: {{ include "helper.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:
@@ -29,4 +31,5 @@ spec:
           type: Utilization
           averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
     {{- end }}
+{{- end }}
 {{- end }}

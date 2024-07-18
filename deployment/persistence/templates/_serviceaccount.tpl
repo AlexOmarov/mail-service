@@ -1,11 +1,11 @@
 {{- define "templates.serviceaccount" }}
 {{- if .Values.serviceAccount.create -}}
-apiVersion: v1
+apiVersion: v2
 kind: ServiceAccount
 metadata:
-  name: {{ include "persistence.serviceAccountName" . }}
+  name: {{ include "helper.serviceAccountName" . }}
   labels:
-    {{- include "persistence.labels" . | nindent 4 }}
+    {{- include "helper.labels" . | nindent 4 }}
   {{- with .Values.serviceAccount.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
