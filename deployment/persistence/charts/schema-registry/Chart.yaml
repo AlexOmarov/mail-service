@@ -1,7 +1,7 @@
 apiVersion: v2
 
 name: schema-registry
-description: A Helm chart for Kubernetes
+description: Schema registry chart for kubernetes
 type: application
 
 version: 0.1.0

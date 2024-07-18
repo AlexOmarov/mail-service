@@ -79,6 +79,30 @@ postgres:
     limits:
       memory: 384Mi
       cpu: 300m
+  livenessProbe:
+    exec:
+      command:
+        - pg_isready
+        - -U
+        - test
+        - -d
+        - test
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+  readinessProbe:
+    exec:
+      command:
+        - pg_isready
+        - -U
+        - test
+        - -d
+        - test
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
   env:
       POSTGRES_DB: test
       POSTGRES_USER: test
@@ -108,6 +132,24 @@ clickhouse:
     limits:
       memory: 384Mi
       cpu: 300m
+  livenessProbe:
+    failureThreshold: 6
+    initialDelaySeconds: 60
+    periodSeconds: 60
+    successThreshold: 1
+    httpGet:
+      port: 8123
+      path: /ping
+    timeoutSeconds: 5
+  readinessProbe:
+    failureThreshold: 6
+    initialDelaySeconds: 60
+    periodSeconds: 60
+    successThreshold: 1
+    httpGet:
+      port: 8123
+      path: /ping
+    timeoutSeconds: 5
   env:
     CLICKHOUSE_DB: test
     CLICKHOUSE_USER: test
@@ -145,6 +187,16 @@ keydb:
     limits:
       memory: 384Mi
       cpu: 300m
+  livenessProbe:
+    tcpSocket:
+      port: 6379
+      initialDelaySeconds: 3
+      periodSeconds: 3
+  readinessProbe:
+    tcpSocket:
+      port: 6379
+      initialDelaySeconds: 3
+      periodSeconds: 3
   env:
     REDIS_PASSWORD: 123
 
@@ -162,12 +214,6 @@ zookeeper:
       port: 2181
       initialDelaySeconds: 3
       periodSeconds: 3
-  volumeMounts:
-    - name: foo
-      mountPath: "/etc/foo"
-      readOnly: false
-  volumes:
-    - name: foo
   service:
     selector:
       app: zookeeper
@@ -215,6 +261,22 @@ kafka:
     limits:
       memory: 1024Mi
       cpu: 300m
+  livenessProbe:
+    failureThreshold: 6
+    initialDelaySeconds: 60
+    periodSeconds: 60
+    successThreshold: 1
+    tcpSocket:
+      port: 9092
+    timeoutSeconds: 5
+  readinessProbe:
+    failureThreshold: 6
+    initialDelaySeconds: 60
+    periodSeconds: 60
+    successThreshold: 1
+    tcpSocket:
+      port: 9092
+    timeoutSeconds: 5
   env:
     KAFKA_BROKER_ID: 1
     KAFKA_ZOOKEEPER_CONNECT: persistence-zookeeper:2181
@@ -252,6 +314,24 @@ schema-registry:
     limits:
       memory: 1024Mi
       cpu: 300m
+  livenessProbe:
+    failureThreshold: 6
+    initialDelaySeconds: 60
+    periodSeconds: 60
+    successThreshold: 1
+    httpGet:
+      path: /
+      port: 6005
+    timeoutSeconds: 5
+  readinessProbe:
+    failureThreshold: 6
+    initialDelaySeconds: 60
+    periodSeconds: 60
+    successThreshold: 1
+    httpGet:
+      path: /
+      port: 6005
+    timeoutSeconds: 5
   env:
     SCHEMA_REGISTRY_HOST_NAME: localhost
     SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:6005
