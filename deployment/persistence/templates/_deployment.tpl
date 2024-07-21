@@ -1,6 +1,6 @@
 {{- define "templates.deployment" }}
 ---
-apiVersion: apps/v2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "helper.fullname" . }}
@@ -8,7 +8,7 @@ metadata:
   labels:
     {{- include "helper.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
+  {{- if or (not .Values.autoscaling) (not .Values.autoscaling.enabled) }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
@@ -56,8 +56,10 @@ spec:
             name: {{ .Values.secretEnvName }}
             {{- end }}
           {{- end }}
+          {{- with .Values.ports }}
           ports:
-            {{- toYaml .Values.ports | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:

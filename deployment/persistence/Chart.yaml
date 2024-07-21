@@ -2,7 +2,7 @@ apiVersion: v2
 name: persistence
 description: A overall chart for releases of all infrastructure of Berte project
 
-version: 0.1.0
+version: 0.1.1
 
 dependencies:
   - name: postgres
@@ -34,3 +34,8 @@ dependencies:
     version: 0.1.0
     repository: file://charts/clickhouse
     condition: clickhouse.enabled
+
+  - name: opensearch
+    version: 0.1.0
+    repository: file://charts/opensearch
+    condition: opensearch.enabled

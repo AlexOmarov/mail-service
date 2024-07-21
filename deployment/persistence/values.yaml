@@ -38,7 +38,7 @@ global:
       memory: 256Mi
       cpu: 20m
     limits:
-      memory: 384Mi
+      memory: 1024Mi
       cpu: 300m
 
   autoscaling:
@@ -156,6 +156,51 @@ clickhouse:
     CLICKHOUSE_PASSWORD: test
     CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT : 1
 
+opensearch:
+  enabled: true
+  service:
+    selector:
+      app: opensearch
+    port: 8123
+    targetPort: 8123
+  image:
+    repository: "opensearchproject/opensearch"
+    tag: "2.15.0"
+  livenessProbe:
+    failureThreshold: 6
+    initialDelaySeconds: 60
+    periodSeconds: 60
+    successThreshold: 1
+    httpGet:
+      port: 9200
+      path: /
+    timeoutSeconds: 5
+  readinessProbe:
+    failureThreshold: 6
+    initialDelaySeconds: 60
+    periodSeconds: 60
+    successThreshold: 1
+    httpGet:
+      port: 9200
+      path: /
+    timeoutSeconds: 5
+  ports:
+    - name: tcp
+      containerPort: 9200
+      protocol: TCP
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 200m
+    limits:
+      memory: 4096Mi
+      cpu: 300m
+  env:
+    OPENSEARCH_INITIAL_ADMIN_PASSWORD: "Aa1@~sfhkjswfyj!"
+    discovery.type: "single-node"
+    DISABLE_SECURITY_PLUGIN: true
+    OPENSEARCH_JAVA_OPTS: "-Dopensearch.experimental.feature.telemetry.enabled=true"
+
 keydb:
   enabled: true
   service:
@@ -188,15 +233,15 @@ keydb:
       memory: 384Mi
       cpu: 300m
   livenessProbe:
+    initialDelaySeconds: 3
+    periodSeconds: 3
     tcpSocket:
       port: 6379
-      initialDelaySeconds: 3
-      periodSeconds: 3
   readinessProbe:
+    initialDelaySeconds: 3
+    periodSeconds: 3
     tcpSocket:
       port: 6379
-      initialDelaySeconds: 3
-      periodSeconds: 3
   env:
     REDIS_PASSWORD: 123
 
@@ -205,15 +250,15 @@ zookeeper:
     repository: "confluentinc/cp-zookeeper"
     tag: "latest"
   livenessProbe:
+    initialDelaySeconds: 3
+    periodSeconds: 3
     tcpSocket:
       port: 2181
-      initialDelaySeconds: 3
-      periodSeconds: 3
   readinessProbe:
+    initialDelaySeconds: 3
+    periodSeconds: 3
     tcpSocket:
       port: 2181
-      initialDelaySeconds: 3
-      periodSeconds: 3
   service:
     selector:
       app: zookeeper

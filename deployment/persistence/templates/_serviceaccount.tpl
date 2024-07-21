@@ -1,5 +1,5 @@
 {{- define "templates.serviceaccount" }}
-{{- if .Values.serviceAccount.create -}}
+{{- if and .Values.serviceAccount .Values.serviceAccount.create -}}
 apiVersion: v2
 kind: ServiceAccount
 metadata:

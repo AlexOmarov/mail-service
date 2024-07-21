@@ -1,7 +1,7 @@
 {{- define "templates.configmap_env" }}
 {{- if or .Values.env .Values.global.env }}
 {{- $values := deepCopy .Values | mergeOverwrite (.Values.global) }}
-apiVersion: v2
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "helper.fullname" . }}-env

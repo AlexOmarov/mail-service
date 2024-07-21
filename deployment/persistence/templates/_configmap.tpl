@@ -2,7 +2,7 @@
 
 {{- range $map := .Values.configmaps}}
 ---
-apiVersion: v2
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "helper.fullname" $ }}-{{ $map.name }}
