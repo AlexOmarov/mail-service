@@ -12,7 +12,7 @@ receivers:
 
   otlp/traces:
     protocols:
-      grpc:
+      http:
         endpoint: 0.0.0.0:4319
 
   zookeeper:
@@ -68,11 +68,6 @@ receivers:
             data_type: gauge
 
 exporters:
-  prometheus:
-    endpoint: "0.0.0.0:8008"
-    resource_to_telemetry_conversion:
-      enabled: true # Convert resource attributes to metric labels
-
   otlp/logs:
     endpoint: dataprepper:4317
     tls:
@@ -90,7 +85,7 @@ service:
   pipelines:
     metrics:
       receivers: [sqlquery/pgstatstatements, otlp/metrics, zookeeper, kafkametrics, redis, postgresql]
-      exporters: [otlp/metrics,prometheus]
+      exporters: [otlp/metrics]
     logs:
       receivers: [ otlp/logs ]
       exporters: [ otlp/logs ]

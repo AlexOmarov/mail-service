@@ -6,7 +6,9 @@ logs_pipeline:
   sink:
     - opensearch:
         hosts: [ "http://opensearch:9200" ]
-        index: logs-otel-v1-%{yyyy.MM.dd}
+        index_type: custom
+        index: otel-events-%{yyyy.MM.dd}
+        bulk_size: 4
 
 metrics_pipeline:
   source:
@@ -15,10 +17,18 @@ metrics_pipeline:
       ssl: false
   processor:
     - otel_metrics_raw_processor:
+        calculate_histogram_buckets: true
+        calculate_exponential_histogram_buckets: true
+        exponential_histogram_max_allowed_scale: 10
+        flatten_attributes: false
   sink:
     - opensearch:
         hosts: [ "http://opensearch:9200" ]
-        index: metrics-otel-v1-%{yyyy.MM.dd}
+        index_type: custom
+        template_type: index-template
+        template_file: "/usr/share/data-prepper/pipelines/ss4o_metrics.json"
+        index: ss4o_metrics-otel-%{yyyy.MM.dd}
+        bulk_size: 4
 
 traces_pipeline:
   source:
@@ -49,7 +59,7 @@ service_traces_pipeline:
     pipeline:
       name: "traces_pipeline"
   processor:
-    - service_map:
+    - service_map_stateful:
   sink:
     - opensearch:
         hosts: ["http://opensearch:9200"]

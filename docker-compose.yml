@@ -3,7 +3,7 @@ services:
   service:
     # Uncomment to use prebuilt srcs instead of image
     build:
-     context: .
+      context: .
     # image: decentboat/mail-service:latest
     container_name: service
     healthcheck:
@@ -65,7 +65,7 @@ services:
       - pg_data:/var/lib/postgresql/data
       - ./config/db/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
   pgadmin:
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:2024-07-23-1
     depends_on:
       - db
     environment:
@@ -80,7 +80,7 @@ services:
       - "4002:80"
   keydb:
     container_name: keydb
-    image: eqalpha/keydb:latest
+    image: eqalpha/keydb:alpine_x86_64_v6.3.4
     restart: always
     entrypoint: keydb-server --appendonly yes --requirepass 123 --maxmemory 512mb --maxmemory-policy allkeys-lru
     ports:
@@ -89,20 +89,22 @@ services:
       - keydb_data:/data
   # Kafka
   zookeeper:
-    image: confluentinc/cp-zookeeper
+    image: confluentinc/cp-zookeeper:7.6.2
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_SERVER_ID: 1
       KAFKA_JMX_PORT: 9101
-      KAFKA_JMX_HOSTNAME : 0.0.0.0
+      KAFKA_JMX_HOSTNAME: 0.0.0.0
       KAFKA_OPTS: "-Dzookeeper.4lw.commands.whitelist=*"
     volumes:
       - zk-data:/var/lib/zookeeper/data
       - zk-txn-logs:/var/lib/zookeeper/log
       - zk-secrets:/etc/zookeeper/secrets
   schema-registry:
-    image: confluentinc/cp-schema-registry
+    image: confluentinc/cp-schema-registry:7.6.2
+    ports:
+      - "6005:6005"
     depends_on:
       - kafka
     environment:
@@ -112,7 +114,7 @@ services:
     volumes:
       - schema-registry-secrets:/etc/schema-registry/secrets
   kafka:
-    image: confluentinc/cp-enterprise-kafka
+    image: confluentinc/cp-kafka:7.6.2
     depends_on:
       - zookeeper
     ports:
@@ -128,14 +130,14 @@ services:
       KAFKA_DEFAULT_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_JMX_PORT: 9101
-      KAFKA_JMX_HOSTNAME : 0.0.0.0
-      KAFKA_JMX_OPTS : "-Dcom.sun.management.jmxremote.rmi.port=9101 -Djava.rmi.server.hostname=0.0.0.0 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false"
+      KAFKA_JMX_HOSTNAME: 0.0.0.0
+      KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote.rmi.port=9101 -Djava.rmi.server.hostname=0.0.0.0 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false"
     volumes:
       - kafka-data:/var/lib/kafka/data
       - kafka-secrets:/etc/kafka/secrets
   kafka-ui:
     container_name: kafka-ui
-    image: provectuslabs/kafka-ui
+    image: provectuslabs/kafka-ui:v0.7.2
     ports:
       - "9001:8080"
     depends_on:
@@ -146,36 +148,12 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
       KAFKA_CLUSTERS_0_JMXPORT: 9997
-  # keycloak
-  keycloak:
-    build:
-      context: config/keycloak
-    environment:
-      KEYCLOAK_ADMIN: "admin"
-      KEYCLOAK_ADMIN_PASSWORD: "admin"
-      DB_HOST: "db:5432"
-      DB_DRIVER: postgres
-      DB_NAME: keycloak
-      DB_USER: keycloak
-      DB_PASSWORD: keycloak
-    volumes:
-      - kc-data:/opt/keycloak
-    ports:
-      - "4000:9000"
-      - "4001:8443"
   # Observability
-  prometheus:
-    image: prom/prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./config/observability/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/var/lib/prometheus
   collector:
     image: otel/opentelemetry-collector-contrib:0.102.1
     volumes:
       - ./config/observability/otelcollector/config.yaml:/etc/config.yaml
-    command: ["--config=/etc/config.yaml"]
+    command: [ "--config=/etc/config.yaml" ]
     ports:
       - "4317:4317" # OTLP gRPC receiver
       - "4318:4318" # OTLP http receiver
@@ -204,6 +182,8 @@ services:
       # must be a string with no spaces when specified as an environment variable
       OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
       DISABLE_SECURITY_DASHBOARDS_PLUGIN: true
+    volumes:
+      - ./config/observability/dashboard/opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
   # Analytics
   clickhouse:
     image: clickhouse/clickhouse-server:24.5.3.5-alpine
@@ -211,10 +191,10 @@ services:
       - "8123:8123"
       - "9000:9000"
     environment:
-        CLICKHOUSE_DB: mail_service
-        CLICKHOUSE_USER: mail_service
-        CLICKHOUSE_PASSWORD: mail_service
-        CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT : 1
+      CLICKHOUSE_DB: mail_service
+      CLICKHOUSE_USER: mail_service
+      CLICKHOUSE_PASSWORD: mail_service
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
     volumes:
       - ch-data:/var/lib/clickhouse/
       # - ./config/analytics/clickhouse/users.xml:/etc/clickhouse-server/users.d/users.xml
@@ -306,7 +286,7 @@ services:
       HC: ${HC:-0}
   # Side
   mock-server:
-    image: mockserver/mockserver
+    image: mockserver/mockserver:5.15.0
     ports:
       - "5001:1080"
     environment:
@@ -317,17 +297,12 @@ services:
       - ./config/side/mockserver:/config
   mailslurper:
     container_name: mailslurper
-    image: marcopas/docker-mailslurper:latest
+    image: marcopas/docker-mailslurper:latest # have to use latest, there are no other option
     restart: always
     ports:
       - "2500:2500"
       - "8085:8085"
       - "8083:8080"
-  # LB
-  nginx:
-    image: nginx:1.27.0
-    ports:
-      - "10000:80"
 
 volumes:
   pg_data: { }
@@ -348,4 +323,3 @@ volumes:
 
   keydb_data: { }
   ch-data: { }
-  kc-data: { }
