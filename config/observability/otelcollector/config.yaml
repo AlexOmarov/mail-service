@@ -67,7 +67,18 @@ receivers:
             value_type: double
             data_type: gauge
 
+processors:
+  attributes/example:
+    actions:
+      - key: serviceName
+        value: kafka
+        action: upsert
+
 exporters:
+  prometheus:
+    endpoint: "0.0.0.0:8008"
+    resource_to_telemetry_conversion:
+      enabled: true # Convert resource attributes to metric labels
   otlp/logs:
     endpoint: dataprepper:4317
     tls:
@@ -84,8 +95,9 @@ exporters:
 service:
   pipelines:
     metrics:
-      receivers: [sqlquery/pgstatstatements, otlp/metrics, zookeeper, kafkametrics, redis, postgresql]
-      exporters: [otlp/metrics]
+      receivers: [otlp/metrics, sqlquery/pgstatstatements, zookeeper, kafkametrics, redis, postgresql]
+      processors: [attributes/example]
+      exporters: [otlp/metrics, prometheus]
     logs:
       receivers: [ otlp/logs ]
       exporters: [ otlp/logs ]

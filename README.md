@@ -78,9 +78,10 @@ Compose файл включает в себя следующие инструм�
 11. Clickhouse - 8123/9000
 12. DataLens - 8855
 13. KeyDB - 6379
-14. [MailSlurper](https://www.mailslurper.com/) - 2500/8085/8083
-15. Mock server - 5001
-16. Сервис - localhost:8080, localhost:9091, localhost:7001, localhost:9010
+14. Prometheus - 9090 (пока opensearch не может принимать метрики в otlp формате)
+15. [MailSlurper](https://www.mailslurper.com/) - 2500/8085/8083
+16. Mock server - 5001
+17. Сервис - localhost:8080, localhost:9091, localhost:7001, localhost:9010
 
 **Важно!** Запуск потребует скачивания недостающих образов для запуска всех контейнеров 
 и около 8 ГБ оперативной памяти в процессе работы развёртки.
@@ -112,10 +113,21 @@ Compose файл включает в себя следующие инструм�
    ![visualvm.png](doc/img/visualvm.png)
 8. [Opensearch logs](http://localhost:5601)
    ![opensearch_logs.jpg](doc/img/opensearch_logs.png)
-9. [Opensearch metrics](http://localhost:5601)
-   ![opensearch_metrics.jpg](doc/img/opensearch_metrics.png)
+9. [Opensearch metrics](http://localhost:5601) - пока не сделан OTLP анализ необходимо добавить prometheus
+   В dev tools выполнить следующий запрос
+   ```
+   POST _plugins/_query/_datasources 
+   {
+       "name" : "prometheus",
+       "connector": "prometheus",
+       "properties" : {
+           "prometheus.uri" : "http://prometheus:9090"
+       }
+   }
+   ```
+   ![opensearch_metrics.jpg](doc/img/opensearch_metrics.jpg)
 10. [Opensearch traces](http://localhost:5601)  - необходимо создать index pattern traces-*
-    ![opensearch_traces.jpg](doc/img/opensearch_traces.png)
+    ![opensearch_traces.jpg](doc/img/opensearch_tracing.png)
 11. [DataLens]()
     ![datalens.jpg](doc/img/datalens.jpg)
 

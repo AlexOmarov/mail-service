@@ -149,8 +149,15 @@ services:
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
       KAFKA_CLUSTERS_0_JMXPORT: 9997
   # Observability
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/observability/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/var/lib/prometheus
   collector:
-    image: otel/opentelemetry-collector-contrib:0.102.1
+    image: otel/opentelemetry-collector-contrib:0.105.0
     volumes:
       - ./config/observability/otelcollector/config.yaml:/etc/config.yaml
     command: [ "--config=/etc/config.yaml" ]
