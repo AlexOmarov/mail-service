@@ -128,8 +128,8 @@ Compose файл включает в себя следующие инструм�
    ![opensearch_metrics.jpg](doc/img/opensearch_metrics.jpg)
 10. [Opensearch traces](http://localhost:5601)  - необходимо создать index pattern traces-*
     ![opensearch_traces.jpg](doc/img/opensearch_tracing.png)
-11. [DataLens]()
-    ![datalens.jpg](doc/img/datalens.jpg)
+11. [DataLens](https://datalens.tech/) - необходимо настроить подключение и создать дашборд по таблице queue.
+    ![datalens.jpg](doc/img/datalens.png)
 
 `Liveness` и `readiness` API доступны по `actuator/health/liveness` и `actuator/health/readiness` путям.
 Также для ручного вызова доступны API сервиса по адресам `localhost:7001` (rsocket, websocket соединение), `localhost:8080` (http).  
