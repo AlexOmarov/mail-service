@@ -29,7 +29,7 @@ global:
     # capabilities:
     #   drop:
     #   - ALL
-    # readOnlyRootFilesystem: true
+  # readOnlyRootFilesystem: true
   # runAsNonRoot: true
   # runAsUser: 1000
 
@@ -104,9 +104,9 @@ postgres:
     timeoutSeconds: 5
     failureThreshold: 3
   env:
-      POSTGRES_DB: test
-      POSTGRES_USER: test
-      POSTGRES_PASSWORD: test
+    POSTGRES_DB: test
+    POSTGRES_USER: test
+    POSTGRES_PASSWORD: test
 
 clickhouse:
   enabled: true
@@ -154,7 +154,7 @@ clickhouse:
     CLICKHOUSE_DB: test
     CLICKHOUSE_USER: test
     CLICKHOUSE_PASSWORD: test
-    CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT : 1
+    CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
 
 opensearch:
   enabled: true
@@ -248,26 +248,26 @@ keydb:
 zookeeper:
   image:
     repository: "confluentinc/cp-zookeeper"
-    tag: "latest"
+    tag: "7.6.2"
   livenessProbe:
-    initialDelaySeconds: 3
-    periodSeconds: 3
-    tcpSocket:
-      port: 2181
+    exec:
+      command: [ '/bin/bash', '-c', 'echo "ruok" | nc -w 2 localhost 2181 | grep imok' ]
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+    successThreshold: 1
   readinessProbe:
-    initialDelaySeconds: 3
-    periodSeconds: 3
-    tcpSocket:
-      port: 2181
+    exec:
+      command: [ '/bin/bash', '-c', 'echo "ruok" | nc -w 2 localhost 2181 | grep imok' ]
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+    successThreshold: 1
   service:
-    selector:
-      app: zookeeper
     port: 2181
     targetPort: 2181
-  ports:
-    - name: tcp
-      containerPort: 9101
-      protocol: TCP
   resources:
     requests:
       memory: 256Mi
@@ -279,25 +279,22 @@ zookeeper:
     ZOOKEEPER_CLIENT_PORT: 2181
     ZOOKEEPER_TICK_TIME: 2000
     ZOOKEEPER_SERVER_ID: 1
-    KAFKA_JMX_PORT: 9101
-    KAFKA_JMX_HOSTNAME: 0.0.0.0
     KAFKA_OPTS: "-Dzookeeper.4lw.commands.whitelist=*"
 
 kafka:
+  enabled: true
   image:
-    repository: "confluentinc/cp-enterprise-kafka"
-    tag: "latest"
+    repository: "confluentinc/cp-kafka"
+    tag: "7.6.2"
   service:
-    selector:
-      app: kafka
-    port: 9092
-    targetPort: 9092
+    port: 29092
+    targetPort: 29092
   ports:
     - name: jmx
       containerPort: 9101
       protocol: TCP
     - name: kafka
-      containerPort: 29092
+      containerPort: 9092
       protocol: TCP
   resources:
     requests:
@@ -312,7 +309,7 @@ kafka:
     periodSeconds: 60
     successThreshold: 1
     tcpSocket:
-      port: 9092
+      port: 29092
     timeoutSeconds: 5
   readinessProbe:
     failureThreshold: 6
@@ -320,23 +317,24 @@ kafka:
     periodSeconds: 60
     successThreshold: 1
     tcpSocket:
-      port: 9092
+      port: 29092
     timeoutSeconds: 5
   env:
     KAFKA_BROKER_ID: 1
     KAFKA_ZOOKEEPER_CONNECT: persistence-zookeeper:2181
     KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092
-    KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:29092,EXTERNAL://persistence-kafka:9092
+    KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://persistence-kafka.persistence:29092,EXTERNAL://localhost:9092
     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     KAFKA_DEFAULT_REPLICATION_FACTOR: 1
-    KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 10
     KAFKA_JMX_PORT: 9101
     KAFKA_JMX_HOSTNAME: 0.0.0.0
     KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote.rmi.port=9101 -Djava.rmi.server.hostname=0.0.0.0 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false"
 
 schema-registry:
+  enabled: true
   image:
     repository: "confluentinc/cp-schema-registry"
     tag: "latest"
@@ -380,4 +378,4 @@ schema-registry:
   env:
     SCHEMA_REGISTRY_HOST_NAME: localhost
     SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:6005
-    SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'persistence-kafka:9092'
+    SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'persistence-kafka:29092'
