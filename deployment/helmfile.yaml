@@ -5,3 +5,6 @@ releases:
   - name: ui
     namespace: ui
     chart: ui/
+  - name: monitoring
+    namespace: monitoring
+    chart: monitoring/

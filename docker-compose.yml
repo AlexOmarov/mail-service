@@ -154,7 +154,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./config/observability/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml
+      - ./config/observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/var/lib/prometheus
   collector:
     image: otel/opentelemetry-collector-contrib:0.105.0

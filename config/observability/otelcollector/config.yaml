@@ -91,6 +91,14 @@ exporters:
     endpoint: dataprepper:4319
     tls:
       insecure: true
+extensions:
+  health_check:
+    endpoint: "localhost:13133"
+    check_collector_pipeline:
+      enabled: true
+      interval: "5m"
+      exporter_failure_threshold: 5
+    path: "/health"
 
 service:
   pipelines:

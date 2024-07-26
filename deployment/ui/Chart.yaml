@@ -9,3 +9,11 @@ dependencies:
     version: 0.1.0
     repository: file://charts/kafka-ui
     condition: kafka-ui.enabled
+  - name: opensearch-dashboard
+    version: 0.1.0
+    repository: file://charts/opensearch-dashboard
+    condition: opensearch-dashboard.enabled
+  - name: pgadmin
+    version: 0.1.0
+    repository: file://charts/pgadmin
+    condition: pgadmin.enabled

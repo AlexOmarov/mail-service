@@ -1,0 +1,182 @@
+global:
+  replicaCount: 1
+
+  image:
+    pullPolicy: IfNotPresent
+
+  imagePullSecrets: [ ]
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Automatically mount a ServiceAccount's API credentials?
+    automount: true
+    # Annotations to add to the service account
+    annotations: { }
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  podAnnotations: { }
+  podLabels: { }
+
+  podSecurityContext: { }
+  # fsGroup: 2000
+
+  securityContext: { }
+    # capabilities:
+    #   drop:
+    #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+  # resources:
+  #   requests:
+  #     memory: 256Mi
+  #     cpu: 20m
+  #   limits:
+  #     memory: 1024Mi
+  #     cpu: 300m
+
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: { }
+
+  tolerations: [ ]
+
+  affinity: { }
+
+  serviceDiscoveryRoleBinding: true
+  env:
+    TEST_ENV: "TEST"
+
+prometheus:
+  enabled: true
+  image:
+    repository: "prom/prometheus"
+    tag: "v2.53.1"
+  pv:
+    enabled: true
+    accessModes:
+      - ReadWriteMany
+    hostPath: "/run/desktop/mnt/host/g/work/projects/personal/mail-service/config/observability/prometheus"
+  pvc:
+    enabled: true
+    accessMode: ReadWriteMany
+
+  volumeMounts:
+    - name: config-volume
+      mountPath: /etc/prometheus
+
+  volumes:
+    - name: config-volume
+      persistentVolumeClaim:
+        claimName: monitoring-prometheus-pvc
+
+  service:
+    ports:
+      - port: 9090
+        targetPort: 9090
+        name: port
+        protocol: TCP
+  ports:
+    - name: http
+      containerPort: 9090
+      protocol: TCP
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 20m
+    limits:
+      memory: 512Mi
+      cpu: 300m
+  livenessProbe:
+    failureThreshold: 6
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    successThreshold: 1
+    httpGet:
+      port: 9090
+      path: /
+    timeoutSeconds: 5
+  readinessProbe:
+    failureThreshold: 6
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    successThreshold: 1
+    httpGet:
+      port: 9090
+      path: /
+    timeoutSeconds: 5
+
+collector:
+  enabled: true
+  image:
+    repository: "otel/opentelemetry-collector-contrib"
+    tag: "0.105.0"
+  pv:
+    enabled: true
+    accessModes:
+      - ReadWriteMany
+    hostPath: "/run/desktop/mnt/host/g/work/projects/personal/mail-service/config/observability/otelcollector"
+  pvc:
+    enabled: true
+    accessMode: ReadWriteMany
+  volumeMounts:
+    - name: config-volume
+      mountPath: /etc/otelcol-contrib
+  volumes:
+    - name: config-volume
+      persistentVolumeClaim:
+        claimName: monitoring-collector-pvc
+  service:
+    ports:
+      - port: 4317
+        targetPort: 4317
+        name: logs
+        protocol: TCP
+      - port: 4318
+        targetPort: 4318
+        name: metrics
+        protocol: TCP
+      - port: 4319
+        targetPort: 4319
+        name: traces
+        protocol: TCP
+  ports:
+    - name: logs
+      containerPort: 4317
+      protocol: TCP
+    - name: metrics
+      containerPort: 4318
+      protocol: TCP
+    - name: traces
+      containerPort: 4319
+      protocol: TCP
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 20m
+    limits:
+      memory: 512Mi
+      cpu: 300m
+
+dataprepper:
+  enabled: false
+  image:
+    repository: "opensearchproject/data-prepper"
+    tag: "2.8.0"
+  service:
+    ports:
+      - port: 9090
+        targetPort: 9090
+        name: port
+        protocol: TCP
