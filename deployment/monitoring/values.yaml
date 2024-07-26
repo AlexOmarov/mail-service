@@ -143,6 +143,51 @@ collector:
         targetPort: 4317
         name: logs
         protocol: TCP
+      - port: 8008
+        targetPort: 8008
+        name: monitoring
+        protocol: TCP
+      - port: 4318
+        targetPort: 4318
+        name: metrics
+        protocol: TCP
+      - port: 4319
+        targetPort: 4319
+        name: traces
+        protocol: TCP
+  ports:
+    - name: logs
+      containerPort: 4317
+      protocol: TCP
+    - name: metrics
+      containerPort: 4318
+      protocol: TCP
+    - port: 8008
+      containerPort: 8008
+      name: monitoring
+      protocol: TCP
+    - name: traces
+      containerPort: 4319
+      protocol: TCP
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 20m
+    limits:
+      memory: 512Mi
+      cpu: 300m
+
+dataprepper:
+  enabled: true
+  image:
+    repository: "opensearchproject/data-prepper"
+    tag: "2.8.0"
+  service:
+    ports:
+      - port: 4317
+        targetPort: 4317
+        name: logs
+        protocol: TCP
       - port: 4318
         targetPort: 4318
         name: metrics
@@ -161,22 +206,18 @@ collector:
     - name: traces
       containerPort: 4319
       protocol: TCP
-  resources:
-    requests:
-      memory: 256Mi
-      cpu: 20m
-    limits:
-      memory: 512Mi
-      cpu: 300m
-
-dataprepper:
-  enabled: false
-  image:
-    repository: "opensearchproject/data-prepper"
-    tag: "2.8.0"
-  service:
-    ports:
-      - port: 9090
-        targetPort: 9090
-        name: port
-        protocol: TCP
+  pv:
+    enabled: true
+    accessModes:
+      - ReadWriteMany
+    hostPath: "/run/desktop/mnt/host/g/work/projects/personal/mail-service/config/observability/dataprepper"
+  pvc:
+    enabled: true
+    accessMode: ReadWriteMany
+  volumeMounts:
+    - name: config-volume
+      mountPath: /usr/share/data-prepper/pipelines
+  volumes:
+    - name: config-volume
+      persistentVolumeClaim:
+        claimName: monitoring-dataprepper-pvc

@@ -5,7 +5,7 @@ logs_pipeline:
       ssl: false
   sink:
     - opensearch:
-        hosts: [ "http://opensearch:9200" ]
+        hosts: [ "http://persistence-opensearch.persistence:9200" ]
         index_type: custom
         index: otel-events-%{yyyy.MM.dd}
         bulk_size: 4
@@ -23,7 +23,7 @@ metrics_pipeline:
         flatten_attributes: false
   sink:
     - opensearch:
-        hosts: [ "http://opensearch:9200" ]
+        hosts: [ "http://persistence-opensearch.persistence:9200" ]
         index_type: custom
         template_type: index-template
         template_file: "/usr/share/data-prepper/pipelines/ss4o_metrics.json"
@@ -49,7 +49,7 @@ raw_traces_pipeline:
     - otel_trace_raw:
   sink:
     - opensearch:
-        hosts: ["http://opensearch:9200"]
+        hosts: ["http://persistence-opensearch.persistence:9200"]
         insecure: true
         index_type: trace-analytics-raw
         trace_analytics_raw: true
@@ -62,7 +62,7 @@ service_traces_pipeline:
     - service_map_stateful:
   sink:
     - opensearch:
-        hosts: ["http://opensearch:9200"]
+        hosts: ["http://persistence-opensearch.persistence:9200"]
         insecure: true
         index_type: trace-analytics-service-map
         trace_analytics_service_map: true

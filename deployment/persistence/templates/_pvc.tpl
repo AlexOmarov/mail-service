@@ -9,12 +9,13 @@ metadata:
   labels:
     {{- include "helper.labels" . | nindent 4 }}
 spec:
-    accessModes:
-        - {{ .Values.pvc.accessMode }}
-    resources:
-      requests:
-        storage: {{ default "1024Mi" .Values.pvc.capacity }}
-    volumeName: {{ include "helper.fullname" . }}-pv
+  storageClassName: {{ default "manual" .Values.pvc.storageClassName }}
+  accessModes:
+      - {{ .Values.pvc.accessMode }}
+  resources:
+    requests:
+      storage: {{ default "1024Mi" .Values.pvc.capacity }}
+  volumeName: {{ include "helper.fullname" . }}-pv
 
 {{- end }}
 {{- end }}

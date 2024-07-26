@@ -68,6 +68,22 @@ postgres:
   image:
     repository: "postgres"
     tag: "16.3"
+  pv:
+    enabled: true
+    accessModes:
+      - ReadWriteMany
+    hostPath: "/run/desktop/mnt/host/g/work/projects/personal/mail-service/config/db/postgres"
+  pvc:
+    enabled: true
+    accessMode: ReadWriteMany
+  # TODO: add config volume for postgresql.conf with shared libs for pg stat
+  volumeMounts:
+    - name: config-volume
+      mountPath: /docker-entrypoint-initdb.d
+  volumes:
+    - name: config-volume
+      persistentVolumeClaim:
+        claimName: persistence-postgres-pvc
   ports:
     - name: tcp
       containerPort: 5432
