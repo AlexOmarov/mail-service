@@ -16,11 +16,11 @@ receivers:
         endpoint: 0.0.0.0:4319
 
   zookeeper:
-    endpoint: "zookeeper:2181"
+    endpoint: "persistence-zookeeper.persistence:2181"
     collection_interval: 5s
 
   kafkametrics:
-    brokers: kafka:9092
+    brokers: persistence-kafka.persistence:29092
     protocol_version: 3.7.0
     scrapers:
       - brokers
@@ -29,17 +29,17 @@ receivers:
     collection_interval: 5s
 
   redis:
-    endpoint: "keydb:6379"
+    endpoint: "persistence-keydb.persistence:6379"
     password: "123"
     collection_interval: 5s
 
   postgresql:
-    endpoint: db:5432
+    endpoint: persistence-postgres.persistence:5432
     transport: tcp
-    username: mail_service
-    password: mail_service
+    username: test
+    password: test
     databases:
-      - mail_service
+      - test
     collection_interval: 5s
     tls:
       insecure: true
@@ -51,7 +51,7 @@ receivers:
 
   sqlquery/pgstatstatements:
     driver: postgres
-    datasource: "host=db port=5432 user=mail_service password=mail_service sslmode=disable dbname=mail_service"
+    datasource: "host=persistence-postgres.persistence port=5432 user=test password=test sslmode=disable dbname=test"
     collection_interval: 5s
     queries:
       - sql: "SELECT queryid, total_exec_time, mean_exec_time, userid, dbid FROM pg_stat_statements"
@@ -71,7 +71,7 @@ processors:
   attributes/example:
     actions:
       - key: serviceName
-        value: kafka
+        value: SERVICE_NAME_FROM_PROCESSOR_ATTR_OTEL_COLLECTOR
         action: upsert
 
 exporters:
@@ -80,20 +80,20 @@ exporters:
     resource_to_telemetry_conversion:
       enabled: true # Convert resource attributes to metric labels
   otlp/logs:
-    endpoint: dataprepper:4317
+    endpoint: monitoring-dataprepper.monitoring:4317
     tls:
       insecure: true
   otlp/metrics:
-    endpoint: dataprepper:4318
+    endpoint: monitoring-dataprepper.monitoring:4318
     tls:
       insecure: true
   otlp/traces:
-    endpoint: dataprepper:4319
+    endpoint: monitoring-dataprepper.monitoring:4319
     tls:
       insecure: true
 extensions:
   health_check:
-    endpoint: "localhost:13133"
+    endpoint: "0.0.0.0:13133"
     check_collector_pipeline:
       enabled: true
       interval: "5m"
