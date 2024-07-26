@@ -63,8 +63,8 @@ kafka-ui:
   service:
     selector:
       app: postgres
-    port: 5432
-    targetPort: 5432
+    port: 8080
+    targetPort: 8080
   image:
     repository: "provectuslabs/kafka-ui"
     tag: "v0.7.2"
@@ -102,3 +102,105 @@ kafka-ui:
     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "persistence-kafka.persistence.svc.cluster.local:29092"
     KAFKA_CLUSTERS_0_ZOOKEEPER: "persistence-zookeeper.persistence.svc.cluster.local:2181"
     KAFKA_CLUSTERS_0_JMXPORT: 9997
+
+pgadmin:
+  enabled: true
+  service:
+    port: 5432
+    targetPort: 5432
+  image:
+    repository: "dpage/pgadmin4"
+    tag: "2024-07-23-1"
+  ports:
+    - name: http
+      containerPort: 80
+      protocol: TCP
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 20m
+    limits:
+      memory: 384Mi
+      cpu: 300m
+  livenessProbe:
+    failureThreshold: 6
+    initialDelaySeconds: 60
+    periodSeconds: 60
+    successThreshold: 1
+    httpGet:
+      port: 80
+      path: /
+    timeoutSeconds: 5
+  readinessProbe:
+    failureThreshold: 6
+    initialDelaySeconds: 60
+    periodSeconds: 60
+    successThreshold: 1
+    httpGet:
+      port: 80
+      path: /
+    timeoutSeconds: 5
+  env:
+    PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+    PGADMIN_DEFAULT_PASSWORD: admin
+    PGADMIN_CONFIG_SERVER_MODE: 'False'
+    # PGADMIN_SERVER_JSON_FILE: /pgadmin4/config/servers.json
+
+opensearch-dashboard:
+  enabled: true
+  image:
+    repository: "opensearchproject/opensearch-dashboards"
+    tag: "2.15.0"
+  pv:
+    enabled: true
+    accessModes:
+      - ReadWriteMany
+    hostPath: "/run/desktop/mnt/host/g/work/projects/personal/mail-service/config/observability/dashboard"
+  pvc:
+    enabled: true
+    accessMode: ReadWriteMany
+
+  volumeMounts:
+    - name: config-volume
+      mountPath: /usr/share/opensearch-dashboards/config
+
+  volumes:
+    - name: config-volume
+      persistentVolumeClaim:
+        claimName: ui-opensearch-dashboard-pvc
+
+  service:
+    port: 5601
+    targetPort: 5601
+  ports:
+    - name: http
+      containerPort: 5601
+      protocol: TCP
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 20m
+    limits:
+      memory: 2048Mi
+      cpu: 300m
+  livenessProbe:
+    failureThreshold: 6
+    initialDelaySeconds: 60
+    periodSeconds: 60
+    successThreshold: 1
+    httpGet:
+      port: 5601
+      path: /
+    timeoutSeconds: 5
+  readinessProbe:
+    failureThreshold: 6
+    initialDelaySeconds: 60
+    periodSeconds: 60
+    successThreshold: 1
+    httpGet:
+      port: 5601
+      path: /
+    timeoutSeconds: 5
+  env:
+    OPENSEARCH_HOSTS: '["http://persistence-opensearch.persistence:9200"]'
+    DISABLE_SECURITY_DASHBOARDS_PLUGIN: true

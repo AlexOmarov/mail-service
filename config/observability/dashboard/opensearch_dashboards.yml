@@ -2,7 +2,6 @@ vis_type_vega.enableExternalUrls: true
 data_source.enabled: true
 vis_type_timeseries.enabled: true
 
-opensearch.hosts: [http://localhost:9200]
 opensearch.ssl.verificationMode: none
 opensearch.username: kibanaserver
 opensearch.password: kibanaserver

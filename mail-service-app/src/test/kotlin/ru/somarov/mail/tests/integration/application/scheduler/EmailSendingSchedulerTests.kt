@@ -1,6 +1,5 @@
 package ru.somarov.mail.tests.integration.application.scheduler
 
-import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
@@ -16,6 +15,7 @@ import ru.somarov.mail.infrastructure.db.entity.Mail
 import ru.somarov.mail.infrastructure.db.entity.MailChannel
 import ru.somarov.mail.infrastructure.db.entity.MailStatus
 import ru.somarov.mail.infrastructure.db.repo.MailRepo
+import ru.somarov.mail.infrastructure.mail.EmailSenderFacade
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -28,6 +28,9 @@ import java.util.UUID
 class EmailSendingSchedulerTests : BaseIntegrationTest() {
     @SpyBean
     lateinit var service: EmailSenderService
+
+    @SpyBean
+    lateinit var facade: EmailSenderFacade
 
     @Autowired
     lateinit var mailRepo: MailRepo
@@ -63,11 +66,12 @@ class EmailSendingSchedulerTests : BaseIntegrationTest() {
             ).toList()
         }
         val delay = props.contour.scheduling.emailSending.delay
+
         verifyBlocking(service, timeout((delay + delay).toMillis()).atLeastOnce()) {
             sendNewEmails(any())
         }
-        verifyBlocking(emailSenderImpl, timeout((delay).toMillis()).atLeastOnce()) {
-            send(*listOf(any<MimeMessage>()).toTypedArray())
+        verifyBlocking(facade, timeout((delay).toMillis()).atLeastOnce()) {
+            sendMimeMessages(any())
         }
     }
 }

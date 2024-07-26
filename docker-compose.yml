@@ -190,7 +190,7 @@ services:
       OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
       DISABLE_SECURITY_DASHBOARDS_PLUGIN: true
     volumes:
-      - ./config/observability/dashboard/opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
+      - /G/work/projects/personal/mail-service/config/observability/dashboard/opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
   # Analytics
   clickhouse:
     image: clickhouse/clickhouse-server:24.5.3.5-alpine

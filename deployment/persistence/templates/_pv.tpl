@@ -2,7 +2,7 @@
 
 {{- if and .Values.pv .Values.pv.enabled -}}
 
-apiVersion: v2
+apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: {{ include "helper.fullname" . }}

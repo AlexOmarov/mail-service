@@ -161,8 +161,8 @@ opensearch:
   service:
     selector:
       app: opensearch
-    port: 8123
-    targetPort: 8123
+    port: 9200
+    targetPort: 9200
   image:
     repository: "opensearchproject/opensearch"
     tag: "2.15.0"
