@@ -240,7 +240,7 @@ control-api:
       memory: 256Mi
       cpu: 20m
     limits:
-      memory: 384Mi
+      memory: 1024Mi
       cpu: 300m
   env:
     BI_API_UWSGI_WORKERS_COUNT: 4
@@ -286,7 +286,7 @@ data-api:
       memory: 256Mi
       cpu: 20m
     limits:
-      memory: 384Mi
+      memory: 1024Mi
       cpu: 300m
   env:
     GUNICORN_WORKERS_COUNT: 5
@@ -343,7 +343,7 @@ datalens:
     APP_ENV: "production"
     APP_INSTALLATION: "opensource"
     AUTH_POLICY: "disabled"
-    US_ENDPOINT: "http://ui-us.ui:8080"
+    US_ENDPOINT: "http://ui-us.ui:8083"
     BI_API_ENDPOINT: "http://ui-control-api.ui:8080"
     BI_DATA_ENDPOINT: "http://ui-data-api.ui:8080"
     NODE_EXTRA_CA_CERTS: "/usr/local/share/ca-certificates/cert.pem"
@@ -351,21 +351,21 @@ datalens:
 us:
   enabled: true
   service:
-    port: 8080
-    targetPort: 8080
+    port: 8083
+    targetPort: 8083
   image:
     repository: "ghcr.io/datalens-tech/datalens-us"
     tag: "0.209.0"
   ports:
     - name: http
-      containerPort: 8080
+      containerPort: 8083
       protocol: TCP
   resources:
     requests:
       memory: 256Mi
       cpu: 20m
     limits:
-      memory: 384Mi
+      memory: 1024Mi
       cpu: 300m
   env:
     APP_INSTALLATION: "opensource"
