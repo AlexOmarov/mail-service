@@ -5,7 +5,6 @@ services:
     build:
       context: .
     # image: decentboat/mail-service:latest
-    container_name: service
     healthcheck:
       test: "wget --no-verbose --tries=1 --spider localhost:8080/actuator/health/liveness || exit 1"
       interval: 5s
@@ -13,16 +12,16 @@ services:
       retries: 5
       start_period: 20s
     depends_on:
-      - db
-      - dataprepper
-      - collector
-      - kafka
-      - keydb
+      - persistence-postgres.persistence
+      - monitoring-dataprepper.monitoring
+      - monitoring-collector.monitoring
+      - persistence-kafka.persistence
+      - persistence-keydb.persistence
       - mailslurper
       - mock-server
     environment:
-      contour.cache.host: keydb
-      spring.application.name: mail-service-two
+      contour.cache.host: persistence-keydb.persistence
+      spring.application.name: mail-service
       contour.cache.port: 6379
 
       contour.mail.host: mailslurper
@@ -34,43 +33,42 @@ services:
       contour.mail.auth-enabled: false
       contour.mail.port: 2500
 
-      contour.kafka.brokers: kafka:9092
+      contour.kafka.brokers: persistence-kafka.persistence:9092
 
-      contour.otlp.host: collector
+      contour.otlp.host: monitoring-collector.monitoring
 
-      contour.database.host: db
+      contour.database.host: persistence-postgres.persistence
       contour.database.port: 5432
-      contour.database.name: mail_service
+      contour.database.name: test
       contour.database.schema: mail_service
-      contour.database.password: mail_service
-      contour.database.user: mail_service
+      contour.database.password: test
+      contour.database.user: test
     ports:
       - "8080:8080"
       - "9091:9091"
       - "9010:9010"
       - "7001:7001"
   # Storage
-  db:
+  persistence-postgres.persistence:
     image: postgres:16.3
-    container_name: db
     restart: always
     ports:
       - "7000:5432"
     environment:
-      POSTGRES_PASSWORD: mail_service
-      POSTGRES_USER: mail_service
-      POSTGRES_DB: mail_service
+      POSTGRES_PASSWORD: test
+      POSTGRES_USER: test
+      POSTGRES_DB: test
     command: postgres -c shared_preload_libraries='pg_stat_statements'
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ./config/db/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
-  pgadmin:
+  ui-pgadmin.ui:
     image: dpage/pgadmin4:2024-07-23-1
     depends_on:
-      - db
+      - persistence-postgres.persistence
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: 'False'
       PGADMIN_SERVER_JSON_FILE: /pgadmin4/config/servers.json
     volumes:
@@ -78,8 +76,7 @@ services:
       - pgadmin:/var/lib/pgadmin
     ports:
       - "4002:80"
-  keydb:
-    container_name: keydb
+  persistence-keydb.persistence:
     image: eqalpha/keydb:alpine_x86_64_v6.3.4
     restart: always
     entrypoint: keydb-server --appendonly yes --requirepass 123 --maxmemory 512mb --maxmemory-policy allkeys-lru
@@ -101,16 +98,16 @@ services:
       - zk-data:/var/lib/zookeeper/data
       - zk-txn-logs:/var/lib/zookeeper/log
       - zk-secrets:/etc/zookeeper/secrets
-  schema-registry:
+  persistence-schema-registry.persistence:
     image: confluentinc/cp-schema-registry:7.6.2
     ports:
       - "6005:6005"
     depends_on:
-      - kafka
+      - persistence-kafka.persistence
     environment:
       SCHEMA_REGISTRY_HOST_NAME: localhost
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:6005
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:9092'
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'persistence-kafka.persistence:9092'
     volumes:
       - schema-registry-secrets:/etc/schema-registry/secrets
   persistence-kafka.persistence:
@@ -135,21 +132,20 @@ services:
     volumes:
       - kafka-data:/var/lib/kafka/data
       - kafka-secrets:/etc/kafka/secrets
-  kafka-ui:
-    container_name: kafka-ui
+  ui-kafka-ui.ui:
     image: provectuslabs/kafka-ui:v0.7.2
     ports:
       - "9001:8080"
     depends_on:
-      - zookeeper
-      - kafka
+      - persistence-zookeeper.persistence
+      - persistence-kafka.persistence
     environment:
       KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: localhost:9092
-      KAFKA_CLUSTERS_0_ZOOKEEPER: localhost:2181
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: persistence-kafka.persistence:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: persistence-zookeeper.persistence:2181
       KAFKA_CLUSTERS_0_JMXPORT: 9997
   # Observability
-  prometheus:
+  monitoring-prometheus.monitoring:
     image: prom/prometheus
     ports:
       - "9090:9090"
