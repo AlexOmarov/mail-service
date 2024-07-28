@@ -124,6 +124,134 @@ postgres:
     POSTGRES_USER: test
     POSTGRES_PASSWORD: test
 
+pgcompeng:
+  enabled: true
+  service:
+    port: 5432
+    targetPort: 5432
+  image:
+    repository: "postgres"
+    tag: "16.3"
+  pv:
+    enabled: true
+    accessModes:
+      - ReadWriteMany
+    hostPath: "/run/desktop/mnt/host/g/work/projects/personal/mail-service/config/db/pgcompeng"
+  pvc:
+    enabled: true
+    accessMode: ReadWriteMany
+  # TODO: add config volume for postgresql.conf with shared libs for pg stat
+  volumeMounts:
+    - name: config-volume
+      mountPath: /docker-entrypoint-initdb.d
+  volumes:
+    - name: config-volume
+      persistentVolumeClaim:
+        claimName: persistence-pgcompeng-pvc
+  ports:
+    - name: tcp
+      containerPort: 5432
+      protocol: TCP
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 20m
+    limits:
+      memory: 384Mi
+      cpu: 300m
+  livenessProbe:
+    exec:
+      command:
+        - pg_isready
+        - -U
+        - pg-compeng
+        - -d
+        - pg-compeng
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+  readinessProbe:
+    exec:
+      command:
+        - pg_isready
+        - -U
+        - pg-compeng
+        - -d
+        - pg-compeng
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  env:
+    POSTGRES_PASSWORD: "pg-compeng"
+    POSTGRES_DB: pg-compeng
+    POSTGRES_USER: pg-compeng
+
+pgus:
+  enabled: true
+  service:
+    port: 5432
+    targetPort: 5432
+  image:
+    repository: "postgres"
+    tag: "16.3"
+  pv:
+    enabled: true
+    accessModes:
+      - ReadWriteMany
+    hostPath: "/run/desktop/mnt/host/g/work/projects/personal/mail-service/config/db/pgus"
+  pvc:
+    enabled: true
+    accessMode: ReadWriteMany
+  # TODO: add config volume for postgresql.conf with shared libs for pg stat
+  volumeMounts:
+    - name: config-volume
+      mountPath: /docker-entrypoint-initdb.d
+  volumes:
+    - name: config-volume
+      persistentVolumeClaim:
+        claimName: persistence-pgus-pvc
+  ports:
+    - name: tcp
+      containerPort: 5432
+      protocol: TCP
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 20m
+    limits:
+      memory: 384Mi
+      cpu: 300m
+  livenessProbe:
+    exec:
+      command:
+        - pg_isready
+        - -U
+        - us
+        - -d
+        - us-db-ci_purgeable
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+  readinessProbe:
+    exec:
+      command:
+        - pg_isready
+        - -U
+        - us
+        - -d
+        - us-db-ci_purgeable
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  env:
+    POSTGRES_DB: us-db-ci_purgeable
+    POSTGRES_USER: us
+    POSTGRES_PASSWORD: us
+
 clickhouse:
   enabled: true
   service:
@@ -143,10 +271,10 @@ clickhouse:
       protocol: TCP
   resources:
     requests:
-      memory: 256Mi
+      memory: 512Mi
       cpu: 20m
     limits:
-      memory: 384Mi
+      memory: 2048Mi
       cpu: 300m
   livenessProbe:
     failureThreshold: 6

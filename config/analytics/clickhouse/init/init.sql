@@ -1,7 +1,7 @@
   CREATE TABLE mail_service.queue (
     id String,
     status String
-  ) ENGINE = Kafka('kafka:9092', 'mail_service_mail_broadcast', 'clickhouse', 'JSONEachRow');
+  ) ENGINE = Kafka('persistence-kafka.persistence:9092', 'mail_service_mail_broadcast', 'clickhouse', 'JSONEachRow');
 
 CREATE TABLE mail_service.queue_dest (
   created_timestamp Nullable(DateTime),
