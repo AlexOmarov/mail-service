@@ -113,15 +113,14 @@ Compose файл включает в себя следующие инструм�
    ![visualvm.png](doc/img/visualvm.png)
 8. [Opensearch logs](http://localhost:5601)
    ![opensearch_logs.jpg](doc/img/opensearch_logs.png)
-9. [Opensearch metrics](http://localhost:5601) - пока не сделан OTLP анализ необходимо добавить prometheus
-   В dev tools выполнить следующий запрос
+9. [Opensearch metrics](http://localhost:5601) - необходимо добавить prometheus, в dev tools выполнить следующий запрос
    ```
    POST _plugins/_query/_datasources 
    {
-       "name" : "prometheus",
+       "name" : "monitoring-prometheus",
        "connector": "prometheus",
        "properties" : {
-           "prometheus.uri" : "http://prometheus:9090"
+           "prometheus.uri" : "http://monitoring-prometheus.monitoring:9090"
        }
    }
    ```
