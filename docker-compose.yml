@@ -33,7 +33,7 @@ services:
       contour.mail.auth-enabled: false
       contour.mail.port: 2500
 
-      contour.kafka.brokers: persistence-kafka.persistence:9092
+      contour.kafka.brokers: persistence-kafka.persistence:29092
 
       contour.otlp.host: monitoring-collector.monitoring
 
@@ -107,7 +107,7 @@ services:
     environment:
       SCHEMA_REGISTRY_HOST_NAME: localhost
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:6005
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'persistence-kafka.persistence:9092'
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'persistence-kafka.persistence:29092'
     volumes:
       - schema-registry-secrets:/etc/schema-registry/secrets
   persistence-kafka.persistence:
@@ -183,10 +183,10 @@ services:
       - "5601:5601"
     environment:
       # must be a string with no spaces when specified as an environment variable
-      OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
+      OPENSEARCH_HOSTS: '["http://persistence-opensearch.persistence:9200"]'
       DISABLE_SECURITY_DASHBOARDS_PLUGIN: true
     volumes:
-      - /G/work/projects/personal/mail-service/config/observability/dashboard/opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
+      - ./config/observability/dashboard/opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
   # Analytics
   persistence-clickhouse.persistence:
     image: clickhouse/clickhouse-server:24.5.3.5-alpine
