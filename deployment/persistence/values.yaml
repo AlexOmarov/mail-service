@@ -72,7 +72,7 @@ postgres:
     enabled: true
     accessModes:
       - ReadWriteMany
-    hostPath: "/run/desktop/mnt/host/g/work/projects/personal/mail-service/config/db/postgres"
+    hostPath: "/run/desktop/mnt/host/g/work/projects/mail-service/config/db/postgres"
   pvc:
     enabled: true
     accessMode: ReadWriteMany
@@ -136,7 +136,7 @@ pgcompeng:
     enabled: true
     accessModes:
       - ReadWriteMany
-    hostPath: "/run/desktop/mnt/host/g/work/projects/personal/mail-service/config/db/pgcompeng"
+    hostPath: "/run/desktop/mnt/host/g/work/projects/mail-service/config/db/pgcompeng"
   pvc:
     enabled: true
     accessMode: ReadWriteMany
@@ -200,7 +200,7 @@ pgus:
     enabled: true
     accessModes:
       - ReadWriteMany
-    hostPath: "/run/desktop/mnt/host/g/work/projects/personal/mail-service/config/db/pgus"
+    hostPath: "/run/desktop/mnt/host/g/work/projects/mail-service/config/db/pgus"
   pvc:
     enabled: true
     accessMode: ReadWriteMany

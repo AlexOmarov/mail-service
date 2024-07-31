@@ -155,7 +155,7 @@ opensearch-dashboard:
     enabled: true
     accessModes:
       - ReadWriteMany
-    hostPath: "/run/desktop/mnt/host/g/work/projects/personal/mail-service/config/observability/dashboard"
+    hostPath: "/run/desktop/mnt/host/g/work/projects/mail-service/config/observability/dashboard"
   pvc:
     enabled: true
     accessMode: ReadWriteMany
@@ -214,7 +214,7 @@ control-api:
     enabled: true
     accessModes:
       - ReadWriteMany
-    hostPath: "/run/desktop/mnt/host/g/work/projects/personal/mail-service/config/analytics/datalens/backend-configs"
+    hostPath: "/run/desktop/mnt/host/g/work/projects/mail-service/config/analytics/datalens/backend-configs"
   pvc:
     enabled: true
     accessMode: ReadWriteMany
@@ -258,7 +258,7 @@ data-api:
     enabled: true
     accessModes:
       - ReadWriteMany
-    hostPath: "/run/desktop/mnt/host/g/work/projects/personal/mail-service/config/analytics/datalens/backend-configs"
+    hostPath: "/run/desktop/mnt/host/g/work/projects/mail-service/config/analytics/datalens/backend-configs"
   pvc:
     enabled: true
     accessMode: ReadWriteMany

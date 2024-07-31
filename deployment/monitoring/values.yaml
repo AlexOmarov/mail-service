@@ -67,7 +67,7 @@ prometheus:
     enabled: true
     accessModes:
       - ReadWriteMany
-    hostPath: "/run/desktop/mnt/host/g/work/projects/personal/mail-service/config/observability/prometheus"
+    hostPath: "/run/desktop/mnt/host/g/work/projects/mail-service/config/observability/prometheus"
   pvc:
     enabled: true
     accessMode: ReadWriteMany
@@ -126,7 +126,7 @@ collector:
     enabled: true
     accessModes:
       - ReadWriteMany
-    hostPath: "/run/desktop/mnt/host/g/work/projects/personal/mail-service/config/observability/otelcollector"
+    hostPath: "/run/desktop/mnt/host/g/work/projects/mail-service/config/observability/otelcollector"
   pvc:
     enabled: true
     accessMode: ReadWriteMany
@@ -210,7 +210,7 @@ dataprepper:
     enabled: true
     accessModes:
       - ReadWriteMany
-    hostPath: "/run/desktop/mnt/host/g/work/projects/personal/mail-service/config/observability/dataprepper"
+    hostPath: "/run/desktop/mnt/host/g/work/projects/mail-service/config/observability/dataprepper"
   pvc:
     enabled: true
     accessMode: ReadWriteMany
