@@ -60,6 +60,9 @@ global:
 
 postgres:
   enabled: true
+  args:
+    - "-c"
+    - "shared_preload_libraries=pg_stat_statements"
   service:
     selector:
       app: postgres
@@ -262,6 +265,21 @@ clickhouse:
   image:
     repository: "clickhouse/clickhouse-server"
     tag: "24.5.3.5-alpine"
+  pv:
+    enabled: true
+    accessModes:
+      - ReadWriteMany
+    hostPath: "/run/desktop/mnt/host/g/work/projects/mail-service/config/analytics/clickhouse/init"
+  pvc:
+    enabled: true
+    accessMode: ReadWriteMany
+  volumeMounts:
+    - name: config-volume
+      mountPath: /docker-entrypoint-initdb.d/
+  volumes:
+    - name: config-volume
+      persistentVolumeClaim:
+        claimName: persistence-clickhouse-pvc
   ports:
     - name: tcp
       containerPort: 8123
