@@ -1,7 +1,0 @@
-apiVersion: v2
-
-name: opensearch-dashboard
-description: Chart for kubernetes
-type: application
-
-version: 0.1.0
