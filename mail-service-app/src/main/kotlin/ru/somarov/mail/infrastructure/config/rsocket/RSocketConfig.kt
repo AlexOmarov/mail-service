@@ -3,6 +3,7 @@ package ru.somarov.mail.infrastructure.config.rsocket
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.observation.ObservationRegistry
 import io.rsocket.core.RSocketConnector
+import io.rsocket.loadbalance.LoadbalanceRSocketClient
 import io.rsocket.micrometer.MicrometerRSocketInterceptor
 import io.rsocket.micrometer.observation.ObservationRequesterRSocketProxy
 import io.rsocket.micrometer.observation.ObservationResponderRSocketProxy

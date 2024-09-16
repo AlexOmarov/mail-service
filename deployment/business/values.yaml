@@ -1,0 +1,100 @@
+global:
+  replicaCount: 3
+
+  image:
+    pullPolicy: Never
+
+  imagePullSecrets: [ ]
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Automatically mount a ServiceAccount's API credentials?
+    automount: true
+    # Annotations to add to the service account
+    annotations: { }
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  podAnnotations: { }
+  podLabels: { }
+
+  podSecurityContext: { }
+  # fsGroup: 2000
+
+  securityContext: { }
+    # capabilities:
+    #   drop:
+    #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+  # resources:
+  #   requests:
+  #     memory: 256Mi
+  #     cpu: 20m
+  #   limits:
+  #     memory: 1024Mi
+  #     cpu: 300m
+
+  nodeSelector: { }
+
+  tolerations: [ ]
+
+  affinity: { }
+
+  serviceDiscoveryRoleBinding: true
+  env:
+    TEST_ENV: "TEST"
+
+auth:
+  enabled: true
+  replicaCount: 3
+  image:
+    repository: "decentboat/auth-service"
+    tag: "1.2"
+  service:
+    type: NodePort
+    ports:
+      - port: 8081
+        targetPort: 8081
+        nodePort: 30020
+        name: port
+        protocol: TCP
+  ports:
+    - name: http
+      containerPort: 8081
+      protocol: TCP
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 20m
+    limits:
+      memory: 512Mi
+      cpu: 300m
+  livenessProbe:
+    failureThreshold: 6
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    successThreshold: 1
+    httpGet:
+      port: 8081
+      path: /health
+    timeoutSeconds: 5
+  readinessProbe:
+    failureThreshold: 6
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    successThreshold: 1
+    httpGet:
+      port: 8081
+      path: /health
+    timeoutSeconds: 5
+  env:
+    DB_HOST: persistence-postgres.persistence
+    KAFKA_BROKERS: persistence-kafka.persistence:29092
+    OTEL_HOST: monitoring-collector.monitoring

@@ -8,3 +8,6 @@ releases:
   - name: monitoring
     namespace: monitoring
     chart: monitoring/
+  - name: business
+    namespace: business
+    chart: business/
