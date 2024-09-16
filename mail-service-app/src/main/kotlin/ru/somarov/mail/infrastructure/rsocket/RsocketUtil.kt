@@ -27,7 +27,7 @@ object RsocketUtil {
             val array = getByteArray(payload.data)
             if (array.isNotEmpty()) {
                 val map = cborMapper.readValue(getByteArray(payload.data), Any::class.java)
-                cborMapper.writeValueAsString(map)
+                jsonMapper.writeValueAsString(map)
             } else {
                 "null"
             }

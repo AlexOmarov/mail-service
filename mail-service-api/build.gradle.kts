@@ -6,10 +6,6 @@ plugins {
     `maven-publish`
 }
 
-detekt {
-    config.setFrom(files("$rootDir/detekt-config.yml"))
-}
-
 dependencies {
     detektPlugins(libs.detekt.ktlint)
 
@@ -17,7 +13,6 @@ dependencies {
     api(libs.kotlin.serialization.cbor)
     api(libs.spring.boot.starter.validation)
 }
-
 
 publishing {
     publications {
@@ -36,6 +31,19 @@ publishing {
             authentication {
                 create<HttpHeaderAuthentication>("header")
             }
+        }
+    }
+}
+
+detekt {
+    config.setFrom(files("$rootDir/detekt-config.yml"))
+}
+
+@Suppress("UnstableApiUsage") // getSupportedKotlinVersion is unstable for some reason
+configurations.matching { it.name == "detekt" }.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.jetbrains.kotlin") {
+            useVersion(io.gitlab.arturbosch.detekt.getSupportedKotlinVersion())
         }
     }
 }

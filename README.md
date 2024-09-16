@@ -101,7 +101,7 @@ Compose файл включает в себя следующие инструм�
    ![kafka.jpg](doc/img/kafka.jpg)
 2. [Openapi UI с описанием http-API сервиса](http://localhost:8080/webjars/swagger-ui/index.html#/) - авторизация user/password
    ![openapi.jpg](doc/img/openapi.jpg)
-3. [PGAdmin](http://localhost:4002/browser/) - мастер-пароль 123, пароль для подключения к базе mail_service
+3. [PGAdmin](http://localhost:4002/browser/) - мастер-пароль 123, пароль для подключения к базе test
    ![pgadmin.jpg](doc/img/pgadmin.jpg)
    ![pgadmin_data.jpg](doc/img/pgadmin_data.jpg)
 4. [Redis](https://github.com/qishibo/AnotherRedisDesktopManager/releases) - Используется программа AnotherRedisDesktopManager. Подключение localhost:6379, пароль 123

@@ -23,7 +23,6 @@ services:
       contour.cache.host: persistence-keydb.persistence
       spring.application.name: mail-service
       contour.cache.port: 6379
-
       contour.mail.host: mailslurper
       contour.mail.username: user@mail.ru
       contour.mail.password: password
@@ -32,11 +31,8 @@ services:
       contour.mail.tls-required: false
       contour.mail.auth-enabled: false
       contour.mail.port: 2500
-
       contour.kafka.brokers: persistence-kafka.persistence:29092
-
       contour.otlp.host: monitoring-collector.monitoring
-
       contour.database.host: persistence-postgres.persistence
       contour.database.port: 5432
       contour.database.name: test
@@ -141,7 +137,7 @@ services:
       - persistence-kafka.persistence
     environment:
       KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: persistence-kafka.persistence:9092
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: persistence-kafka.persistence:29092
       KAFKA_CLUSTERS_0_ZOOKEEPER: persistence-zookeeper.persistence:2181
       KAFKA_CLUSTERS_0_JMXPORT: 9997
   # Observability

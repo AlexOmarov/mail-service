@@ -17,12 +17,10 @@ sonar {
     val exclusions = project.properties["test_exclusions"].toString()
     val appBuildDirectory = project(":mail-service-app").layout.buildDirectory.get().asFile
     val apiBuildDirectory = project(":mail-service-api").layout.buildDirectory.get().asFile
+    val reportPaths = "$appBuildDirectory/reports/detekt/detekt.xml, $apiBuildDirectory/reports/detekt/detekt.xml"
 
     properties {
-        property(
-            "sonar.kotlin.detekt.reportPaths",
-            "$appBuildDirectory/reports/detekt/detekt.xml, $apiBuildDirectory/reports/detekt/detekt.xml"
-        )
+        property("sonar.kotlin.detekt.reportPaths", reportPaths)
         property("sonar.qualitygate.wait", "true")
         property("sonar.core.codeCoveragePlugin", "jacoco")
         property("sonar.coverage.jacoco.xmlReportPaths", "$appBuildDirectory/reports/kover/report.xml")

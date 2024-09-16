@@ -1,5 +1,6 @@
 receivers:
   # TODO: add jmx for all systems
+  # TODO: metrics/traces are now grpc, should use other meter registry and other tracing exporter
   otlp/logs:
     protocols:
       grpc:

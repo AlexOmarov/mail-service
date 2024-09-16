@@ -10,10 +10,6 @@ plugins {
     alias(libs.plugins.kover)
 }
 
-detekt {
-    config.setFrom(files("$rootDir/detekt-config.yml"))
-}
-
 dependencies {
     implementation(project(":mail-service-api"))
 
@@ -40,17 +36,35 @@ dependencies {
     implementation(libs.logback.logstash)
     implementation(libs.logback.otel)
     implementation(libs.otel.otlp)
+    implementation(libs.otel.sdk)
 
     testImplementation(libs.bundles.test)
     testRuntimeOnly(libs.junit.launcher)
-
 }
+
 repositories {
     mavenCentral()
 }
 
+detekt {
+    config.setFrom(files("$rootDir/detekt-config.yml"))
+}
+
+@Suppress("UnstableApiUsage") // getSupportedKotlinVersion is unstable for some reason
+configurations.matching { it.name == "detekt" }.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.jetbrains.kotlin") {
+            useVersion(io.gitlab.arturbosch.detekt.getSupportedKotlinVersion())
+        }
+    }
+}
+
 tasks.bootJar {
     archiveFileName.set("app.jar")
+}
+
+springBoot {
+    buildInfo()
 }
 
 tasks.withType<Test> {
@@ -68,19 +82,15 @@ tasks.withType<Test> {
     }
 }
 
-springBoot {
-    buildInfo()
-}
-
 kover {
     useJacoco()
     reports {
         total {
-            verify {
-                rule {
-                    minBound(50)
-                }
-            }
+            verify { rule { minBound(50) } }
+            xml { onCheck = true }
+            html { onCheck = true }
+            log { onCheck = true }
+
             filters {
                 excludes {
                     classes(
@@ -90,13 +100,6 @@ kover {
                             .split(",")
                     )
                 }
-            }
-
-            xml {
-                onCheck = true
-            }
-            html {
-                onCheck = true
             }
         }
     }
