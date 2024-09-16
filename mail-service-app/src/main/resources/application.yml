@@ -82,12 +82,6 @@ contour:
     password: mail_service
 
 management:
-  otlp:
-    metrics:
-      export:
-        url: 'http://${contour.otlp.host}:${contour.otlp.metrics-port}/v1/metrics'
-    tracing:
-      endpoint: 'http://${contour.otlp.host}:${contour.otlp.traces-port}/v1/traces'
   health:
     readinessState:
       enabled: true

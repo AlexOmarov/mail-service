@@ -36,6 +36,7 @@ dependencies {
     implementation(libs.logback.logstash)
     implementation(libs.logback.otel)
     implementation(libs.otel.otlp)
+    implementation(libs.otel.micrometer)
     implementation(libs.otel.sdk)
 
     testImplementation(libs.bundles.test)

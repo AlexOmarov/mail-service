@@ -7,6 +7,7 @@ import java.time.Duration
 data class ServiceProps(
     val contour: ContourProps,
     val spring: SpringProps,
+    val management: ManagementProps,
     val kafka: KafkaProps
 ) {
     data class ContourProps(
@@ -38,6 +39,20 @@ data class ServiceProps(
     data class OtlpProps(
         val host: String,
         val logsPort: Int,
+        val metricsPort: Int,
+        val tracesPort: Int,
+    )
+
+    data class ManagementProps(
+        val tracing: TracingProps
+    )
+
+    data class TracingProps(
+        val sampling: SamplingProps
+    )
+
+    data class SamplingProps(
+        val probability: Double
     )
 
     data class WebClientProps(
