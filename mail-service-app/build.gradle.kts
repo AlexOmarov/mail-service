@@ -38,6 +38,7 @@ dependencies {
     implementation(libs.otel.otlp)
     implementation(libs.otel.micrometer)
     implementation(libs.otel.sdk)
+    implementation(libs.otel.api.incubator)
 
     testImplementation(libs.bundles.test)
     testRuntimeOnly(libs.junit.launcher)
